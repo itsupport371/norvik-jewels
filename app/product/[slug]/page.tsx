@@ -25,21 +25,6 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
     <>
       <SiteHeader />
       <main className="mx-auto max-w-7xl px-6 py-12 lg:px-10 lg:py-16">
-        <nav className="mb-8 flex items-center gap-2 text-xs text-muted">
-          <Link href="/" className="hover:text-ink">Home</Link>
-          <span>/</span>
-          <Link href="/shop" className="hover:text-ink">Shop</Link>
-          <span>/</span>
-          <Link
-            href={`/shop?category=${product.category.toLowerCase()}`}
-            className="hover:text-ink"
-          >
-            {product.category}
-          </Link>
-          <span>/</span>
-          <span className="text-charcoal">{product.name}</span>
-        </nav>
-
         <ProductConfigurator product={product} />
 
         {related.length > 0 && (

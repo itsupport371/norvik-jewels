@@ -19,6 +19,11 @@ const CATEGORIES = [
 export default function ShopContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category");
+  const collectionParam = searchParams.get("collection");
+  const sortParam = searchParams.get("sort");
+  const isSignatureCollection = collectionParam === "signature";
+  const isBestsellers = sortParam === "bestsellers";
+  const isNewArrivals = sortParam === "new";
   const normalizedInitial =
     CATEGORIES.find(
       (c) => c.toLowerCase() === initialCategory?.toLowerCase(),
@@ -29,7 +34,10 @@ export default function ShopContent() {
   const [sort, setSort] = useState<SortOption>("featured");
 
   const filtered = useMemo(() => {
-    let list = products;
+    let list =
+      isSignatureCollection || isBestsellers
+        ? products.filter((p) => p.isSignature)
+        : products;
     if (category !== "All") {
       list = list.filter((p) => p.category === category);
     }
@@ -39,24 +47,32 @@ export default function ShopContent() {
       list = [...list].sort((a, b) => getDisplayPrice(b) - getDisplayPrice(a));
     }
     return list;
-  }, [category, sort]);
+  }, [category, sort, isSignatureCollection, isBestsellers]);
+
+  const heading = isSignatureCollection
+    ? "The Signature Collection"
+    : isBestsellers
+      ? "Best Sellers"
+      : isNewArrivals
+        ? "New Arrivals"
+        : "Shop All";
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-12 lg:px-10 lg:py-16">
       <div className="mb-8">
         <h1 className="font-display text-3xl font-medium text-ink sm:text-4xl">
-          Shop All
+          {heading}
         </h1>
         <p className="mt-2 text-sm text-muted">{filtered.length} pieces</p>
       </div>
 
       <div className="mb-10 flex flex-wrap items-center justify-between gap-4 border-b border-line pb-5">
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {CATEGORIES.map((c) => (
             <button
               key={c}
               onClick={() => setCategory(c)}
-              className={`border px-4 py-2 text-xs font-medium uppercase tracking-wide2 transition-colors ${
+              className={`border px-3 py-2 text-xs font-medium uppercase tracking-wide2 transition-colors ${
                 category === c
                   ? "border-ink bg-ink text-white"
                   : "border-line text-charcoal hover:border-ink"

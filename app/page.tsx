@@ -12,119 +12,141 @@ export default function HomePage() {
       <main className="bg-ivory">
         <HeroCarousel />
 
-        {/* Featured Collections */}
+        {/* Shop by Collection — row layout, Soft White cards */}
         <section className="mx-auto max-w-7xl px-6 py-20 lg:px-10">
           <div className="mb-10 text-center">
-            <h2 className="font-display text-2xl font-medium text-ink sm:text-3xl">
+            <p className="mb-3 text-xs font-medium uppercase tracking-[0.25em] text-antiquegold">
+              Explore
+            </p>
+            <h2 className="font-display text-2xl font-medium text-inknavy sm:text-3xl">
               Shop by Collection
             </h2>
           </div>
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-5">
+            {[
+              {
+                href: "/shop?category=rings",
+                label: "Rings",
+                image: "/images/product-ring-1.jpg",
+              },
+              {
+                href: "/shop?category=earrings",
+                label: "Earrings",
+                image: "/images/product-earring-1.jpg",
+              },
+              {
+                href: "/shop?category=necklaces",
+                label: "Necklaces",
+                image: "/images/swan-pendant-a-white.jpg",
+              },
+              {
+                href: "/shop?category=nose pin",
+                label: "Nose Pin",
+                image: "/images/nose-pin-yellow.jpg",
+              },
+            ].map((c) => (
+              <Link
+                key={c.label}
+                href={c.href}
+                className="group block border border-warmstone bg-softwhite p-4 transition-colors hover:border-antiquegold"
+              >
+                <div className="relative aspect-square overflow-hidden bg-softwhite">
+                  <Image
+                    src={c.image}
+                    alt={`${c.label} collection`}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    sizes="(min-width: 640px) 25vw, 50vw"
+                  />
+                </div>
+                <span className="mt-4 block text-center font-display text-sm font-medium text-inknavy sm:text-base">
+                  {c.label}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* Signature Collection banner */}
+        <section className="grid grid-cols-1 bg-midnight lg:grid-cols-2">
+          <div className="relative min-h-[360px] lg:order-2 lg:min-h-[560px]">
+            <Image
+              src="/images/hero-web-2.jpg"
+              alt="The Signature Collection"
+              fill
+              className="object-cover"
+              sizes="(min-width: 1024px) 50vw, 100vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-midnight/40 via-transparent to-transparent lg:bg-gradient-to-l" />
+          </div>
+          <div className="flex flex-col items-start justify-center px-8 py-20 lg:order-1 lg:px-20">
+            <p className="mb-4 text-xs font-medium uppercase tracking-[0.3em] text-champagnegold">
+              Norvik Signature
+            </p>
+            <h2 className="font-display mb-6 text-3xl font-medium leading-tight text-softwhite sm:text-4xl">
+              The Signature Collection
+            </h2>
+            <p className="mb-9 max-w-md text-sm leading-relaxed text-warmstone">
+              A curated edit of our most-loved designs — one defining piece from
+              every category, chosen for the way it catches the light.
+            </p>
             <Link
-              href="/shop?category=rings"
-              className="group relative aspect-[4/3] overflow-hidden bg-ink"
+              href="/shop?collection=signature"
+              className="border border-antiquegold px-8 py-3.5 text-xs font-medium uppercase tracking-wide2 text-softwhite transition-colors hover:bg-antiquegold hover:text-midnight"
             >
-              <Image
-                src="/images/product-ring-1.jpg"
-                alt="Rings collection"
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                sizes="(min-width: 640px) 50vw, 100vw"
-              />
-              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
-              <span className="absolute bottom-6 left-6 font-display text-xl font-medium text-white">
-                Rings
-              </span>
-            </Link>
-            <Link
-              href="/shop?category=earrings"
-              className="group relative aspect-[4/3] overflow-hidden bg-ink"
-            >
-              <Image
-                src="/images/product-earring-1.jpg"
-                alt="Earrings collection"
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                sizes="(min-width: 640px) 50vw, 100vw"
-              />
-              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
-              <span className="absolute bottom-6 left-6 font-display text-xl font-medium text-white">
-                Earrings
-              </span>
-            </Link>
-            <Link
-              href="/shop?category=necklaces"
-              className="group relative aspect-[4/3] overflow-hidden bg-ink"
-            >
-              <Image
-                src="/images/swan-pendant-a-white.jpg"
-                alt="Necklaces collection"
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                sizes="(min-width: 640px) 50vw, 100vw"
-              />
-              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
-              <span className="absolute bottom-6 left-6 font-display text-xl font-medium text-white">
-                Necklaces
-              </span>
-            </Link>
-            <Link
-              href="/shop?category=nose pin"
-              className="group relative aspect-[4/3] overflow-hidden bg-ink"
-            >
-              <Image
-                src="/images/nose-pin-yellow.jpg"
-                alt="Nose Pin collection"
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                sizes="(min-width: 640px) 50vw, 100vw"
-              />
-              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
-              <span className="absolute bottom-6 left-6 font-display text-xl font-medium text-white">
-                Nose Pin
-              </span>
+              Shop the Collection
             </Link>
           </div>
         </section>
 
         {/* New Arrivals */}
-        <section className="mx-auto max-w-7xl px-6 pb-20 lg:px-10">
-          <div className="mb-10 flex items-end justify-between">
-            <h2 className="font-display text-2xl font-medium text-ink sm:text-3xl">
-              New Arrivals
-            </h2>
-            <Link
-              href="/shop"
-              className="text-xs font-medium uppercase tracking-wide2 text-charcoal underline underline-offset-4 hover:text-[#B8935A]"
-            >
-              View All
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:grid-cols-5">
-            {products.map((product) => (
+        <section className="bg-scandi px-6 py-20 lg:px-10">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-10 flex items-end justify-between border-b border-warmstone pb-6">
+              <div>
+                <p className="mb-2 text-xs font-medium uppercase tracking-[0.25em] text-antiquegold">
+                  Just In
+                </p>
+                <h2 className="font-display text-2xl font-medium text-inknavy sm:text-3xl">
+                  New Arrivals
+                </h2>
+              </div>
               <Link
-                href={`/product/${product.slug}`}
-                key={product.slug}
-                className="group block"
+                href="/shop"
+                className="text-xs font-medium uppercase tracking-wide2 text-inknavy underline underline-offset-4 transition-colors hover:text-antiquegold"
               >
-                <div className="relative aspect-square overflow-hidden bg-[#F7F5F2]">
-                  <Image
-                    src={product.images[0]}
-                    alt={product.name}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
-                  />
-                </div>
-                <p className="mt-3 text-xs font-medium text-ink">
-                  {product.name}
-                </p>
-                <p className="mt-1 text-xs text-muted">
-                  {product.currency}
-                  {getDisplayPrice(product).toLocaleString("en-IN")}
-                </p>
+                View All
               </Link>
-            ))}
+            </div>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-5">
+              {products.map((product) => (
+                <Link
+                  href={`/product/${product.slug}`}
+                  key={product.slug}
+                  className="group block border border-warmstone bg-softwhite p-3 transition-colors hover:border-antiquegold"
+                >
+                  <div className="relative aspect-square overflow-hidden bg-softwhite">
+                    <Image
+                      src={product.images[0]}
+                      alt={product.name}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
+                    />
+                  </div>
+                  <p className="mt-4 text-[11px] font-medium uppercase tracking-wide2 text-antiquegold">
+                    {product.category}
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-inknavy">
+                    {product.name}
+                  </p>
+                  <p className="mt-1 text-xs text-inknavy/60">
+                    {product.currency}
+                    {getDisplayPrice(product).toLocaleString("en-IN")}
+                  </p>
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
 

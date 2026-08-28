@@ -1,21 +1,17 @@
-"use client";
+'use client';
 
-import { useState, useMemo } from "react";
-import Image from "next/image";
-import { useRouter, usePathname } from "next/navigation";
-import type { Product, OptionChoice } from "@/lib/mock-products";
-import {
-  CLARITY_ALLOWED_COLORS,
-  stockFor,
-  COLOR_CHARGE_PERCENT,
-} from "@/lib/mock-products";
-import ProductSpecifications from "@/components/product-specifications";
-import { createClient } from "@/lib/supabase/client";
-import { calculatePrice, TEST_GOLD_RATE_24K_PER_10G } from "@/lib/pricing";
-import { useWishlist } from "@/lib/wishlist-context";
-import { useCart } from "@/lib/cart-context";
+import { useState, useMemo } from 'react';
+import Image from 'next/image';
+import { useRouter, usePathname } from 'next/navigation';
+import type { Product, OptionChoice } from '@/lib/mock-products';
+import { CLARITY_ALLOWED_COLORS, stockFor, COLOR_CHARGE_PERCENT } from '@/lib/mock-products';
+import ProductSpecifications from '@/components/product-specifications';
+import { createClient } from '@/lib/supabase/client';
+import { calculatePrice, TEST_GOLD_RATE_24K_PER_10G } from '@/lib/pricing';
+import { useWishlist } from '@/lib/wishlist-context';
+import { useCart } from '@/lib/cart-context';
 
-const FIXED_CLARITY = "SI1";
+const FIXED_CLARITY = 'SI1';
 
 function extractKarat(metalLabel: string): 9 | 14 | 18 {
   const match = metalLabel.match(/^(\d+)/);
@@ -31,13 +27,7 @@ function CardGrid({
   onSelect,
 }: {
   label: string;
-  cards: {
-    key: string;
-    title: string;
-    sublabel?: string;
-    stock: string;
-    selected: boolean;
-  }[];
+  cards: { key: string; title: string; sublabel?: string; stock: string; selected: boolean }[];
   selected: string;
   onSelect: (key: string) => void;
 }) {
@@ -54,17 +44,15 @@ function CardGrid({
             onClick={() => onSelect(card.key)}
             className={`flex flex-col items-center gap-1.5 border px-2 py-3 text-center transition-colors ${
               card.key === selected
-                ? "border-ink bg-ink text-white"
-                : "border-line bg-ivory text-charcoal hover:border-ink"
+                ? 'border-ink bg-ink text-white'
+                : 'border-line bg-ivory text-charcoal hover:border-ink'
             }`}
           >
-            <span className="text-sm font-semibold leading-tight">
-              {card.title}
-            </span>
+            <span className="text-sm font-semibold leading-tight">{card.title}</span>
             {card.sublabel && (
               <span
                 className={`text-[10px] leading-tight ${
-                  card.key === selected ? "text-white/70" : "text-muted"
+                  card.key === selected ? 'text-white/70' : 'text-muted'
                 }`}
               >
                 {card.sublabel}
@@ -73,9 +61,7 @@ function CardGrid({
             {card.stock && (
               <span
                 className={`mt-1 rounded-full px-2 py-0.5 text-[10px] ${
-                  card.key === selected
-                    ? "bg-ivory/15 text-white"
-                    : "bg-[#F1EEE8] text-charcoal"
+                  card.key === selected ? 'bg-ivory/15 text-white' : 'bg-[#F1EEE8] text-charcoal'
                 }`}
               >
                 {card.stock}
@@ -94,7 +80,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
   const [activeImage, setActiveImage] = useState(0);
   const [metalKey, setMetalKey] = useState(product.metalOptions[0].label);
   const [sizeKey, setSizeKey] = useState<string | null>(
-    () => product.sizeOptions.find((o) => o.label === "9")?.label ?? null,
+    () => product.sizeOptions.find((o) => o.label === '9')?.label ?? null
   );
   const [added, setAdded] = useState(false);
   const { isWishlisted, toggleWishlist } = useWishlist();
@@ -105,18 +91,13 @@ export default function ProductConfigurator({ product }: { product: Product }) {
   const [buyLoading, setBuyLoading] = useState(false);
 
   const hasDiamond = Boolean(product.diamond);
-  const [colorKey, setColorKey] = useState("D-F");
+  const [colorKey, setColorKey] = useState('D-F');
 
-  const allowedColors = useMemo(
-    () => CLARITY_ALLOWED_COLORS[FIXED_CLARITY] ?? [],
-    [],
-  );
+  const allowedColors = useMemo(() => CLARITY_ALLOWED_COLORS[FIXED_CLARITY] ?? [], []);
 
   useMemo(() => {
     if (!product.metalImages) return;
-    const metalColor = product.metalOptions.find(
-      (m) => m.label === metalKey,
-    )?.metalColor;
+    const metalColor = product.metalOptions.find((m) => m.label === metalKey)?.metalColor;
     if (metalColor && product.metalImages[metalColor]) {
       const idx = product.images.indexOf(product.metalImages[metalColor]);
       if (idx !== -1) setActiveImage(idx);
@@ -139,21 +120,12 @@ export default function ProductConfigurator({ product }: { product: Product }) {
     const match = sublabel.match(/[\d.]+/);
     return match ? parseFloat(match[0]) : 0;
   }
-  const baselineMM = parseMM(
-    product.sizeOptions.find((o) => o.label === "9")?.sublabel,
-  );
-  const selectedMM = parseMM(
-    product.sizeOptions.find((o) => o.label === sizeKey)?.sublabel,
-  );
+  const baselineMM = parseMM(product.sizeOptions.find((o) => o.label === '9')?.sublabel);
+  const selectedMM = parseMM(product.sizeOptions.find((o) => o.label === sizeKey)?.sublabel);
   const sizeWeightDelta = needsSize ? (selectedMM - baselineMM) * 0.03 : 0;
-  const effectiveGoldWeight = Math.max(
-    0.1,
-    product.goldWeightGrams + sizeWeightDelta,
-  );
+  const effectiveGoldWeight = Math.max(0.1, product.goldWeightGrams + sizeWeightDelta);
 
-  const colorChargePercent = hasDiamond
-    ? (COLOR_CHARGE_PERCENT[colorKey] ?? 0)
-    : 0;
+  const colorChargePercent = hasDiamond ? COLOR_CHARGE_PERCENT[colorKey] ?? 0 : 0;
 
   const rawPricing = calculatePrice({
     goldRate24kPer10g: TEST_GOLD_RATE_24K_PER_10G,
@@ -178,12 +150,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
 
   function handleAddToBag() {
     if (!canAddToBag) return;
-    const id = [
-      product.slug,
-      metalKey,
-      hasDiamond ? colorKey : "",
-      sizeKey ?? "",
-    ].join("|");
+    const id = [product.slug, metalKey, hasDiamond ? colorKey : '', sizeKey ?? ''].join('|');
     addToCart({
       id,
       slug: product.slug,
@@ -218,8 +185,8 @@ export default function ProductConfigurator({ product }: { product: Product }) {
       metal: metalKey,
       price: String(grandTotal),
     });
-    if (hasDiamond) params.set("color", colorKey);
-    if (sizeKey) params.set("size", sizeKey);
+    if (hasDiamond) params.set('color', colorKey);
+    if (sizeKey) params.set('size', sizeKey);
 
     router.push(`/checkout?${params.toString()}`);
   }
@@ -234,7 +201,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
       }
     } else {
       await navigator.clipboard.writeText(url);
-      alert("Link copied to clipboard");
+      alert('Link copied to clipboard');
     }
   }
 
@@ -251,9 +218,9 @@ export default function ProductConfigurator({ product }: { product: Product }) {
   const diamondSummary = hasDiamond ? colorKey : null;
 
   return (
-    <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
-      {/* Image gallery */}
-      <div>
+    <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-x-16 lg:gap-y-10">
+      {/* Image gallery — first on mobile and desktop */}
+      <div className="lg:col-start-1 lg:row-start-1">
         <div className="relative aspect-square overflow-hidden bg-[#F7F5F2]">
           <Image
             src={product.images[activeImage]}
@@ -271,39 +238,18 @@ export default function ProductConfigurator({ product }: { product: Product }) {
                 key={img}
                 onClick={() => setActiveImage(i)}
                 className={`relative h-20 w-20 overflow-hidden bg-[#F7F5F2] transition-opacity ${
-                  activeImage === i
-                    ? "opacity-100 ring-1 ring-black"
-                    : "opacity-60 hover:opacity-90"
+                  activeImage === i ? 'opacity-100 ring-1 ring-black' : 'opacity-60 hover:opacity-90'
                 }`}
               >
-                <Image
-                  src={img}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="80px"
-                />
+                <Image src={img} alt="" fill className="object-cover" sizes="80px" />
               </button>
             ))}
           </div>
         )}
-
-        <ProductSpecifications
-          product={product}
-          colorKey={hasDiamond ? colorKey : undefined}
-          karat={karat}
-          goldWeightGrams={effectiveGoldWeight}
-          goldValue={goldValue}
-          diamondCharge={diamondCharge}
-          makingCharge={makingCharge}
-          subtotal={subtotal}
-          gstAmount={gstAmount}
-          grandTotal={grandTotal}
-        />
       </div>
 
-      {/* Details & configurator */}
-      <div>
+      {/* Details & configurator — second on mobile, right column on desktop */}
+      <div className="lg:col-start-2 lg:row-start-1">
         <div className="flex items-start justify-between gap-4">
           <h1 className="font-display text-2xl font-medium text-ink sm:text-3xl">
             {product.name}
@@ -313,7 +259,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
         <div className="mt-3 flex items-center justify-between gap-3">
           <span className="text-xl font-medium text-ink">
             {product.currency}
-            {grandTotal.toLocaleString("en-IN")}
+            {grandTotal.toLocaleString('en-IN')}
           </span>
           <div className="flex gap-2">
             <button
@@ -325,7 +271,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
                 width="18"
                 height="18"
                 viewBox="0 0 24 24"
-                fill={wishlisted ? "#B8935A" : "none"}
+                fill={wishlisted ? '#B8935A' : 'none'}
                 stroke="currentColor"
                 strokeWidth="1.5"
                 strokeLinecap="round"
@@ -339,14 +285,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
               aria-label="Share this product"
               className="flex h-10 w-10 items-center justify-center border border-line text-ink transition-colors hover:border-ink"
             >
-              <svg
-                width="17"
-                height="17"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.6"
-              >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
                 <circle cx="18" cy="5" r="3" />
                 <circle cx="6" cy="12" r="3" />
                 <circle cx="18" cy="19" r="3" />
@@ -366,30 +305,20 @@ export default function ProductConfigurator({ product }: { product: Product }) {
           <div className="mt-8 flex divide-x divide-line border border-line">
             {needsSize && (
               <div className="flex-1 px-3 py-3">
-                <p className="text-[10px] uppercase tracking-wide2 text-muted">
-                  Size
-                </p>
+                <p className="text-[10px] uppercase tracking-wide2 text-muted">Size</p>
                 <p className="mt-0.5 text-sm font-medium text-ink">
-                  {sizeKey ?? "Select"}
+                  {sizeKey ?? 'Select'}
                 </p>
               </div>
             )}
             <div className="flex-1 px-3 py-3">
-              <p className="text-[10px] uppercase tracking-wide2 text-muted">
-                Metal
-              </p>
-              <p className="mt-0.5 truncate text-sm font-medium text-ink">
-                {metalKey}
-              </p>
+              <p className="text-[10px] uppercase tracking-wide2 text-muted">Metal</p>
+              <p className="mt-0.5 truncate text-sm font-medium text-ink">{metalKey}</p>
             </div>
             {hasDiamond && (
               <div className="flex-1 px-3 py-3">
-                <p className="text-[10px] uppercase tracking-wide2 text-muted">
-                  Diamond Quality
-                </p>
-                <p className="mt-0.5 text-sm font-medium text-ink">
-                  {diamondSummary}
-                </p>
+                <p className="text-[10px] uppercase tracking-wide2 text-muted">Diamond Quality</p>
+                <p className="mt-0.5 text-sm font-medium text-ink">{diamondSummary}</p>
               </div>
             )}
             <button
@@ -404,28 +333,15 @@ export default function ProductConfigurator({ product }: { product: Product }) {
         {/* Size guide banner */}
         {!customizing && needsSize && (
           <div className="mt-3 flex items-center justify-between bg-[#F3EFFB] px-4 py-3">
-            <p className="text-sm text-charcoal">
-              Not sure about your ring size?
-            </p>
+            <p className="text-sm text-charcoal">Not sure about your ring size?</p>
             <button
               onClick={() => setSizeGuideOpen(true)}
               className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide2 text-[#7C5CBF] transition-opacity hover:opacity-75"
             >
               Learn How
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-              >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                 <circle cx="12" cy="12" r="9" />
-                <path
-                  d="M10 8.5l5 3.5-5 3.5z"
-                  fill="currentColor"
-                  stroke="none"
-                />
+                <path d="M10 8.5l5 3.5-5 3.5z" fill="currentColor" stroke="none" />
               </svg>
             </button>
           </div>
@@ -446,14 +362,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
                 aria-label="Close"
                 className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-ivory text-ink shadow"
               >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="18" y1="6" x2="6" y2="18" />
                   <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
@@ -512,17 +421,15 @@ export default function ProductConfigurator({ product }: { product: Product }) {
                       onClick={() => setSizeKey(opt.label)}
                       className={`flex flex-col items-center gap-1 border px-2 py-2.5 text-center transition-colors ${
                         sizeKey === opt.label
-                          ? "border-ink bg-ink text-white"
-                          : "border-line text-charcoal hover:border-ink"
+                          ? 'border-ink bg-ink text-white'
+                          : 'border-line text-charcoal hover:border-ink'
                       }`}
                     >
                       <span className="text-sm font-semibold">{opt.label}</span>
                       {opt.sublabel && (
                         <span
                           className={`text-[10px] ${
-                            sizeKey === opt.label
-                              ? "text-white/70"
-                              : "text-muted"
+                            sizeKey === opt.label ? 'text-white/70' : 'text-muted'
                           }`}
                         >
                           {opt.sublabel}
@@ -532,9 +439,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
                   ))}
                 </div>
                 {sizeKey === null && (
-                  <p className="mt-2 text-xs text-muted">
-                    Select a size to continue.
-                  </p>
+                  <p className="mt-2 text-xs text-muted">Select a size to continue.</p>
                 )}
               </div>
             )}
@@ -553,7 +458,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
           disabled={!canAddToBag || buyLoading}
           className="mt-6 w-full bg-ink py-4 text-sm font-medium uppercase tracking-wide2 text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
         >
-          {buyLoading ? "Please wait…" : "Buy Now"}
+          {buyLoading ? 'Please wait…' : 'Buy Now'}
         </button>
 
         <button
@@ -561,17 +466,32 @@ export default function ProductConfigurator({ product }: { product: Product }) {
           disabled={!canAddToBag}
           className={`mt-3 w-full py-3.5 text-sm font-medium uppercase tracking-wide2 transition-colors ${
             added
-              ? "border border-[#1F4D3D] text-[#1F4D3D]"
-              : "border border-ink text-ink hover:bg-ink/90 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+              ? 'border border-[#1F4D3D] text-[#1F4D3D]'
+              : 'border border-ink text-ink hover:bg-ink/90 hover:text-white disabled:cursor-not-allowed disabled:opacity-30'
           }`}
         >
-          {added ? "Added to Bag ✓" : "Add to Bag"}
+          {added ? 'Added to Bag ✓' : 'Add to Bag'}
         </button>
 
         <p className="mt-4 text-xs text-muted">
-          Certified 18K gold · Free insured shipping · 15-day returns on ready
-          pieces
+          Certified 18K gold · Free insured shipping · 15-day returns on ready pieces
         </p>
+      </div>
+
+      {/* Specifications — last on mobile, back under the image on desktop */}
+      <div className="lg:col-start-1 lg:row-start-2">
+        <ProductSpecifications
+          product={product}
+          colorKey={hasDiamond ? colorKey : undefined}
+          karat={karat}
+          goldWeightGrams={effectiveGoldWeight}
+          goldValue={goldValue}
+          diamondCharge={diamondCharge}
+          makingCharge={makingCharge}
+          subtotal={subtotal}
+          gstAmount={gstAmount}
+          grandTotal={grandTotal}
+        />
       </div>
     </div>
   );

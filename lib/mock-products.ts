@@ -38,6 +38,7 @@ export type Product = {
   goldWeightGrams: number; // used in the Specifications price breakdown
   diamondPieceCount?: number;
   diamondCaratTotal?: number;
+  isSignature?: boolean; // featured in the homepage "Signature Collection" banner
 };
 
 // ---------- Shared IGI-standard diamond grading ----------
@@ -258,6 +259,7 @@ export const products: Product[] = [
     goldWeightGrams: 2.8,
     diamondPieceCount: 12,
     diamondCaratTotal: 0.35,
+    isSignature: true,
   },
   {
     slug: 'solitaire-band',
@@ -341,6 +343,7 @@ export const products: Product[] = [
     goldWeightGrams: 1.8,
     diamondPieceCount: 8,
     diamondCaratTotal: 0.15,
+    isSignature: true,
   },
   {
     slug: 'flower-stud-earring',
@@ -454,6 +457,7 @@ export const products: Product[] = [
     ],
     sizeOptions: [{ label: 'One Size', priceModifier: 0, stock: 'In Stock' }],
     goldWeightGrams: 3.5,
+    isSignature: true,
   },
   {
     slug: 'flower-cluster-nose-pin',
@@ -483,6 +487,7 @@ export const products: Product[] = [
     ],
     sizeOptions: [{ label: 'One Size', priceModifier: 0, stock: 'In Stock' }],
     goldWeightGrams: 0.8,
+    isSignature: true,
   },
 ];
 
