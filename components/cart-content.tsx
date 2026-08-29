@@ -36,7 +36,7 @@ export default function CartContent() {
       <div className="mt-8 divide-y divide-line border-y border-line">
         {cart.map((item) => (
           <div key={item.id} className="flex gap-4 py-5">
-            <div className="relative h-24 w-24 shrink-0 overflow-hidden bg-[#F7F5F2]">
+            <div className="relative h-24 w-24 shrink-0 overflow-hidden bg-white">
               <Image src={item.image} alt={item.name} fill className="object-cover" sizes="96px" />
             </div>
             <div className="flex flex-1 flex-col justify-between">

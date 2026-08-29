@@ -221,7 +221,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
     <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-x-16 lg:gap-y-10">
       {/* Image gallery — first on mobile and desktop */}
       <div className="lg:col-start-1 lg:row-start-1">
-        <div className="relative aspect-square overflow-hidden bg-[#F7F5F2]">
+        <div className="relative aspect-square overflow-hidden bg-white">
           <Image
             src={product.images[activeImage]}
             alt={product.name}
@@ -237,7 +237,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
               <button
                 key={img}
                 onClick={() => setActiveImage(i)}
-                className={`relative h-20 w-20 overflow-hidden bg-[#F7F5F2] transition-opacity ${
+                className={`relative h-20 w-20 overflow-hidden bg-white transition-opacity ${
                   activeImage === i ? 'opacity-100 ring-1 ring-black' : 'opacity-60 hover:opacity-90'
                 }`}
               >

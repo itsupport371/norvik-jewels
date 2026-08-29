@@ -106,7 +106,7 @@ export default function ShopContent() {
               key={product.slug}
               className="group block"
             >
-              <div className="relative aspect-square overflow-hidden bg-[#F7F5F2]">
+              <div className="relative aspect-square overflow-hidden bg-white">
                 <Image
                   src={product.images[0]}
                   alt={product.name}

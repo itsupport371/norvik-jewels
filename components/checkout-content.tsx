@@ -214,7 +214,7 @@ export default function CheckoutContent() {
               <div className="space-y-4">
                 {cart.map((item) => (
                   <div key={item.id} className="flex gap-3">
-                    <div className="relative h-16 w-16 shrink-0 overflow-hidden bg-[#F7F5F2]">
+                    <div className="relative h-16 w-16 shrink-0 overflow-hidden bg-white">
                       <Image src={item.image} alt={item.name} fill className="object-cover" sizes="64px" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -230,7 +230,7 @@ export default function CheckoutContent() {
               </div>
             ) : (
               <div className="flex gap-4">
-                <div className="relative h-20 w-20 shrink-0 overflow-hidden bg-[#F7F5F2]">
+                <div className="relative h-20 w-20 shrink-0 overflow-hidden bg-white">
                   <Image src={singleProduct!.images[0]} alt={singleProduct!.name} fill className="object-cover" sizes="80px" />
                 </div>
                 <div className="min-w-0 flex-1">

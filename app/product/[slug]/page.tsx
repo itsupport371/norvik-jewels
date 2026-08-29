@@ -35,7 +35,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
             <div className="grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-4">
               {related.map((p) => (
                 <Link href={`/product/${p.slug}`} key={p.slug} className="group block">
-                  <div className="relative aspect-square overflow-hidden bg-[#F7F5F2]">
+                  <div className="relative aspect-square overflow-hidden bg-white">
                     <Image
                       src={p.images[0]}
                       alt={p.name}

@@ -91,7 +91,7 @@ export default function SearchTrigger() {
                     onClick={close}
                     className="flex items-center gap-3 p-2 transition-colors hover:bg-[#F7F5F2]"
                   >
-                    <div className="relative h-12 w-12 shrink-0 overflow-hidden bg-[#F7F5F2]">
+                    <div className="relative h-12 w-12 shrink-0 overflow-hidden bg-white">
                       <Image src={p.images[0]} alt={p.name} fill className="object-cover" sizes="48px" />
                     </div>
                     <div className="min-w-0">
