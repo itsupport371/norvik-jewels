@@ -50,7 +50,7 @@ export default function HomePage() {
                 href={c.href}
                 className="group block border border-warmstone bg-softwhite p-4 transition-colors hover:border-antiquegold"
               >
-                <div className="relative aspect-square overflow-hidden bg-softwhite">
+                <div className="relative aspect-square overflow-hidden bg-white">
                   <Image
                     src={c.image}
                     alt={`${c.label} collection`}
@@ -125,7 +125,7 @@ export default function HomePage() {
                   key={product.slug}
                   className="group block border border-warmstone bg-softwhite p-3 transition-colors hover:border-antiquegold"
                 >
-                  <div className="relative aspect-square overflow-hidden bg-softwhite">
+                  <div className="relative aspect-square overflow-hidden bg-white">
                     <Image
                       src={product.images[0]}
                       alt={product.name}
