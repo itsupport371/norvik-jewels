@@ -29,7 +29,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
 
         {related.length > 0 && (
           <section className="mt-20 border-t border-line pt-12">
-            <h2 className="font-display mb-8 text-xl font-medium text-ink sm:text-2xl">
+            <h2 className="font-display mb-8 text-[26px] font-medium leading-[1.05] tracking-[-0.01em] text-ink sm:text-[36px]">
               You May Also Like
             </h2>
             <div className="grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-4">
@@ -44,8 +44,8 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                       sizes="(min-width: 1024px) 25vw, 50vw"
                     />
                   </div>
-                  <p className="mt-3 text-sm font-medium text-ink">{p.name}</p>
-                  <p className="mt-1 text-xs text-muted">
+                  <p className="mt-3 text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">{p.name}</p>
+                  <p className="mt-1 text-[13px] leading-[1.35] text-muted">
                     {p.currency}{p.basePrice.toLocaleString('en-IN')}
                   </p>
                 </Link>

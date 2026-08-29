@@ -20,10 +20,10 @@ export default function SearchContent() {
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-12 lg:px-10 lg:py-16">
-      <h1 className="font-display text-3xl font-medium text-ink sm:text-4xl">
+      <h1 className="font-display text-[26px] font-medium leading-[1.05] tracking-[-0.01em] text-ink sm:text-[36px]">
         Search results
       </h1>
-      <p className="mt-2 text-sm text-muted">
+      <p className="mt-2 text-[14px] leading-[1.6] text-muted">
         {q
           ? `${results.length} results for "${q}"`
           : "Type something to search"}
@@ -31,12 +31,12 @@ export default function SearchContent() {
 
       {q && results.length === 0 ? (
         <div className="py-20 text-center">
-          <p className="text-sm text-muted">
+          <p className="text-[14px] leading-[1.6] text-muted">
             No pieces found matching &ldquo;{q}&rdquo;.
           </p>
           <Link
             href="/shop"
-            className="mt-4 inline-block bg-ink px-6 py-3 text-xs font-medium uppercase tracking-wide2 text-white"
+            className="mt-4 inline-block bg-ink px-6 py-3 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-white sm:text-[12px]"
           >
             Browse All
           </Link>
@@ -58,13 +58,13 @@ export default function SearchContent() {
                   sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
                 />
               </div>
-              <p className="mt-3 text-xs uppercase tracking-wide2 text-muted">
+              <p className="mt-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                 {product.category}
               </p>
-              <p className="mt-1 text-sm font-medium text-ink">
+              <p className="mt-1 text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">
                 {product.name}
               </p>
-              <p className="mt-1 text-xs text-muted">
+              <p className="mt-1 text-[13px] leading-[1.35] text-muted">
                 {product.currency}
                 {getDisplayPrice(product).toLocaleString("en-IN")}
               </p>

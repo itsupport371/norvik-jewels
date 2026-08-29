@@ -15,12 +15,12 @@ export default async function AccountPage() {
   return (
     <main className="min-h-screen bg-ivory px-6 py-16">
       <div className="mx-auto max-w-lg">
-        <h1 className="font-display text-3xl font-medium text-ink">
+        <h1 className="font-display text-[26px] font-medium leading-[1.05] tracking-[-0.01em] text-ink sm:text-[36px]">
           Your account
         </h1>
-        <p className="mt-2 text-sm text-muted">Signed in as {user.email}</p>
+        <p className="mt-2 text-[14px] leading-[1.6] text-muted">Signed in as {user.email}</p>
 
-        <div className="mt-8 border border-line bg-paper p-6 text-sm">
+        <div className="mt-8 border border-line bg-paper p-6 text-[14px] leading-[1.6]">
           <p className="text-muted">
             Order history, saved addresses, and wishlist will live here once
             the commerce backend is connected.

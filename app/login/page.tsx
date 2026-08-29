@@ -20,14 +20,14 @@ export default function LoginPage() {
         <div className="absolute inset-0 flex flex-col justify-between p-14">
           <Link href="/" className="inline-block w-fit">
             <Image
-              src="/images/logo-mark-new.png"
+              src="/images/logo-mark-jewels.png"
               alt="NORVIK JEWELS"
               width={56}
               height={56}
               className="h-16 w-auto"
             />
           </Link>
-          <blockquote className="font-display text-3xl font-light leading-snug text-white">
+          <blockquote className="font-display text-[38px] font-medium leading-[1.08] tracking-[-0.01em] text-white">
             Jewellery is worn every day.
             <br />
             It should be made for exactly that.
@@ -39,9 +39,9 @@ export default function LoginPage() {
       <div className="flex items-center justify-center bg-ivory px-6 py-16">
         <div className="w-full max-w-sm">
           <div className="mb-10 flex flex-col items-center">
-            <Link href="/" className="rounded-md bg-ink px-8 py-4">
+            <Link href="/" className="rounded-md bg-midnight px-8 py-4">
               <Image
-                src="/images/logo-full-new.png"
+                src="/images/logo-full-jewels-dark.png"
                 alt="NORVIK JEWELS"
                 width={280}
                 height={93}

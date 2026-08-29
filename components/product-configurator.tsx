@@ -33,7 +33,7 @@ function CardGrid({
 }) {
   return (
     <div>
-      <label className="mb-2.5 block text-xs font-medium uppercase tracking-wide2 text-muted">
+      <label className="mb-2.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
         {label}
       </label>
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -48,10 +48,10 @@ function CardGrid({
                 : 'border-line bg-ivory text-charcoal hover:border-ink'
             }`}
           >
-            <span className="text-sm font-semibold leading-tight">{card.title}</span>
+            <span className="text-[13px] font-medium leading-[1.35]">{card.title}</span>
             {card.sublabel && (
               <span
-                className={`text-[10px] leading-tight ${
+                className={`text-[10px] leading-[1.2] ${
                   card.key === selected ? 'text-white/70' : 'text-muted'
                 }`}
               >
@@ -251,13 +251,13 @@ export default function ProductConfigurator({ product }: { product: Product }) {
       {/* Details & configurator — second on mobile, right column on desktop */}
       <div className="lg:col-start-2 lg:row-start-1">
         <div className="flex items-start justify-between gap-4">
-          <h1 className="font-display text-2xl font-medium text-ink sm:text-3xl">
+          <h1 className="font-sans text-[14px] font-medium leading-[1.35] text-ink sm:text-[15px]">
             {product.name}
           </h1>
         </div>
 
         <div className="mt-3 flex items-center justify-between gap-3">
-          <span className="text-xl font-medium text-ink">
+          <span className="text-[15px] font-medium leading-[1.35] text-ink">
             {product.currency}
             {grandTotal.toLocaleString('en-IN')}
           </span>
@@ -296,7 +296,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
           </div>
         </div>
 
-        <p className="mt-5 max-w-md text-sm leading-relaxed text-charcoal">
+        <p className="mt-5 max-w-md text-[14px] leading-[1.6] text-charcoal sm:text-[15px]">
           {product.description}
         </p>
 
@@ -305,25 +305,25 @@ export default function ProductConfigurator({ product }: { product: Product }) {
           <div className="mt-8 flex divide-x divide-line border border-line">
             {needsSize && (
               <div className="flex-1 px-3 py-3">
-                <p className="text-[10px] uppercase tracking-wide2 text-muted">Size</p>
-                <p className="mt-0.5 text-sm font-medium text-ink">
+                <p className="text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">Size</p>
+                <p className="mt-0.5 text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">
                   {sizeKey ?? 'Select'}
                 </p>
               </div>
             )}
             <div className="flex-1 px-3 py-3">
-              <p className="text-[10px] uppercase tracking-wide2 text-muted">Metal</p>
-              <p className="mt-0.5 truncate text-sm font-medium text-ink">{metalKey}</p>
+              <p className="text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">Metal</p>
+              <p className="mt-0.5 truncate text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">{metalKey}</p>
             </div>
             {hasDiamond && (
               <div className="flex-1 px-3 py-3">
-                <p className="text-[10px] uppercase tracking-wide2 text-muted">Diamond Quality</p>
-                <p className="mt-0.5 text-sm font-medium text-ink">{diamondSummary}</p>
+                <p className="text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">Diamond Quality</p>
+                <p className="mt-0.5 text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">{diamondSummary}</p>
               </div>
             )}
             <button
               onClick={() => setCustomizing(true)}
-              className="bg-[#B8935A] px-5 text-xs font-semibold uppercase tracking-wide2 text-ink transition-opacity hover:opacity-90"
+              className="bg-[#B8935A] px-5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-ink transition-opacity hover:opacity-90 sm:text-[12px]"
             >
               Customise
             </button>
@@ -333,10 +333,10 @@ export default function ProductConfigurator({ product }: { product: Product }) {
         {/* Size guide banner */}
         {!customizing && needsSize && (
           <div className="mt-3 flex items-center justify-between bg-[#F3EFFB] px-4 py-3">
-            <p className="text-sm text-charcoal">Not sure about your ring size?</p>
+            <p className="text-[14px] leading-[1.6] text-charcoal">Not sure about your ring size?</p>
             <button
               onClick={() => setSizeGuideOpen(true)}
-              className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide2 text-[#7C5CBF] transition-opacity hover:opacity-75"
+              className="flex items-center gap-1.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-[#7C5CBF] transition-opacity hover:opacity-75"
             >
               Learn How
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -390,7 +390,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
 
             {hasDiamond && product.diamond && (
               <div className="border-t border-line pt-7">
-                <p className="mb-5 text-xs font-medium uppercase tracking-wide2 text-[#B8935A]">
+                <p className="mb-5 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                   Diamond Details
                 </p>
                 <div className="space-y-6">
@@ -411,7 +411,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
 
             {needsSize && (
               <div className="border-t border-line pt-7">
-                <label className="mb-2.5 block text-xs font-medium uppercase tracking-wide2 text-muted">
+                <label className="mb-2.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                   Select Size
                 </label>
                 <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
@@ -425,10 +425,10 @@ export default function ProductConfigurator({ product }: { product: Product }) {
                           : 'border-line text-charcoal hover:border-ink'
                       }`}
                     >
-                      <span className="text-sm font-semibold">{opt.label}</span>
+                      <span className="text-[13px] font-medium leading-[1.35]">{opt.label}</span>
                       {opt.sublabel && (
                         <span
-                          className={`text-[10px] ${
+                          className={`text-[10px] leading-[1.2] ${
                             sizeKey === opt.label ? 'text-white/70' : 'text-muted'
                           }`}
                         >
@@ -439,14 +439,14 @@ export default function ProductConfigurator({ product }: { product: Product }) {
                   ))}
                 </div>
                 {sizeKey === null && (
-                  <p className="mt-2 text-xs text-muted">Select a size to continue.</p>
+                  <p className="mt-2 text-[13px] leading-[1.35] text-muted">Select a size to continue.</p>
                 )}
               </div>
             )}
 
             <button
               onClick={() => setCustomizing(false)}
-              className="w-full border border-ink py-3 text-xs font-semibold uppercase tracking-wide2 text-ink transition-colors hover:bg-ink/90 hover:text-white"
+              className="w-full border border-ink py-3 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-ink transition-colors hover:bg-ink/90 hover:text-white sm:text-[12px]"
             >
               Done
             </button>
@@ -456,7 +456,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
         <button
           onClick={handleBuyNow}
           disabled={!canAddToBag || buyLoading}
-          className="mt-6 w-full bg-ink py-4 text-sm font-medium uppercase tracking-wide2 text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
+          className="mt-6 w-full bg-ink py-4 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30 sm:text-[12px]"
         >
           {buyLoading ? 'Please wait…' : 'Buy Now'}
         </button>
@@ -464,7 +464,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
         <button
           onClick={handleAddToBag}
           disabled={!canAddToBag}
-          className={`mt-3 w-full py-3.5 text-sm font-medium uppercase tracking-wide2 transition-colors ${
+          className={`mt-3 w-full py-3.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] transition-colors sm:text-[12px] ${
             added
               ? 'border border-[#1F4D3D] text-[#1F4D3D]'
               : 'border border-ink text-ink hover:bg-ink/90 hover:text-white disabled:cursor-not-allowed disabled:opacity-30'
@@ -473,7 +473,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
           {added ? 'Added to Bag ✓' : 'Add to Bag'}
         </button>
 
-        <p className="mt-4 text-xs text-muted">
+        <p className="mt-4 text-[13px] leading-[1.35] text-muted">
           Certified 18K gold · Free insured shipping · 15-day returns on ready pieces
         </p>
       </div>

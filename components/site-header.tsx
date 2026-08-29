@@ -75,7 +75,7 @@ export default async function SiteHeader() {
           </Link>
 
           {/* Nav — placeholder links until those pages are built */}
-          <nav className="hidden items-center gap-8 text-xs font-medium uppercase tracking-wide2 text-inknavy/85 lg:flex">
+          <nav className="hidden items-center gap-8 text-[13px] font-medium uppercase leading-[1.2] tracking-[0.02em] text-inknavy/85 lg:flex">
             <Link href="/shop" className="flex items-center transition-colors hover:text-antiquegold">
               Shop
               {CHEVRON}

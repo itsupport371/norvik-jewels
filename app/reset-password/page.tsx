@@ -41,17 +41,17 @@ export default function ResetPasswordPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-ivory px-6 py-16">
       <div className="w-full max-w-sm">
-        <h1 className="font-display text-3xl font-medium text-ink">
+        <h1 className="font-display text-[26px] font-medium leading-[1.05] tracking-[-0.01em] text-ink sm:text-[36px]">
           Reset your password
         </h1>
-        <p className="mt-2 text-sm text-muted">
+        <p className="mt-2 text-[14px] leading-[1.6] text-muted">
           <Link href="/login" className="text-ink underline underline-offset-4">
             Back to sign in
           </Link>
         </p>
 
         {sent ? (
-          <div className="mt-8 border border-line bg-ivory px-5 py-4 text-sm text-charcoal">
+          <div className="mt-8 border border-line bg-ivory px-5 py-4 text-[14px] leading-[1.6] text-charcoal">
             If an account exists for <span className="font-medium">{email}</span>,
             a reset link has been sent. Check your inbox.
           </div>
@@ -60,7 +60,7 @@ export default function ResetPasswordPage() {
             <div>
               <label
                 htmlFor="email"
-                className="mb-1.5 block text-xs font-medium uppercase tracking-wide2 text-muted"
+                className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]"
               >
                 Email
               </label>
@@ -76,7 +76,7 @@ export default function ResetPasswordPage() {
             </div>
 
             {error && (
-              <p className="text-sm text-red-700" role="alert">
+              <p className="text-[14px] leading-[1.6] text-red-700" role="alert">
                 {error}
               </p>
             )}
@@ -84,7 +84,7 @@ export default function ResetPasswordPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-ink py-3.5 text-sm font-medium tracking-wide2 text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="w-full bg-ink py-3.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-white transition-opacity hover:opacity-90 disabled:opacity-50 sm:text-[12px]"
             >
               {loading ? 'Sending…' : 'Send reset link'}
             </button>

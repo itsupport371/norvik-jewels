@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState, type FormEvent } from "react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { useState, type FormEvent } from 'react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 
-type Mode = "login" | "signup";
+type Mode = 'login' | 'signup';
 
 const GOOGLE_ICON = (
   <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
@@ -29,12 +29,7 @@ const GOOGLE_ICON = (
 );
 
 const FACEBOOK_ICON = (
-  <svg
-    viewBox="0 0 24 24"
-    className="h-4 w-4"
-    fill="#1877F2"
-    aria-hidden="true"
-  >
+  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="#1877F2" aria-hidden="true">
     <path d="M24 12.07C24 5.4 18.6 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.09 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.25h3.33l-.53 3.49h-2.8V24C19.61 23.09 24 18.1 24 12.07z" />
   </svg>
 );
@@ -42,22 +37,22 @@ const FACEBOOK_ICON = (
 export default function AuthForm({ mode }: { mode: Mode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect") ?? "/";
+  const redirectTo = searchParams.get('redirect') ?? '/';
 
   // Phone/OTP is built but hidden until Twilio (SMS provider) is configured.
   // Flip this to true to bring the Phone tab back — the rest of the logic
   // below is untouched and ready to go.
   const PHONE_AUTH_ENABLED = false;
 
-  const [tab, setTab] = useState<"email" | "phone">("email");
+  const [tab, setTab] = useState<'email' | 'phone'>('email');
   const [agreed, setAgreed] = useState(false);
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -66,7 +61,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
 
   function requireAgreement() {
     if (!agreed) {
-      setError("Accept the Terms and Privacy Policy to continue.");
+      setError('Accept the Terms and Privacy Policy to continue.');
       return false;
     }
     return true;
@@ -79,15 +74,15 @@ export default function AuthForm({ mode }: { mode: Mode }) {
     setNotice(null);
     if (!requireAgreement()) return;
 
-    if (mode === "signup" && !name.trim()) {
-      setError("Enter your name.");
+    if (mode === 'signup' && !name.trim()) {
+      setError('Enter your name.');
       return;
     }
-    if (!email.trim() || password.length < (mode === "signup" ? 8 : 1)) {
+    if (!email.trim() || password.length < (mode === 'signup' ? 8 : 1)) {
       setError(
-        mode === "signup"
-          ? "Enter a valid email and a password of at least 8 characters."
-          : "Enter your email and password.",
+        mode === 'signup'
+          ? 'Enter a valid email and a password of at least 8 characters.'
+          : 'Enter your email and password.'
       );
       return;
     }
@@ -95,7 +90,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
     setLoading(true);
     const supabase = createClient();
 
-    if (mode === "signup") {
+    if (mode === 'signup') {
       const { error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password,
@@ -107,9 +102,9 @@ export default function AuthForm({ mode }: { mode: Mode }) {
       setLoading(false);
       if (signUpError) {
         setError(
-          signUpError.message.includes("already registered")
-            ? "An account already exists with this email."
-            : signUpError.message,
+          signUpError.message.includes('already registered')
+            ? 'An account already exists with this email.'
+            : signUpError.message
         );
         return;
       }
@@ -122,9 +117,9 @@ export default function AuthForm({ mode }: { mode: Mode }) {
       setLoading(false);
       if (signInError) {
         setError(
-          signInError.message === "Invalid login credentials"
-            ? "Incorrect email or password."
-            : signInError.message,
+          signInError.message === 'Invalid login credentials'
+            ? 'Incorrect email or password.'
+            : signInError.message
         );
         return;
       }
@@ -141,9 +136,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
     if (!requireAgreement()) return;
 
     if (!/^\+?[0-9]{10,15}$/.test(phone.trim())) {
-      setError(
-        "Enter a valid phone number with country code, e.g. +91XXXXXXXXXX.",
-      );
+      setError('Enter a valid phone number with country code, e.g. +91XXXXXXXXXX.');
       return;
     }
 
@@ -166,7 +159,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
     e.preventDefault();
     setError(null);
     if (!otp.trim() || otp.trim().length < 4) {
-      setError("Enter the code you received.");
+      setError('Enter the code you received.');
       return;
     }
 
@@ -175,7 +168,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
     const { error: verifyError } = await supabase.auth.verifyOtp({
       phone: phone.trim(),
       token: otp.trim(),
-      type: "sms",
+      type: 'sms',
     });
     setLoading(false);
 
@@ -188,7 +181,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
   }
 
   // ---------- OAuth ----------
-  async function handleOAuth(provider: "google" | "facebook") {
+  async function handleOAuth(provider: 'google' | 'facebook') {
     setError(null);
     if (!requireAgreement()) return;
 
@@ -201,29 +194,23 @@ export default function AuthForm({ mode }: { mode: Mode }) {
     });
   }
 
-  const heading = mode === "login" ? "Sign in" : "Create an account";
+  const heading = mode === 'login' ? 'Sign in' : 'Create an account';
 
   return (
     <div className="w-full max-w-sm">
-      <h1 className="font-display text-3xl font-medium text-ink">{heading}</h1>
-      <p className="mt-2 text-sm text-muted">
-        {mode === "login" ? (
+      <h1 className="font-display text-[26px] font-medium leading-[1.05] tracking-[-0.01em] text-ink sm:text-[36px]">{heading}</h1>
+      <p className="mt-2 text-[14px] leading-[1.6] text-muted">
+        {mode === 'login' ? (
           <>
-            New here?{" "}
-            <Link
-              href="/signup"
-              className="text-ink underline underline-offset-4"
-            >
+            New here?{' '}
+            <Link href="/signup" className="text-ink underline underline-offset-4">
               Create an account
             </Link>
           </>
         ) : (
           <>
-            Already have one?{" "}
-            <Link
-              href="/login"
-              className="text-ink underline underline-offset-4"
-            >
+            Already have one?{' '}
+            <Link href="/login" className="text-ink underline underline-offset-4">
               Sign in
             </Link>
           </>
@@ -236,12 +223,12 @@ export default function AuthForm({ mode }: { mode: Mode }) {
           <button
             type="button"
             onClick={() => {
-              setTab("email");
+              setTab('email');
               setError(null);
               setNotice(null);
             }}
-            className={`flex-1 py-2.5 text-xs font-medium uppercase tracking-wide2 transition-colors ${
-              tab === "email" ? "bg-ink text-white" : "bg-ivory text-muted"
+            className={`flex-1 py-2.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] transition-colors sm:text-[12px] ${
+              tab === 'email' ? 'bg-ink text-white' : 'bg-ivory text-muted'
             }`}
           >
             Email
@@ -249,12 +236,12 @@ export default function AuthForm({ mode }: { mode: Mode }) {
           <button
             type="button"
             onClick={() => {
-              setTab("phone");
+              setTab('phone');
               setError(null);
               setNotice(null);
             }}
-            className={`flex-1 py-2.5 text-xs font-medium uppercase tracking-wide2 transition-colors ${
-              tab === "phone" ? "bg-ink text-white" : "bg-ivory text-muted"
+            className={`flex-1 py-2.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] transition-colors sm:text-[12px] ${
+              tab === 'phone' ? 'bg-ink text-white' : 'bg-ivory text-muted'
             }`}
           >
             Phone
@@ -262,17 +249,14 @@ export default function AuthForm({ mode }: { mode: Mode }) {
         </div>
       )}
 
-      {!PHONE_AUTH_ENABLED || tab === "email" ? (
+      {(!PHONE_AUTH_ENABLED || tab === 'email') ? (
         <form
           onSubmit={handleEmailSubmit}
-          className={`space-y-5 ${PHONE_AUTH_ENABLED ? "mt-6" : "mt-8"}`}
+          className={`space-y-5 ${PHONE_AUTH_ENABLED ? 'mt-6' : 'mt-8'}`}
         >
-          {mode === "signup" && (
+          {mode === 'signup' && (
             <div>
-              <label
-                htmlFor="name"
-                className="mb-1.5 block text-xs font-medium uppercase tracking-wide2 text-muted"
-              >
+              <label htmlFor="name" className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                 Full name
               </label>
               <input
@@ -288,10 +272,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
           )}
 
           <div>
-            <label
-              htmlFor="email"
-              className="mb-1.5 block text-xs font-medium uppercase tracking-wide2 text-muted"
-            >
+            <label htmlFor="email" className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
               Email
             </label>
             <input
@@ -307,17 +288,11 @@ export default function AuthForm({ mode }: { mode: Mode }) {
 
           <div>
             <div className="mb-1.5 flex items-center justify-between">
-              <label
-                htmlFor="password"
-                className="block text-xs font-medium uppercase tracking-wide2 text-muted"
-              >
+              <label htmlFor="password" className="block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                 Password
               </label>
-              {mode === "login" && (
-                <Link
-                  href="/reset-password"
-                  className="text-xs text-muted underline underline-offset-4 hover:text-ink"
-                >
+              {mode === 'login' && (
+                <Link href="/reset-password" className="text-[13px] leading-[1.35] text-muted underline underline-offset-4 hover:text-ink">
                   Forgot?
                 </Link>
               )}
@@ -325,37 +300,25 @@ export default function AuthForm({ mode }: { mode: Mode }) {
             <input
               id="password"
               type="password"
-              autoComplete={
-                mode === "signup" ? "new-password" : "current-password"
-              }
+              autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder={
-                mode === "signup" ? "At least 8 characters" : "••••••••"
-              }
+              placeholder={mode === 'signup' ? 'At least 8 characters' : '••••••••'}
               className="w-full border border-line bg-ivory px-4 py-3 text-base text-ink outline-none sm:text-sm transition-colors focus:border-ink"
             />
           </div>
 
           <TermsCheckbox agreed={agreed} setAgreed={setAgreed} />
 
-          {error && (
-            <p className="text-sm text-red-700" role="alert">
-              {error}
-            </p>
-          )}
-          {notice && <p className="text-sm text-charcoal">{notice}</p>}
+          {error && <p className="text-[14px] leading-[1.6] text-red-700" role="alert">{error}</p>}
+          {notice && <p className="text-[14px] leading-[1.6] text-charcoal">{notice}</p>}
 
           <button
             type="submit"
             disabled={loading || !agreed}
-            className="w-full bg-ink py-3.5 text-sm font-medium tracking-wide2 text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
+            className="w-full bg-ink py-3.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30 sm:text-[12px]"
           >
-            {loading
-              ? "Please wait…"
-              : mode === "login"
-                ? "Sign in"
-                : "Create account"}
+            {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
           </button>
         </form>
       ) : (
@@ -363,10 +326,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
           {!otpSent ? (
             <form onSubmit={handleSendOtp} className="space-y-5">
               <div>
-                <label
-                  htmlFor="phone"
-                  className="mb-1.5 block text-xs font-medium uppercase tracking-wide2 text-muted"
-                >
+                <label htmlFor="phone" className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                   Phone number
                 </label>
                 <input
@@ -382,27 +342,20 @@ export default function AuthForm({ mode }: { mode: Mode }) {
 
               <TermsCheckbox agreed={agreed} setAgreed={setAgreed} />
 
-              {error && (
-                <p className="text-sm text-red-700" role="alert">
-                  {error}
-                </p>
-              )}
+              {error && <p className="text-[14px] leading-[1.6] text-red-700" role="alert">{error}</p>}
 
               <button
                 type="submit"
                 disabled={loading || !agreed}
-                className="w-full bg-ink py-3.5 text-sm font-medium tracking-wide2 text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
+                className="w-full bg-ink py-3.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30 sm:text-[12px]"
               >
-                {loading ? "Sending…" : "Send OTP"}
+                {loading ? 'Sending…' : 'Send OTP'}
               </button>
             </form>
           ) : (
             <form onSubmit={handleVerifyOtp} className="space-y-5">
               <div>
-                <label
-                  htmlFor="otp"
-                  className="mb-1.5 block text-xs font-medium uppercase tracking-wide2 text-muted"
-                >
+                <label htmlFor="otp" className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                   Enter OTP
                 </label>
                 <input
@@ -417,29 +370,25 @@ export default function AuthForm({ mode }: { mode: Mode }) {
                 />
               </div>
 
-              {notice && <p className="text-sm text-charcoal">{notice}</p>}
-              {error && (
-                <p className="text-sm text-red-700" role="alert">
-                  {error}
-                </p>
-              )}
+              {notice && <p className="text-[14px] leading-[1.6] text-charcoal">{notice}</p>}
+              {error && <p className="text-[14px] leading-[1.6] text-red-700" role="alert">{error}</p>}
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-ink py-3.5 text-sm font-medium tracking-wide2 text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="w-full bg-ink py-3.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-white transition-opacity hover:opacity-90 disabled:opacity-50 sm:text-[12px]"
               >
-                {loading ? "Verifying…" : "Verify and continue"}
+                {loading ? 'Verifying…' : 'Verify and continue'}
               </button>
 
               <button
                 type="button"
                 onClick={() => {
                   setOtpSent(false);
-                  setOtp("");
+                  setOtp('');
                   setNotice(null);
                 }}
-                className="w-full text-xs text-muted underline underline-offset-4"
+                className="w-full text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-muted underline underline-offset-4 sm:text-[12px]"
               >
                 Use a different number
               </button>
@@ -450,27 +399,25 @@ export default function AuthForm({ mode }: { mode: Mode }) {
 
       <div className="my-6 flex items-center gap-3">
         <span className="h-px flex-1 bg-line" />
-        <span className="text-xs uppercase tracking-wide2 text-muted">
-          Or continue with
-        </span>
+        <span className="text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">Or continue with</span>
         <span className="h-px flex-1 bg-line" />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <button
           type="button"
-          onClick={() => handleOAuth("google")}
+          onClick={() => handleOAuth('google')}
           disabled={!agreed}
-          className="flex items-center justify-center gap-2 border border-line py-3 text-sm font-medium text-ink transition-colors hover:border-ink disabled:cursor-not-allowed disabled:opacity-30"
+          className="flex items-center justify-center gap-2 border border-line py-3 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-ink transition-colors hover:border-ink disabled:cursor-not-allowed disabled:opacity-30 sm:text-[12px]"
         >
           {GOOGLE_ICON}
           Google
         </button>
         <button
           type="button"
-          onClick={() => handleOAuth("facebook")}
+          onClick={() => handleOAuth('facebook')}
           disabled={!agreed}
-          className="flex items-center justify-center gap-2 border border-line py-3 text-sm font-medium text-ink transition-colors hover:border-ink disabled:cursor-not-allowed disabled:opacity-30"
+          className="flex items-center justify-center gap-2 border border-line py-3 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-ink transition-colors hover:border-ink disabled:cursor-not-allowed disabled:opacity-30 sm:text-[12px]"
         >
           {FACEBOOK_ICON}
           Facebook
@@ -488,7 +435,7 @@ function TermsCheckbox({
   setAgreed: (v: boolean) => void;
 }) {
   return (
-    <label className="flex cursor-pointer items-start gap-2.5 text-xs text-muted">
+    <label className="flex cursor-pointer items-start gap-2.5 text-[13px] leading-[1.35] text-muted">
       <input
         type="checkbox"
         checked={agreed}
@@ -496,18 +443,12 @@ function TermsCheckbox({
         className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer border-line accent-black"
       />
       <span>
-        I agree to NORVIK JEWELS&apos;{" "}
-        <Link
-          href="/policies/terms"
-          className="text-ink underline underline-offset-4"
-        >
+        I agree to NORVIK JEWELS&apos;{' '}
+        <Link href="/policies/terms" className="text-ink underline underline-offset-4">
           Terms
-        </Link>{" "}
-        and{" "}
-        <Link
-          href="/policies/privacy"
-          className="text-ink underline underline-offset-4"
-        >
+        </Link>{' '}
+        and{' '}
+        <Link href="/policies/privacy" className="text-ink underline underline-offset-4">
           Privacy Policy
         </Link>
         .

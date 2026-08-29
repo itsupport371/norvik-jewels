@@ -15,34 +15,34 @@ export default function HomePage() {
         {/* Shop by Collection — row layout, Soft White cards */}
         <section className="mx-auto max-w-7xl px-6 py-20 lg:px-10">
           <div className="mb-10 text-center">
-            <p className="mb-3 text-xs font-medium uppercase tracking-[0.25em] text-antiquegold">
+            <p className="mb-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
               Explore
             </p>
-            <h2 className="font-display text-2xl font-medium text-inknavy sm:text-3xl">
+            <h2 className="font-display text-[26px] font-medium leading-[1.05] tracking-[-0.01em] text-inknavy sm:text-[36px]">
               Shop by Collection
             </h2>
           </div>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-5">
             {[
               {
-                href: "/shop?category=rings",
-                label: "Rings",
-                image: "/images/product-ring-1.jpg",
+                href: '/shop?category=rings',
+                label: 'Rings',
+                image: '/images/product-ring-1.jpg',
               },
               {
-                href: "/shop?category=earrings",
-                label: "Earrings",
-                image: "/images/product-earring-1.jpg",
+                href: '/shop?category=earrings',
+                label: 'Earrings',
+                image: '/images/product-earring-1.jpg',
               },
               {
-                href: "/shop?category=necklaces",
-                label: "Necklaces",
-                image: "/images/swan-pendant-a-white.jpg",
+                href: '/shop?category=necklaces',
+                label: 'Necklaces',
+                image: '/images/swan-pendant-a-white.jpg',
               },
               {
-                href: "/shop?category=nose pin",
-                label: "Nose Pin",
-                image: "/images/nose-pin-yellow.jpg",
+                href: '/shop?category=nose pin',
+                label: 'Nose Pin',
+                image: '/images/nose-pin-yellow.jpg',
               },
             ].map((c) => (
               <Link
@@ -59,7 +59,7 @@ export default function HomePage() {
                     sizes="(min-width: 640px) 25vw, 50vw"
                   />
                 </div>
-                <span className="mt-4 block text-center font-display text-sm font-medium text-inknavy sm:text-base">
+                <span className="mt-4 block text-center font-sans text-[13px] font-medium leading-[1.35] text-inknavy sm:text-[15px]">
                   {c.label}
                 </span>
               </Link>
@@ -80,19 +80,19 @@ export default function HomePage() {
             <div className="absolute inset-0 bg-gradient-to-r from-midnight/40 via-transparent to-transparent lg:bg-gradient-to-l" />
           </div>
           <div className="flex flex-col items-start justify-center px-8 py-20 lg:order-1 lg:px-20">
-            <p className="mb-4 text-xs font-medium uppercase tracking-[0.3em] text-champagnegold">
+            <p className="mb-4 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
               Norvik Signature
             </p>
-            <h2 className="font-display mb-6 text-3xl font-medium leading-tight text-softwhite sm:text-4xl">
+            <h2 className="font-display mb-6 text-[34px] font-medium leading-[1] tracking-[-0.015em] text-softwhite sm:text-[46px]">
               The Signature Collection
             </h2>
-            <p className="mb-9 max-w-md text-sm leading-relaxed text-warmstone">
+            <p className="mb-9 max-w-md text-[14px] leading-[1.6] text-warmstone sm:text-[15px]">
               A curated edit of our most-loved designs — one defining piece from
               every category, chosen for the way it catches the light.
             </p>
             <Link
               href="/shop?collection=signature"
-              className="border border-antiquegold px-8 py-3.5 text-xs font-medium uppercase tracking-wide2 text-softwhite transition-colors hover:bg-antiquegold hover:text-midnight"
+              className="border border-antiquegold px-8 py-3.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-softwhite transition-colors hover:bg-antiquegold hover:text-midnight sm:text-[12px]"
             >
               Shop the Collection
             </Link>
@@ -104,16 +104,16 @@ export default function HomePage() {
           <div className="mx-auto max-w-7xl">
             <div className="mb-10 flex items-end justify-between border-b border-warmstone pb-6">
               <div>
-                <p className="mb-2 text-xs font-medium uppercase tracking-[0.25em] text-antiquegold">
+                <p className="mb-2 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                   Just In
                 </p>
-                <h2 className="font-display text-2xl font-medium text-inknavy sm:text-3xl">
+                <h2 className="font-display text-[26px] font-medium leading-[1.05] tracking-[-0.01em] text-inknavy sm:text-[36px]">
                   New Arrivals
                 </h2>
               </div>
               <Link
                 href="/shop"
-                className="text-xs font-medium uppercase tracking-wide2 text-inknavy underline underline-offset-4 transition-colors hover:text-antiquegold"
+                className="text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-inknavy underline underline-offset-4 transition-colors hover:text-antiquegold sm:text-[12px]"
               >
                 View All
               </Link>
@@ -134,13 +134,13 @@ export default function HomePage() {
                       sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
                     />
                   </div>
-                  <p className="mt-4 text-[11px] font-medium uppercase tracking-wide2 text-antiquegold">
+                  <p className="mt-4 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                     {product.category}
                   </p>
-                  <p className="mt-1 text-sm font-medium text-inknavy">
+                  <p className="mt-1 text-[13px] font-medium leading-[1.35] text-inknavy sm:text-[14px]">
                     {product.name}
                   </p>
-                  <p className="mt-1 text-xs text-inknavy/60">
+                  <p className="mt-1 text-[13px] leading-[1.35] text-inknavy/60">
                     {product.currency}
                     {getDisplayPrice(product).toLocaleString("en-IN")}
                   </p>
@@ -162,22 +162,22 @@ export default function HomePage() {
             />
           </div>
           <div className="flex flex-col items-start justify-center bg-[#F7F5F2] px-8 py-16 lg:px-16">
-            <p className="mb-3 text-xs font-medium uppercase tracking-[0.25em] text-[#B8935A]">
+            <p className="mb-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
               Craftsmanship
             </p>
-            <h2 className="font-display mb-5 text-2xl font-medium text-ink sm:text-3xl">
+            <h2 className="font-display mb-5 text-[30px] font-medium leading-[1.08] tracking-[-0.01em] text-ink sm:text-[38px]">
               Every piece, considered.
             </h2>
-            <p className="mb-6 max-w-md text-sm leading-relaxed text-charcoal">
+            <p className="mb-6 max-w-md text-[14px] leading-[1.6] text-charcoal sm:text-[15px]">
               {/* Placeholder — replace with real brand copy from Norvik Jewels. */}
-              From first sketch to final polish, every Norvik Jewels piece
-              passes through the hands of skilled artisans who bring
-              Scandinavian minimalism to 18K gold and certified diamonds —
-              designed in Dubai, made to last a lifetime.
+              From first sketch to final polish, every Norvik Jewels piece passes
+              through the hands of skilled artisans who bring Scandinavian
+              minimalism to 18K gold and certified diamonds — designed in Dubai,
+              made to last a lifetime.
             </p>
             <Link
               href="/about"
-              className="text-xs font-medium uppercase tracking-wide2 text-ink underline underline-offset-4 hover:text-[#B8935A]"
+              className="text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-ink underline underline-offset-4 hover:text-antiquegold sm:text-[12px]"
             >
               Our Story
             </Link>
@@ -186,21 +186,21 @@ export default function HomePage() {
 
         {/* Newsletter */}
         <section className="bg-ink px-6 py-20 text-center">
-          <p className="mx-auto mb-3 text-xs font-medium uppercase tracking-[0.25em] text-[#D9BE93]">
+          <p className="mx-auto mb-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
             Stay in the Know
           </p>
-          <h2 className="font-display mx-auto mb-8 max-w-md text-2xl font-medium text-white">
+          <h2 className="font-display mx-auto mb-8 max-w-md text-[30px] font-medium leading-[1.08] tracking-[-0.01em] text-white sm:text-[38px]">
             New collections, bespoke stories, and early access — in your inbox.
           </h2>
           <form className="mx-auto flex max-w-sm flex-col gap-3 sm:flex-row">
             <input
               type="email"
               placeholder="your@email.com"
-              className="flex-1 border border-white/20 bg-transparent px-4 py-3 text-sm text-white outline-none placeholder:text-white/40 focus:border-white"
+              className="flex-1 border border-white/20 bg-transparent px-4 py-3 text-[14px] leading-[1.6] text-white outline-none placeholder:text-white/40 focus:border-white sm:text-[15px]"
             />
             <button
               type="submit"
-              className="whitespace-nowrap bg-ivory px-6 py-3 text-xs font-medium uppercase tracking-wide2 text-ink transition-opacity hover:opacity-90"
+              className="whitespace-nowrap bg-ivory px-6 py-3 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-ink transition-opacity hover:opacity-90 sm:text-[12px]"
             >
               Subscribe
             </button>

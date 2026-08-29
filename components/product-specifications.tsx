@@ -35,17 +35,17 @@ export default function ProductSpecifications({
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center justify-between text-left"
       >
-        <h3 className="font-display text-lg font-medium text-ink">Specifications</h3>
+        <h3 className="font-display text-lg font-medium leading-[1.05] tracking-[-0.01em] text-ink">Specifications</h3>
         <span className="text-xl text-charcoal">{open ? '−' : '+'}</span>
       </button>
 
       {open && (
         <div className="mt-4 overflow-hidden border border-line">
-          <div className="border-b border-line bg-[#F7F5F2] py-2.5 text-center text-xs font-semibold uppercase tracking-wide2 text-charcoal">
+          <div className="border-b border-line bg-[#F7F5F2] py-2.5 text-center text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
             Product Details
           </div>
 
-          <div className="grid grid-cols-3 divide-x divide-line border-b border-line text-center text-sm">
+          <div className="grid grid-cols-3 divide-x divide-line border-b border-line text-center text-[13px] leading-[1.35]">
             <div className="px-3 py-3 font-medium text-ink">Gold ({karat}K)</div>
             <div className="px-3 py-3 text-charcoal">{goldWeightGrams.toFixed(2)}gm</div>
             <div className="px-3 py-3 text-charcoal">
@@ -55,7 +55,7 @@ export default function ProductSpecifications({
           </div>
 
           {hasDiamond && (
-            <div className="grid grid-cols-3 divide-x divide-line border-b border-line text-center text-sm">
+            <div className="grid grid-cols-3 divide-x divide-line border-b border-line text-center text-[13px] leading-[1.35]">
               <div className="px-3 py-3 font-medium text-ink">
                 {colorKey ?? 'Diamond'}
                 {product.diamondPieceCount ? ` (${product.diamondPieceCount} Nos.)` : ''}
@@ -72,7 +72,7 @@ export default function ProductSpecifications({
             </div>
           )}
 
-          <div className="grid grid-cols-3 divide-x divide-line border-b border-line text-center text-sm">
+          <div className="grid grid-cols-3 divide-x divide-line border-b border-line text-center text-[13px] leading-[1.35]">
             <div className="px-3 py-3 font-medium text-ink">Making</div>
             <div className="px-3 py-3 text-charcoal">-</div>
             <div className="px-3 py-3 text-charcoal">
@@ -81,7 +81,7 @@ export default function ProductSpecifications({
             </div>
           </div>
 
-          <div className="grid grid-cols-3 divide-x divide-line border-b border-line text-center text-sm">
+          <div className="grid grid-cols-3 divide-x divide-line border-b border-line text-center text-[13px] leading-[1.35]">
             <div className="px-3 py-3 font-medium text-ink">Subtotal</div>
             <div className="px-3 py-3 text-charcoal">-</div>
             <div className="px-3 py-3 text-charcoal">
@@ -90,7 +90,7 @@ export default function ProductSpecifications({
             </div>
           </div>
 
-          <div className="grid grid-cols-3 divide-x divide-line border-b border-line text-center text-sm">
+          <div className="grid grid-cols-3 divide-x divide-line border-b border-line text-center text-[13px] leading-[1.35]">
             <div className="px-3 py-3 font-medium text-ink">GST (3%)</div>
             <div className="px-3 py-3 text-charcoal">-</div>
             <div className="px-3 py-3 text-charcoal">
@@ -99,7 +99,7 @@ export default function ProductSpecifications({
             </div>
           </div>
 
-          <div className="grid grid-cols-3 divide-x divide-line text-center text-sm">
+          <div className="grid grid-cols-3 divide-x divide-line text-center text-[13px] leading-[1.35]">
             <div className="px-3 py-3 font-semibold text-ink">Grand Total</div>
             <div className="px-3 py-3 text-charcoal">-</div>
             <div className="px-3 py-3 font-semibold text-ink">
@@ -108,7 +108,7 @@ export default function ProductSpecifications({
             </div>
           </div>
 
-          <p className="border-t border-line px-3 py-2 text-[11px] text-muted">
+          <p className="border-t border-line px-3 py-2 text-[12px] leading-[1.35] text-muted">
             *Weight may vary in the final product. Differential amount if any, will be charged extra.
           </p>
         </div>

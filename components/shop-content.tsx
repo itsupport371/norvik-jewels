@@ -60,10 +60,10 @@ export default function ShopContent() {
   return (
     <main className="mx-auto max-w-7xl px-6 py-12 lg:px-10 lg:py-16">
       <div className="mb-8">
-        <h1 className="font-display text-3xl font-medium text-ink sm:text-4xl">
+        <h1 className="font-display text-[26px] font-medium leading-[1.05] tracking-[-0.01em] text-ink sm:text-[36px]">
           {heading}
         </h1>
-        <p className="mt-2 text-sm text-muted">{filtered.length} pieces</p>
+        <p className="mt-2 text-[14px] leading-[1.6] text-muted">{filtered.length} pieces</p>
       </div>
 
       <div className="mb-10 flex flex-wrap items-center justify-between gap-4 border-b border-line pb-5">
@@ -72,7 +72,7 @@ export default function ShopContent() {
             <button
               key={c}
               onClick={() => setCategory(c)}
-              className={`border px-3 py-2 text-xs font-medium uppercase tracking-wide2 transition-colors ${
+              className={`border px-3 py-2 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] transition-colors sm:text-[12px] ${
                 category === c
                   ? "border-ink bg-ink text-white"
                   : "border-line text-charcoal hover:border-ink"
@@ -86,7 +86,7 @@ export default function ShopContent() {
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value as SortOption)}
-          className="border border-line bg-ivory px-3 py-2 text-xs font-medium uppercase tracking-wide2 text-charcoal outline-none focus:border-ink"
+          className="border border-line bg-ivory px-3 py-2 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-charcoal outline-none focus:border-ink sm:text-[12px]"
         >
           <option value="featured">Featured</option>
           <option value="price-low">Price: Low to High</option>
@@ -95,7 +95,7 @@ export default function ShopContent() {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="py-20 text-center text-sm text-muted">
+        <p className="py-20 text-center text-[14px] leading-[1.6] text-muted">
           No pieces found in this category yet.
         </p>
       ) : (
@@ -115,13 +115,13 @@ export default function ShopContent() {
                   sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
                 />
               </div>
-              <p className="mt-3 text-xs uppercase tracking-wide2 text-muted">
+              <p className="mt-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                 {product.category}
               </p>
-              <p className="mt-1 text-sm font-medium text-ink">
+              <p className="mt-1 text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">
                 {product.name}
               </p>
-              <p className="mt-1 text-xs text-muted">
+              <p className="mt-1 text-[13px] leading-[1.35] text-muted">
                 {product.currency}
                 {getDisplayPrice(product).toLocaleString("en-IN")}
               </p>

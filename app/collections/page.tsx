@@ -42,15 +42,15 @@ export default function CollectionsPage() {
       <SiteHeader />
       <main className="bg-scandi">
         <section className="mx-auto max-w-7xl px-6 py-16 text-center lg:px-10 lg:py-20">
-          <p className="mb-3 text-xs font-medium uppercase tracking-[0.3em] text-antiquegold">
+          <p className="mb-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
             Norvik Jewels
           </p>
-          <h1 className="font-display text-3xl font-medium text-inknavy sm:text-4xl">
+          <h1 className="font-display text-[34px] font-medium leading-[1] tracking-[-0.015em] text-inknavy sm:text-[46px]">
             Our Collections
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-inknavy/70">
-            Every collection is designed in Dubai and finished by hand — pick a
-            category to explore, or start with the pieces we love most.
+          <p className="mx-auto mt-4 max-w-xl text-[14px] leading-[1.6] text-inknavy/70 sm:text-[15px]">
+            Every collection is designed in Dubai and finished by hand — pick
+            a category to explore, or start with the pieces we love most.
           </p>
         </section>
 
@@ -71,10 +71,10 @@ export default function CollectionsPage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-midnight/85 via-midnight/10 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-6">
-                  <p className="font-display text-xl font-medium text-softwhite">
+                  <p className="font-display text-xl font-medium leading-[1.05] tracking-[-0.01em] text-softwhite">
                     {c.label}
                   </p>
-                  <p className="mt-1 text-xs text-warmstone">{c.tagline}</p>
+                  <p className="mt-1 text-[13px] leading-[1.35] text-warmstone">{c.tagline}</p>
                 </div>
               </Link>
             ))}

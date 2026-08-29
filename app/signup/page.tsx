@@ -1,7 +1,7 @@
-import Image from "next/image";
-import Link from "next/link";
-import { Suspense } from "react";
-import AuthForm from "@/components/auth-form";
+import Image from 'next/image';
+import Link from 'next/link';
+import { Suspense } from 'react';
+import AuthForm from '@/components/auth-form';
 
 export default function SignupPage() {
   return (
@@ -27,7 +27,7 @@ export default function SignupPage() {
               className="h-16 w-auto"
             />
           </Link>
-          <blockquote className="font-display text-3xl font-light leading-snug text-white">
+          <blockquote className="font-display text-[38px] font-medium leading-[1.08] tracking-[-0.01em] text-white">
             An account remembers your
             <br />
             sizes, your addresses, your story.

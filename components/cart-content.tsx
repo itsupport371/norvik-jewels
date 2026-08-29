@@ -12,11 +12,11 @@ export default function CartContent() {
   if (cart.length === 0) {
     return (
       <main className="mx-auto max-w-3xl px-6 py-24 text-center">
-        <h1 className="font-display text-3xl font-medium text-ink">Your Bag</h1>
-        <p className="mt-4 text-sm text-muted">Your bag is empty.</p>
+        <h1 className="font-display text-[26px] font-medium leading-[1.05] tracking-[-0.01em] text-ink sm:text-[36px]">Your Bag</h1>
+        <p className="mt-4 text-[14px] leading-[1.6] text-muted">Your bag is empty.</p>
         <Link
           href="/shop"
-          className="mt-6 inline-block bg-ink px-6 py-3 text-xs font-medium uppercase tracking-wide2 text-white"
+          className="mt-6 inline-block bg-ink px-6 py-3 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-white sm:text-[12px]"
         >
           Start Browsing
         </Link>
@@ -26,10 +26,10 @@ export default function CartContent() {
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-12 lg:px-10 lg:py-16">
-      <h1 className="font-display text-3xl font-medium text-ink sm:text-4xl">
+      <h1 className="font-display text-[26px] font-medium leading-[1.05] tracking-[-0.01em] text-ink sm:text-[36px]">
         Your Bag
       </h1>
-      <p className="mt-2 text-sm text-muted">
+      <p className="mt-2 text-[14px] leading-[1.6] text-muted">
         {cart.length} {cart.length === 1 ? 'item' : 'items'}
       </p>
 
@@ -41,14 +41,14 @@ export default function CartContent() {
             </div>
             <div className="flex flex-1 flex-col justify-between">
               <div>
-                <Link href={`/product/${item.slug}`} className="text-sm font-medium text-ink hover:underline">
+                <Link href={`/product/${item.slug}`} className="text-[13px] font-medium leading-[1.35] text-ink hover:underline sm:text-[14px]">
                   {item.name}
                 </Link>
-                <p className="mt-1 text-xs text-muted">{item.metalKey}</p>
+                <p className="mt-1 text-[13px] leading-[1.35] text-muted">{item.metalKey}</p>
                 {item.colorKey && (
-                  <p className="text-xs text-muted">Diamond Quality: {item.colorKey}</p>
+                  <p className="text-[13px] leading-[1.35] text-muted">Diamond Quality: {item.colorKey}</p>
                 )}
-                {item.sizeKey && <p className="text-xs text-muted">Size: {item.sizeKey}</p>}
+                {item.sizeKey && <p className="text-[13px] leading-[1.35] text-muted">Size: {item.sizeKey}</p>}
               </div>
               <div className="mt-2 flex items-center justify-between">
                 <div className="flex items-center border border-line">
@@ -59,7 +59,7 @@ export default function CartContent() {
                   >
                     −
                   </button>
-                  <span className="flex h-8 w-8 items-center justify-center text-sm">
+                  <span className="flex h-8 w-8 items-center justify-center text-[13px] leading-[1.35]">
                     {item.quantity}
                   </span>
                   <button
@@ -72,13 +72,13 @@ export default function CartContent() {
                 </div>
                 <button
                   onClick={() => removeFromCart(item.id)}
-                  className="text-xs text-muted underline underline-offset-2 hover:text-ink"
+                  className="text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-muted underline underline-offset-2 hover:text-ink"
                 >
                   Remove
                 </button>
               </div>
             </div>
-            <p className="shrink-0 text-sm font-medium text-ink">
+            <p className="shrink-0 text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">
               {item.currency}
               {(item.price * item.quantity).toLocaleString('en-IN')}
             </p>
@@ -86,7 +86,7 @@ export default function CartContent() {
         ))}
       </div>
 
-      <div className="mt-8 flex flex-col items-end gap-4">
+      <div className="mt-8 flex flex-col items-center gap-4 sm:items-end">
         <div className="flex w-full max-w-xs justify-between text-base font-semibold text-ink sm:w-72">
           <span>Total</span>
           <span>
@@ -96,7 +96,7 @@ export default function CartContent() {
         </div>
         <button
           onClick={() => router.push('/checkout?cart=1')}
-          className="w-full max-w-xs bg-ink py-4 text-sm font-medium uppercase tracking-wide2 text-white transition-opacity hover:opacity-90 sm:w-72"
+          className="w-full max-w-xs bg-ink py-4 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-white transition-opacity hover:opacity-90 sm:w-72 sm:text-[12px]"
         >
           Proceed to Checkout
         </button>

@@ -58,18 +58,18 @@ export default function ResetPasswordConfirmPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-ivory px-6 py-16">
       <div className="w-full max-w-sm">
-        <h1 className="font-display text-3xl font-medium text-ink">
+        <h1 className="font-display text-[26px] font-medium leading-[1.05] tracking-[-0.01em] text-ink sm:text-[36px]">
           Set a new password
         </h1>
 
         {error && !ready ? (
-          <p className="mt-6 text-sm text-red-700">{error}</p>
+          <p className="mt-6 text-[14px] leading-[1.6] text-red-700">{error}</p>
         ) : (
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
             <div>
               <label
                 htmlFor="password"
-                className="mb-1.5 block text-xs font-medium uppercase tracking-wide2 text-muted"
+                className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]"
               >
                 New password
               </label>
@@ -87,7 +87,7 @@ export default function ResetPasswordConfirmPage() {
             <div>
               <label
                 htmlFor="confirm"
-                className="mb-1.5 block text-xs font-medium uppercase tracking-wide2 text-muted"
+                className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]"
               >
                 Confirm password
               </label>
@@ -103,7 +103,7 @@ export default function ResetPasswordConfirmPage() {
             </div>
 
             {error && (
-              <p className="text-sm text-red-700" role="alert">
+              <p className="text-[14px] leading-[1.6] text-red-700" role="alert">
                 {error}
               </p>
             )}
@@ -111,7 +111,7 @@ export default function ResetPasswordConfirmPage() {
             <button
               type="submit"
               disabled={loading || !ready}
-              className="w-full bg-ink py-3.5 text-sm font-medium tracking-wide2 text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="w-full bg-ink py-3.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-white transition-opacity hover:opacity-90 disabled:opacity-50 sm:text-[12px]"
             >
               {loading ? 'Updating…' : 'Update password'}
             </button>

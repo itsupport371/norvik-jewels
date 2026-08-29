@@ -33,10 +33,10 @@ export default function CheckoutContent() {
   if (isCartMode && cart.length === 0) {
     return (
       <main className="mx-auto max-w-xl px-6 py-24 text-center">
-        <h1 className="font-display text-2xl text-ink">Your bag is empty</h1>
+        <h1 className="font-display text-[26px] font-medium leading-[1.05] tracking-[-0.01em] text-ink sm:text-[36px]">Your bag is empty</h1>
         <Link
           href="/shop"
-          className="mt-6 inline-block bg-ink px-6 py-3 text-xs font-medium uppercase tracking-wide2 text-white"
+          className="mt-6 inline-block bg-ink px-6 py-3 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-white sm:text-[12px]"
         >
           Continue Shopping
         </Link>
@@ -47,13 +47,13 @@ export default function CheckoutContent() {
   if (!isCartMode && !singleProduct) {
     return (
       <main className="mx-auto max-w-xl px-6 py-24 text-center">
-        <h1 className="font-display text-2xl text-ink">No item selected</h1>
-        <p className="mt-3 text-sm text-muted">
+        <h1 className="font-display text-[26px] font-medium leading-[1.05] tracking-[-0.01em] text-ink sm:text-[36px]">No item selected</h1>
+        <p className="mt-3 text-[14px] leading-[1.6] text-muted">
           Please go back and choose a piece to check out.
         </p>
         <Link
           href="/shop"
-          className="mt-6 inline-block bg-ink px-6 py-3 text-xs font-medium uppercase tracking-wide2 text-white"
+          className="mt-6 inline-block bg-ink px-6 py-3 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-white sm:text-[12px]"
         >
           Continue Shopping
         </Link>
@@ -101,20 +101,20 @@ export default function CheckoutContent() {
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-10 lg:px-10 lg:py-14">
-      <h1 className="font-display mb-8 text-2xl font-medium text-ink sm:text-3xl">
+      <h1 className="font-display mb-8 text-[26px] font-medium leading-[1.05] tracking-[-0.01em] text-ink sm:text-[36px]">
         Checkout
       </h1>
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_380px]">
         {/* Left: address form */}
         <div>
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide2 text-ink">
+          <h2 className="mb-4 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
             Delivery Address
           </h2>
           <div className="space-y-4 border border-line p-5">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide2 text-muted">
+                <label className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                   Full Name
                 </label>
                 <input
@@ -125,7 +125,7 @@ export default function CheckoutContent() {
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide2 text-muted">
+                <label className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                   Phone
                 </label>
                 <input
@@ -138,7 +138,7 @@ export default function CheckoutContent() {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide2 text-muted">
+              <label className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                 Address Line 1
               </label>
               <input
@@ -150,7 +150,7 @@ export default function CheckoutContent() {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide2 text-muted">
+              <label className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                 Address Line 2 <span className="normal-case text-muted/70">(Optional)</span>
               </label>
               <input
@@ -162,7 +162,7 @@ export default function CheckoutContent() {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide2 text-muted">
+              <label className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                 Landmark <span className="normal-case text-muted/70">(Optional)</span>
               </label>
               <input
@@ -175,7 +175,7 @@ export default function CheckoutContent() {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide2 text-muted">
+                <label className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                   City
                 </label>
                 <input
@@ -186,7 +186,7 @@ export default function CheckoutContent() {
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide2 text-muted">
+                <label className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                   Pincode
                 </label>
                 <input
@@ -199,14 +199,14 @@ export default function CheckoutContent() {
             </div>
           </div>
 
-          <p className="mt-3 text-xs text-muted">
+          <p className="mt-3 text-[13px] leading-[1.35] text-muted">
             Saved addresses and address-book selection will be added once the account system is fully connected.
           </p>
         </div>
 
         {/* Right: order summary */}
         <div>
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide2 text-ink">
+          <h2 className="mb-4 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
             Order Summary
           </h2>
           <div className="border border-line p-5">
@@ -218,10 +218,10 @@ export default function CheckoutContent() {
                       <Image src={item.image} alt={item.name} fill className="object-cover" sizes="64px" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-ink">{item.name}</p>
-                      <p className="text-xs text-muted">Qty: {item.quantity}</p>
+                      <p className="truncate text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">{item.name}</p>
+                      <p className="text-[13px] leading-[1.35] text-muted">Qty: {item.quantity}</p>
                     </div>
-                    <p className="shrink-0 text-sm font-medium text-ink">
+                    <p className="shrink-0 text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">
                       {item.currency}
                       {(item.price * item.quantity).toLocaleString('en-IN')}
                     </p>
@@ -234,19 +234,19 @@ export default function CheckoutContent() {
                   <Image src={singleProduct!.images[0]} alt={singleProduct!.name} fill className="object-cover" sizes="80px" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-ink">{singleProduct!.name}</p>
-                  <p className="mt-1 text-xs text-muted">{metal}</p>
-                  {color && <p className="text-xs text-muted">Diamond Quality: {color}</p>}
-                  {size && <p className="text-xs text-muted">Size: {size}</p>}
+                  <p className="truncate text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">{singleProduct!.name}</p>
+                  <p className="mt-1 text-[13px] leading-[1.35] text-muted">{metal}</p>
+                  {color && <p className="text-[13px] leading-[1.35] text-muted">Diamond Quality: {color}</p>}
+                  {size && <p className="text-[13px] leading-[1.35] text-muted">Size: {size}</p>}
                 </div>
-                <p className="shrink-0 text-sm font-medium text-ink">
+                <p className="shrink-0 text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">
                   {currency}
                   {price.toLocaleString('en-IN')}
                 </p>
               </div>
             )}
 
-            <div className="mt-5 space-y-2 border-t border-line pt-4 text-sm">
+            <div className="mt-5 space-y-2 border-t border-line pt-4 text-[13px] leading-[1.35]">
               <div className="flex justify-between text-charcoal">
                 <span>Subtotal</span>
                 <span>
@@ -272,19 +272,19 @@ export default function CheckoutContent() {
           <button
             onClick={handlePayment}
             disabled={paying || !isAddressComplete}
-            className="mt-4 w-full bg-ink py-4 text-sm font-medium uppercase tracking-wide2 text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="mt-4 w-full bg-ink py-4 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 sm:text-[12px]"
           >
             {paying ? 'Redirecting…' : 'Proceed to Payment'}
           </button>
           {!isAddressComplete && !paying && (
-            <p className="mt-2 text-center text-xs text-muted">
+            <p className="mt-2 text-center text-[13px] leading-[1.35] text-muted">
               Please fill in your delivery address to continue.
             </p>
           )}
           {payError && (
-            <p className="mt-2 text-center text-xs text-red-700">{payError}</p>
+            <p className="mt-2 text-center text-[13px] leading-[1.35] text-red-700">{payError}</p>
           )}
-          <p className="mt-2 text-center text-xs text-muted">
+          <p className="mt-2 text-center text-[13px] leading-[1.35] text-muted">
             Test mode — use card 4242 4242 4242 4242, any future date, any CVC.
           </p>
         </div>

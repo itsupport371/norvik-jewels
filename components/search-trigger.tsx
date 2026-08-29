@@ -72,7 +72,7 @@ export default function SearchTrigger() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search for rings, earrings, necklaces…"
-                className="flex-1 text-sm text-ink outline-none placeholder:text-muted"
+                className="flex-1 text-[14px] leading-[1.6] text-ink outline-none placeholder:text-muted"
               />
               <button type="button" onClick={close} aria-label="Close search" className="text-charcoal hover:text-ink">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -95,8 +95,8 @@ export default function SearchTrigger() {
                       <Image src={p.images[0]} alt={p.name} fill className="object-cover" sizes="48px" />
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-ink">{p.name}</p>
-                      <p className="text-xs text-muted">{p.category}</p>
+                      <p className="truncate text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">{p.name}</p>
+                      <p className="text-[13px] leading-[1.35] text-muted">{p.category}</p>
                     </div>
                   </Link>
                 ))}
@@ -104,7 +104,7 @@ export default function SearchTrigger() {
             )}
 
             {query.trim() && results.length === 0 && (
-              <p className="mt-3 text-sm text-muted">No results for &ldquo;{query}&rdquo;</p>
+              <p className="mt-3 text-[14px] leading-[1.6] text-muted">No results for &ldquo;{query}&rdquo;</p>
             )}
           </div>
         </div>

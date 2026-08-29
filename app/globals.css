@@ -9,6 +9,8 @@ html {
 body {
   background-color: #f6f3ee;
   color: #0b1626;
+  font-size: 15px;
+  line-height: 1.6;
 }
 
 ::selection {
