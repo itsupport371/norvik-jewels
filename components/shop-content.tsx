@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -32,6 +32,17 @@ export default function ShopContent() {
   const [category, setCategory] =
     useState<(typeof CATEGORIES)[number]>(normalizedInitial);
   const [sort, setSort] = useState<SortOption>("featured");
+
+  // Next.js reuses this same client component instance when navigating
+  // between two URLs that share the /shop route (e.g. a homepage banner
+  // linking to /shop?category=earrings while the shop page was already
+  // showing Rings from an earlier visit). useState's initial value only
+  // runs on first mount, so without this the category filter would keep
+  // showing whatever was selected before instead of following the new
+  // link. Re-sync whenever the URL's own category param changes.
+  useEffect(() => {
+    setCategory(normalizedInitial);
+  }, [normalizedInitial]);
 
   const filtered = useMemo(() => {
     let list =

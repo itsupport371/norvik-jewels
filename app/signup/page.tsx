@@ -20,7 +20,7 @@ export default function SignupPage() {
         <div className="absolute inset-0 flex flex-col justify-between p-14">
           <Link href="/" className="inline-block w-fit">
             <Image
-              src="/images/logo-mark-new.png"
+              src="/images/logo-mark-jewels.png"
               alt="NORVIK JEWELS"
               width={56}
               height={56}
@@ -39,13 +39,13 @@ export default function SignupPage() {
       <div className="flex items-center justify-center bg-ivory px-6 py-16">
         <div className="w-full max-w-sm">
           <div className="mb-10 flex flex-col items-center">
-            <Link href="/" className="rounded-md bg-ink px-8 py-4">
+            <Link href="/" className="flex items-center">
               <Image
-                src="/images/logo-full-new.png"
-                alt="NORVIK JEWELS"
+                src="/images/logo-full-jewels-light.png"
+                alt="Norvik Jewels"
                 width={280}
                 height={93}
-                className="h-12 w-auto"
+                className="h-10 w-auto sm:h-11"
               />
             </Link>
           </div>

@@ -39,13 +39,13 @@ export default function LoginPage() {
       <div className="flex items-center justify-center bg-ivory px-6 py-16">
         <div className="w-full max-w-sm">
           <div className="mb-10 flex flex-col items-center">
-            <Link href="/" className="rounded-md bg-midnight px-8 py-4">
+            <Link href="/" className="flex items-center">
               <Image
-                src="/images/logo-full-jewels-dark.png"
-                alt="NORVIK JEWELS"
+                src="/images/logo-full-jewels-light.png"
+                alt="Norvik Jewels"
                 width={280}
                 height={93}
-                className="h-12 w-auto"
+                className="h-10 w-auto sm:h-11"
               />
             </Link>
           </div>
