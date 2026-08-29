@@ -48,7 +48,7 @@ export default function HomePage() {
               <Link
                 key={c.label}
                 href={c.href}
-                className="group block border border-warmstone bg-softwhite p-4 transition-colors hover:border-antiquegold"
+                className="group block border border-warmstone bg-white p-4 transition-colors hover:border-antiquegold"
               >
                 <div className="relative aspect-square overflow-hidden bg-white">
                   <Image
@@ -123,7 +123,7 @@ export default function HomePage() {
                 <Link
                   href={`/product/${product.slug}`}
                   key={product.slug}
-                  className="group block border border-warmstone bg-softwhite p-3 transition-colors hover:border-antiquegold"
+                  className="group block border border-warmstone bg-white p-3 transition-colors hover:border-antiquegold"
                 >
                   <div className="relative aspect-square overflow-hidden bg-white">
                     <Image
