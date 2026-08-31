@@ -51,8 +51,10 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protect /account and /checkout routes — redirect signed-out users to /login.
-  const protectedPaths = ['/account', '/checkout'];
+  // Protect /account only — checkout allows guest purchases now, so a
+  // signed-out user can "Buy Now" straight through without being forced to
+  // log in first (they fill in an email on the checkout form instead).
+  const protectedPaths = ['/account'];
   const isProtected = protectedPaths.some((p) => request.nextUrl.pathname.startsWith(p));
   if (!user && isProtected) {
     const url = request.nextUrl.clone();

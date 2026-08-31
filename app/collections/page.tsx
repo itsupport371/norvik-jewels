@@ -60,7 +60,7 @@ export default function CollectionsPage() {
               <Link
                 key={c.label}
                 href={c.href}
-                className="group relative block aspect-[4/5] overflow-hidden"
+                className="group relative block aspect-square overflow-hidden"
               >
                 <Image
                   src={c.image}

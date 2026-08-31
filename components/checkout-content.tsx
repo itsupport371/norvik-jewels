@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { getProductBySlug } from '@/lib/mock-products';
 import { useCart } from '@/lib/cart-context';
+import { createClient } from '@/lib/supabase/client';
 
 export default function CheckoutContent() {
   const searchParams = useSearchParams();
@@ -20,6 +21,8 @@ export default function CheckoutContent() {
   const singleProduct = !isCartMode ? getProductBySlug(slug) : undefined;
   const { cart, totalPrice: cartTotal } = useCart();
 
+  const [email, setEmail] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
@@ -29,6 +32,19 @@ export default function CheckoutContent() {
   const [pincode, setPincode] = useState('');
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
+
+  // If the shopper is already signed in, pull their email in and lock the
+  // field — no point re-typing what we already know. Signed-out shoppers
+  // just get an empty, editable field (guest checkout, no login required).
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email) {
+        setEmail(user.email);
+        setIsLoggedIn(true);
+      }
+    });
+  }, []);
 
   if (isCartMode && cart.length === 0) {
     return (
@@ -66,6 +82,7 @@ export default function CheckoutContent() {
   const shipping = 0;
   const total = price + shipping;
   const isAddressComplete =
+    /^\S+@\S+\.\S+$/.test(email.trim()) &&
     name.trim() !== '' &&
     phone.trim() !== '' &&
     address.trim() !== '' &&
@@ -84,7 +101,7 @@ export default function CheckoutContent() {
       const res = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items, cartCheckout: isCartMode }),
+        body: JSON.stringify({ items, cartCheckout: isCartMode, email: email.trim() }),
       });
       const data = await res.json();
       if (data.url) {
@@ -112,6 +129,27 @@ export default function CheckoutContent() {
             Delivery Address
           </h2>
           <div className="space-y-4 border border-line p-5">
+            <div>
+              <label className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                readOnly={isLoggedIn}
+                placeholder="you@example.com"
+                className={`w-full border border-line px-4 py-3 text-base text-ink outline-none focus:border-ink sm:text-sm ${
+                  isLoggedIn ? 'bg-[#F1EEE8] text-muted' : 'bg-ivory'
+                }`}
+              />
+              {!isLoggedIn && (
+                <p className="mt-1.5 text-[13px] leading-[1.35] text-muted">
+                  Order confirmation and updates will be sent here.
+                </p>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">

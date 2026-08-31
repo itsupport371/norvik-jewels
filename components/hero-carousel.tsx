@@ -141,12 +141,12 @@ export default function HeroCarousel() {
       <div className="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-midnight/95 via-midnight/65 to-transparent sm:hidden" />
 
       {/* Text — web, one block per slide, cross-fades with the image */}
-      <div className="absolute inset-0 hidden flex-col items-center justify-end px-6 pb-24 text-center sm:flex">
-        <div className="relative flex min-h-[260px] w-full max-w-2xl flex-col items-center justify-end">
+      <div className="absolute inset-0 hidden flex-col items-start justify-end px-6 pb-24 text-left sm:flex sm:px-16 lg:px-24">
+        <div className="relative flex min-h-[260px] w-full max-w-2xl flex-col items-start justify-end">
           {WEB_SLIDES.map((slide, i) => (
             <div
               key={slide.image}
-              className="absolute inset-0 flex flex-col items-center justify-end transition-opacity duration-1000"
+              className="absolute inset-0 flex flex-col items-start justify-end transition-opacity duration-1000"
               style={{ opacity: i === webIndex ? 1 : 0 }}
             >
               <p className="mb-4 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">

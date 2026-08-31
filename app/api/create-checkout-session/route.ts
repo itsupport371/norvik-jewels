@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 
 export async function POST(req: NextRequest) {
   try {
-    const { items } = await req.json();
+    const { items, email } = await req.json();
 
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'No items to check out.' }, { status: 400 });
@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
       mode: 'payment',
       payment_method_types: ['card'],
       line_items,
+      customer_email: typeof email === 'string' && email.trim() ? email.trim() : undefined,
       success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/checkout`,
     });

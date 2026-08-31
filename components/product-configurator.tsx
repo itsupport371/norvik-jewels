@@ -2,11 +2,10 @@
 
 import { useState, useMemo } from 'react';
 import Image from 'next/image';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import type { Product, OptionChoice } from '@/lib/mock-products';
 import { CLARITY_ALLOWED_COLORS, stockFor, COLOR_CHARGE_PERCENT } from '@/lib/mock-products';
 import ProductSpecifications from '@/components/product-specifications';
-import { createClient } from '@/lib/supabase/client';
 import { calculatePrice, TEST_GOLD_RATE_24K_PER_10G } from '@/lib/pricing';
 import { useWishlist } from '@/lib/wishlist-context';
 import { useCart } from '@/lib/cart-context';
@@ -76,7 +75,6 @@ function CardGrid({
 
 export default function ProductConfigurator({ product }: { product: Product }) {
   const router = useRouter();
-  const pathname = usePathname();
   const [activeImage, setActiveImage] = useState(0);
   const [metalKey, setMetalKey] = useState(product.metalOptions[0].label);
   const [sizeKey, setSizeKey] = useState<string | null>(
@@ -170,16 +168,9 @@ export default function ProductConfigurator({ product }: { product: Product }) {
     if (!canAddToBag || buyLoading) return;
     setBuyLoading(true);
 
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
-      return;
-    }
-
+    // Guest checkout: no login required to buy. Checkout collects an email
+    // itself (pre-filled if the shopper happens to already be signed in),
+    // so there's nothing to gate here anymore.
     const params = new URLSearchParams({
       slug: product.slug,
       metal: metalKey,
