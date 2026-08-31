@@ -7,7 +7,7 @@ html {
 }
 
 body {
-  background-color: #f6f3ee;
+  background-color: #ffffff;
   color: #0b1626;
   font-size: 15px;
   line-height: 1.6;
@@ -15,7 +15,7 @@ body {
 
 ::selection {
   background-color: #0b1626;
-  color: #f6f3ee;
+  color: #ffffff;
 }
 
 input:focus-visible,

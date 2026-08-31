@@ -41,7 +41,7 @@ export default function ProductSpecifications({
 
       {open && (
         <div className="mt-4 overflow-hidden border border-line">
-          <div className="border-b border-line bg-[#F7F5F2] py-2.5 text-center text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
+          <div className="border-b border-line bg-white py-2.5 text-center text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
             Product Details
           </div>
 

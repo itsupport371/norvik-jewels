@@ -8,8 +8,8 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ivory: '#F6F3EE',
-        paper: '#F6F3EE',
+        ivory: '#FFFFFF',
+        paper: '#FFFFFF',
         ink: '#0B1626',
         charcoal: '#1B2A3D',
         muted: '#6B7280',
@@ -22,7 +22,7 @@ const config: Config = {
         // stay dark (midnight/deepmidnight). Gold stays a restrained accent.
         midnight: '#091528', // Primary dark — hero, essence, storytelling, dark strips
         deepmidnight: '#050812', // Deepest dark — footer, overlays
-        scandi: '#F7F4F0', // Primary light — header, category, product grids, PDP
+        scandi: '#FFFFFF', // Primary light — header, category, product grids, PDP
         softwhite: '#FCFBF9', // Product surface — image tiles, cards, forms
         antiquegold: '#B48851', // Primary accent — labels, thin lines, arrows, small CTAs
         champagnegold: '#CFA772', // Highlight accent — premium highlights / selected icons

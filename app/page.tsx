@@ -161,7 +161,7 @@ export default function HomePage() {
               sizes="(min-width: 1024px) 50vw, 100vw"
             />
           </div>
-          <div className="flex flex-col items-start justify-center bg-[#F7F5F2] px-8 py-16 lg:px-16">
+          <div className="flex flex-col items-start justify-center bg-white px-8 py-16 lg:px-16">
             <p className="mb-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
               Craftsmanship
             </p>
