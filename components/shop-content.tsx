@@ -388,9 +388,9 @@ export default function ShopContent() {
                 <Link
                   href={`/product/${product.slug}`}
                   key={product.slug}
-                  className="group block"
+                  className="group relative block aspect-square overflow-hidden border border-warmstone bg-white p-2 transition-colors hover:border-antiquegold sm:p-3"
                 >
-                  <div className="relative aspect-square overflow-hidden bg-white">
+                  <div className="relative h-[calc(100%-88px)] overflow-hidden sm:h-[calc(100%-104px)]">
                     <Image
                       src={product.images[0]}
                       alt={product.name}
@@ -399,16 +399,18 @@ export default function ShopContent() {
                       sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
                     />
                   </div>
-                  <p className="mt-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
-                    {product.category}
-                  </p>
-                  <p className="mt-1 text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">
-                    {product.name}
-                  </p>
-                  <p className="mt-1 text-[13px] leading-[1.35] text-muted">
-                    {product.currency}
-                    {getDisplayPrice(product).toLocaleString("en-IN")}
-                  </p>
+                  <div className="flex h-[88px] flex-col items-center justify-center overflow-hidden px-1 text-center sm:h-[104px]">
+                    <p className="text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
+                      {product.category}
+                    </p>
+                    <p className="mt-1 line-clamp-2 w-full text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">
+                      {product.name}
+                    </p>
+                    <p className="mt-1 text-[13px] leading-[1.35] text-muted">
+                      {product.currency}
+                      {getDisplayPrice(product).toLocaleString("en-IN")}
+                    </p>
+                  </div>
                 </Link>
               ))}
             </div>

@@ -48,9 +48,9 @@ export default function HomePage() {
               <Link
                 key={c.label}
                 href={c.href}
-                className="group block border border-warmstone bg-white p-4 transition-colors hover:border-antiquegold"
+                className="group relative block aspect-square overflow-hidden border border-warmstone bg-white p-4 transition-colors hover:border-antiquegold"
               >
-                <div className="relative aspect-square overflow-hidden bg-white">
+                <div className="relative h-[calc(100%-40px)] overflow-hidden sm:h-[calc(100%-48px)]">
                   <Image
                     src={c.image}
                     alt={`${c.label} collection`}
@@ -59,7 +59,7 @@ export default function HomePage() {
                     sizes="(min-width: 640px) 25vw, 50vw"
                   />
                 </div>
-                <span className="mt-4 block text-center font-sans text-[13px] font-medium leading-[1.35] text-inknavy sm:text-[15px]">
+                <span className="flex h-10 items-center justify-center truncate text-center font-sans text-[13px] font-medium leading-[1.35] text-inknavy sm:h-12 sm:text-[15px]">
                   {c.label}
                 </span>
               </Link>
@@ -118,32 +118,34 @@ export default function HomePage() {
                 View All
               </Link>
             </div>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-5">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
               {products.map((product) => (
                 <Link
                   href={`/product/${product.slug}`}
                   key={product.slug}
-                  className="group block border border-warmstone bg-white p-3 transition-colors hover:border-antiquegold"
+                  className="group relative block aspect-square overflow-hidden border border-warmstone bg-white p-3 transition-colors hover:border-antiquegold"
                 >
-                  <div className="relative aspect-square overflow-hidden bg-white">
+                  <div className="relative h-[calc(100%-88px)] overflow-hidden sm:h-[calc(100%-104px)]">
                     <Image
                       src={product.images[0]}
                       alt={product.name}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
+                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
                     />
                   </div>
-                  <p className="mt-4 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
-                    {product.category}
-                  </p>
-                  <p className="mt-1 text-[13px] font-medium leading-[1.35] text-inknavy sm:text-[14px]">
-                    {product.name}
-                  </p>
-                  <p className="mt-1 text-[13px] leading-[1.35] text-inknavy/60">
-                    {product.currency}
-                    {getDisplayPrice(product).toLocaleString("en-IN")}
-                  </p>
+                  <div className="flex h-[88px] flex-col items-center justify-center overflow-hidden px-1 text-center sm:h-[104px]">
+                    <p className="text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
+                      {product.category}
+                    </p>
+                    <p className="mt-1 line-clamp-2 w-full text-[13px] font-medium leading-[1.35] text-inknavy sm:text-[14px]">
+                      {product.name}
+                    </p>
+                    <p className="mt-1 text-[13px] leading-[1.35] text-inknavy/60">
+                      {product.currency}
+                      {getDisplayPrice(product).toLocaleString("en-IN")}
+                    </p>
+                  </div>
                 </Link>
               ))}
             </div>

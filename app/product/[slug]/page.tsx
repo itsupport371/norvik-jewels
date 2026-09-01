@@ -34,8 +34,12 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
             </h2>
             <div className="grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-4">
               {related.map((p) => (
-                <Link href={`/product/${p.slug}`} key={p.slug} className="group block">
-                  <div className="relative aspect-square overflow-hidden bg-white">
+                <Link
+                  href={`/product/${p.slug}`}
+                  key={p.slug}
+                  className="group relative block aspect-square overflow-hidden border border-warmstone bg-white p-2 transition-colors hover:border-antiquegold sm:p-3"
+                >
+                  <div className="relative h-[calc(100%-64px)] overflow-hidden sm:h-[calc(100%-76px)]">
                     <Image
                       src={p.images[0]}
                       alt={p.name}
@@ -44,10 +48,12 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                       sizes="(min-width: 1024px) 25vw, 50vw"
                     />
                   </div>
-                  <p className="mt-3 text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">{p.name}</p>
-                  <p className="mt-1 text-[13px] leading-[1.35] text-muted">
-                    {p.currency}{p.basePrice.toLocaleString('en-IN')}
-                  </p>
+                  <div className="flex h-16 flex-col items-center justify-center overflow-hidden px-1 text-center sm:h-[76px]">
+                    <p className="line-clamp-2 w-full text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">{p.name}</p>
+                    <p className="mt-1 text-[13px] leading-[1.35] text-muted">
+                      {p.currency}{p.basePrice.toLocaleString('en-IN')}
+                    </p>
+                  </div>
                 </Link>
               ))}
             </div>
