@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 export default function SiteFooter() {
   return (
@@ -13,7 +13,7 @@ export default function SiteFooter() {
               JEWELS
             </p>
             <p className="mt-4 text-[14px] leading-[1.6] text-white/50">
-              Timeless Scandinavian luxury, from Dubai to the world.
+              Timeless Scandinavian luxury, from sweden to the world.
             </p>
           </div>
 
@@ -22,9 +22,21 @@ export default function SiteFooter() {
               Shop
             </h4>
             <ul className="space-y-2.5 text-[14px] leading-[1.6] text-white/60">
-              <li><Link href="/shop" className="hover:text-white">All Jewellery</Link></li>
-              <li><Link href="/collections" className="hover:text-white">Collections</Link></li>
-              <li><Link href="/bespoke" className="hover:text-white">Bespoke</Link></li>
+              <li>
+                <Link href="/shop" className="hover:text-white">
+                  All Jewellery
+                </Link>
+              </li>
+              <li>
+                <Link href="/collections" className="hover:text-white">
+                  Collections
+                </Link>
+              </li>
+              <li>
+                <Link href="/bespoke" className="hover:text-white">
+                  Bespoke
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -33,9 +45,21 @@ export default function SiteFooter() {
               Company
             </h4>
             <ul className="space-y-2.5 text-[14px] leading-[1.6] text-white/60">
-              <li><Link href="/about" className="hover:text-white">Our Story</Link></li>
-              <li><Link href="/contact" className="hover:text-white">Contact</Link></li>
-              <li><Link href="/faq" className="hover:text-white">FAQ</Link></li>
+              <li>
+                <Link href="/about" className="hover:text-white">
+                  Our Story
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-white">
+                  Contact
+                </Link>
+              </li>
+              <li>
+                <Link href="/faq" className="hover:text-white">
+                  FAQ
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -44,15 +68,25 @@ export default function SiteFooter() {
               Legal
             </h4>
             <ul className="space-y-2.5 text-[14px] leading-[1.6] text-white/60">
-              <li><Link href="/policies/terms" className="hover:text-white">Terms</Link></li>
-              <li><Link href="/policies/privacy" className="hover:text-white">Privacy</Link></li>
+              <li>
+                <Link href="/policies/terms" className="hover:text-white">
+                  Terms
+                </Link>
+              </li>
+              <li>
+                <Link href="/policies/privacy" className="hover:text-white">
+                  Privacy
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
 
         <div className="mt-14 flex flex-col gap-3 border-t border-white/10 pt-6 text-[13px] leading-[1.35] text-white/40 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Norvik Jewels. All rights reserved.</p>
-          <p>Down Town, Business Bay, Dubai, UAE · info@norvikgold.com</p>
+          <p>
+            © {new Date().getFullYear()} Norvik Jewels. All rights reserved.
+          </p>
+          <p>Down Town, Business Bay, sweden, UAE · info@norvikgold.com</p>
         </div>
       </div>
     </footer>

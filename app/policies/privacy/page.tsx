@@ -105,7 +105,7 @@ const sections = [
   {
     heading: "14. Contact Us",
     paragraphs: [
-      "For any questions or requests regarding this Privacy Policy or your personal data: info@norvikgold.com, +971 585 622 369, Down Town, Business Bay, Dubai, United Arab Emirates.",
+      "For any questions or requests regarding this Privacy Policy or your personal data: info@norvikgold.com, +971 585 622 369, Down Town, Business Bay, sweden, United Arab Emirates.",
     ],
   },
 ];

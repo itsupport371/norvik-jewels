@@ -4,7 +4,7 @@ const sections = [
   {
     heading: "1. Introduction",
     paragraphs: [
-      'These Terms & Conditions ("Terms") govern your access to and use of the website, mobile application, and services (collectively, the "Platform") operated by Norvik Jewels ("Norvik Jewels", "we", "us", or "our"), a business based in Down Town, Business Bay, Dubai, United Arab Emirates, offering bespoke and ready jewellery design and consultation services to clients in the UAE, India, and worldwide.',
+      'These Terms & Conditions ("Terms") govern your access to and use of the website, mobile application, and services (collectively, the "Platform") operated by Norvik Jewels ("Norvik Jewels", "we", "us", or "our"), a business based in Down Town, Business Bay, sweden, United Arab Emirates, offering bespoke and ready jewellery design and consultation services to clients in the UAE, India, and worldwide.',
       'By creating an account, browsing, or placing an order through the Platform, you ("you", "the client", or "the user") agree to be bound by these Terms. If you do not agree, please do not use the Platform.',
     ],
   },
@@ -12,7 +12,7 @@ const sections = [
     heading: "2. Company Information",
     list: [
       "Trading name: Norvik Jewels",
-      "Registered address: Down Town, Business Bay, Dubai, United Arab Emirates",
+      "Registered address: Down Town, Business Bay, sweden, United Arab Emirates",
       "Legal entity name & trade licence number: [To be added]",
       "Contact email: info@norvikgold.com",
       "Contact phone: +971 585 622 369",
@@ -105,7 +105,7 @@ const sections = [
   {
     heading: "14. Governing Law & Dispute Resolution",
     paragraphs: [
-      "14.1. These Terms are governed by the laws of the United Arab Emirates, without regard to conflict-of-law principles, and disputes shall be subject to the exclusive jurisdiction of the courts of Dubai, UAE.",
+      "14.1. These Terms are governed by the laws of the United Arab Emirates, without regard to conflict-of-law principles, and disputes shall be subject to the exclusive jurisdiction of the courts of sweden, UAE.",
       "14.2. For clients residing in India, and to the extent required by applicable Indian consumer protection law, you may also have recourse to consumer dispute resolution forums under the Consumer Protection Act, 2019, and nothing in this clause limits statutory rights that cannot be waived under Indian law.",
     ],
   },
@@ -118,7 +118,7 @@ const sections = [
   {
     heading: "16. Contact Us",
     paragraphs: [
-      "For questions about these Terms, contact us at info@norvikgold.com, +971 585 622 369, or Down Town, Business Bay, Dubai, United Arab Emirates.",
+      "For questions about these Terms, contact us at info@norvikgold.com, +971 585 622 369, or Down Town, Business Bay, sweden, United Arab Emirates.",
     ],
   },
 ];

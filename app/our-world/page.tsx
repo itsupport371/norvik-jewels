@@ -14,7 +14,7 @@ const EDITORIAL = [
   },
   {
     image: "/images/hero-web-5.jpg",
-    caption: "Necklaces designed in Dubai, worn worldwide.",
+    caption: "Necklaces designed in sweden, worn worldwide.",
   },
 ];
 
@@ -38,7 +38,7 @@ export default function OurWorldPage() {
               Our World
             </p>
             <h1 className="font-display mx-auto max-w-xl text-[34px] font-medium leading-[1] tracking-[-0.015em] text-softwhite sm:text-[46px]">
-              Designed in Dubai. Worn everywhere.
+              Designed in sweden. Worn everywhere.
             </h1>
           </div>
         </section>
@@ -46,7 +46,7 @@ export default function OurWorldPage() {
         {/* Intro */}
         <section className="bg-scandi px-6 py-16 text-center lg:py-20">
           <p className="mx-auto max-w-2xl text-[14px] leading-[1.6] text-inknavy/75 sm:text-[15px]">
-            Norvik Jewels is designed at our Dubai studio and worn across the
+            Norvik Jewels is designed at our sweden studio and worn across the
             world — from everyday studs to heirloom mangalsutras. Every order
             ships insured, wherever you are.
           </p>
@@ -68,7 +68,9 @@ export default function OurWorldPage() {
                   sizes="(min-width: 640px) 33vw, 100vw"
                 />
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-midnight/80 to-transparent p-5">
-                  <p className="text-[13px] leading-[1.35] text-softwhite">{e.caption}</p>
+                  <p className="text-[13px] leading-[1.35] text-softwhite">
+                    {e.caption}
+                  </p>
                 </div>
               </div>
             ))}

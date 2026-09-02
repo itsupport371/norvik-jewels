@@ -49,8 +49,8 @@ export default function CollectionsPage() {
             Our Collections
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-[14px] leading-[1.6] text-inknavy/70 sm:text-[15px]">
-            Every collection is designed in Dubai and finished by hand — pick
-            a category to explore, or start with the pieces we love most.
+            Every collection is designed in sweden and finished by hand — pick a
+            category to explore, or start with the pieces we love most.
           </p>
         </section>
 
@@ -74,7 +74,9 @@ export default function CollectionsPage() {
                   <p className="font-display text-xl font-medium leading-[1.05] tracking-[-0.01em] text-softwhite">
                     {c.label}
                   </p>
-                  <p className="mt-1 text-[13px] leading-[1.35] text-warmstone">{c.tagline}</p>
+                  <p className="mt-1 text-[13px] leading-[1.35] text-warmstone">
+                    {c.tagline}
+                  </p>
                 </div>
               </Link>
             ))}

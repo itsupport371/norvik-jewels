@@ -13,8 +13,8 @@ const VALUES = [
     body: "We work only with refiners who meet responsible-sourcing standards for 18K, 14K, and 9K gold.",
   },
   {
-    title: "Handcrafted in Dubai",
-    body: "Every piece is finished by hand in our Dubai workshop before it ships to you, insured, worldwide.",
+    title: "Handcrafted in sweden",
+    body: "Every piece is finished by hand in our sweden workshop before it ships to you, insured, worldwide.",
   },
 ];
 
@@ -49,18 +49,18 @@ export default function AboutPage() {
               About Norvik
             </p>
             <h2 className="font-display mb-5 text-[26px] font-medium leading-[1.05] tracking-[-0.01em] text-inknavy sm:text-[36px]">
-              Scandinavian minimalism, Dubai craftsmanship.
+              Scandinavian minimalism, sweden craftsmanship.
             </h2>
             <p className="mb-4 max-w-md text-[14px] leading-[1.6] text-inknavy/75 sm:text-[15px]">
               Norvik Jewels began with a simple idea: fine jewellery should be
               as easy to live in as it is beautiful to look at. We pair clean,
-              Scandinavian-inspired design with 18K gold and certified
-              diamonds, so every piece feels considered rather than ornate.
+              Scandinavian-inspired design with 18K gold and certified diamonds,
+              so every piece feels considered rather than ornate.
             </p>
             <p className="mb-6 max-w-md text-[14px] leading-[1.6] text-inknavy/75 sm:text-[15px]">
-              From first sketch to final polish, every piece passes through
-              the hands of skilled artisans in our Dubai workshop — designed
-              to be worn every day, and built to last far longer than that.
+              From first sketch to final polish, every piece passes through the
+              hands of skilled artisans in our sweden workshop — designed to be
+              worn every day, and built to last far longer than that.
             </p>
             <Link
               href="/shop"

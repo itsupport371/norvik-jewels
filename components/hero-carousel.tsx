@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 
 type Slide = {
   image: string;
@@ -14,63 +14,63 @@ type Slide = {
 
 const WEB_SLIDES: Slide[] = [
   {
-    image: '/images/hero-web-1.jpg',
-    eyebrow: 'Trillion-Cut Brilliance',
-    heading: ['Earrings,', 'Reimagined.'],
-    ctaLabel: 'Explore Earrings',
-    ctaHref: '/shop?category=earrings',
+    image: "/images/hero-web-1.jpg",
+    eyebrow: "Trillion-Cut Brilliance",
+    heading: ["Earrings,", "Reimagined."],
+    ctaLabel: "Explore Earrings",
+    ctaHref: "/shop?category=earrings",
   },
   {
-    image: '/images/hero-web-2.jpg',
-    eyebrow: 'Everyday Signature',
-    heading: ['Mangalsutras,', 'Made Modern.'],
-    ctaLabel: 'Explore Necklaces',
-    ctaHref: '/shop?category=necklaces',
+    image: "/images/hero-web-2.jpg",
+    eyebrow: "Everyday Signature",
+    heading: ["Mangalsutras,", "Made Modern."],
+    ctaLabel: "Explore Necklaces",
+    ctaHref: "/shop?category=necklaces",
   },
   {
-    image: '/images/hero-web-3.jpg',
-    eyebrow: 'Timeless Scandinavian Luxury',
-    heading: ['Jewellery made to be worn,', 'not kept away.'],
-    ctaLabel: 'Explore the Collection',
-    ctaHref: '/shop',
+    image: "/images/hero-web-3.jpg",
+    eyebrow: "Timeless Scandinavian Luxury",
+    heading: ["Jewellery made to be worn,", "not kept away."],
+    ctaLabel: "Explore the Collection",
+    ctaHref: "/shop",
   },
   {
-    image: '/images/hero-web-4.jpg',
-    eyebrow: 'Crafted in 18K Gold',
-    heading: ['Heirlooms,', 'Begin Today.'],
-    ctaLabel: 'Explore Necklaces',
-    ctaHref: '/shop?category=necklaces',
+    image: "/images/hero-web-4.jpg",
+    eyebrow: "Crafted in 18K Gold",
+    heading: ["Heirlooms,", "Begin Today."],
+    ctaLabel: "Explore Necklaces",
+    ctaHref: "/shop?category=necklaces",
   },
   {
-    image: '/images/hero-web-5.jpg',
-    eyebrow: 'Designed in Dubai',
-    heading: ['Necklaces,', 'Refined.'],
-    ctaLabel: 'Explore Necklaces',
-    ctaHref: '/shop?category=necklaces',
+    image: "/images/hero-web-5.jpg",
+    eyebrow: "Designed in sweden",
+    heading: ["Necklaces,", "Refined."],
+    ctaLabel: "Explore Necklaces",
+    ctaHref: "/shop?category=necklaces",
   },
 ];
 
 const MOBILE_SLIDES: Slide[] = [
   {
-    image: '/images/hero-mobile-1.jpg',
-    eyebrow: 'Trillion-Cut Brilliance',
-    heading: ['Earrings,', 'Reimagined.'],
-    ctaLabel: 'Explore Earrings',
-    ctaHref: '/shop?category=earrings',
+    image: "/images/hero-mobile-1.jpg",
+    eyebrow: "Trillion-Cut Brilliance",
+    heading: ["Earrings,", "Reimagined."],
+    ctaLabel: "Explore Earrings",
+    ctaHref: "/shop?category=earrings",
   },
   {
-    image: '/images/hero-mobile-2.jpg',
-    eyebrow: 'Timeless Scandinavian Luxury',
-    heading: ['Jewellery made to be worn,', 'not kept away.'],
-    ctaLabel: 'Explore the Collection',
-    ctaHref: '/shop',
+    image: "/images/hero-mobile-2.jpg",
+    eyebrow: "Timeless Scandinavian Luxury",
+    heading: ["Jewellery made to be worn,", "not kept away."],
+    ctaLabel: "Explore the Collection",
+    ctaHref: "/shop",
   },
   {
-    image: '/images/hero-mobile-3.jpg',
-    eyebrow: 'Designed in Dubai',
-    heading: ['Necklaces,', 'Refined.'],
-    ctaLabel: 'Explore Necklaces',
-    ctaHref: '/shop?category=necklaces',
+    image: "/images/hero-mobile-3.jpg",
+    eyebrow: "Designed in sweden",
+    heading: ["Necklaces,", "Refined."],
+    ctaLabel: "Explore Necklaces",
+    ctaHref: "/shop?category=necklaces",
   },
 ];
 
@@ -135,9 +135,6 @@ export default function HeroCarousel() {
       </div>
 
       <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/20 to-ink/10" />
-      {/* Constant top scrim so the transparent header's ivory logo/nav stays
-          readable regardless of how bright any given slide is near the top. */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-ink/50 to-transparent" />
       {/* Extra darkening behind the mobile text block only — the photo's bright
           highlights (diamonds/metal) can sit right where the text lives on a
           portrait crop, so this guarantees contrast regardless of the slide. */}
@@ -178,7 +175,7 @@ export default function HeroCarousel() {
               onClick={() => setWebIndex(i)}
               aria-label={`Go to slide ${i + 1}`}
               className={`h-1.5 rounded-full transition-all ${
-                i === webIndex ? 'w-6 bg-[#D9BE93]' : 'w-1.5 bg-ivory/40'
+                i === webIndex ? "w-6 bg-[#D9BE93]" : "w-1.5 bg-ivory/40"
               }`}
             />
           ))}
@@ -220,7 +217,7 @@ export default function HeroCarousel() {
               onClick={() => setMobileIndex(i)}
               aria-label={`Go to slide ${i + 1}`}
               className={`h-1.5 rounded-full transition-all ${
-                i === mobileIndex ? 'w-6 bg-[#D9BE93]' : 'w-1.5 bg-ivory/40'
+                i === mobileIndex ? "w-6 bg-[#D9BE93]" : "w-1.5 bg-ivory/40"
               }`}
             />
           ))}
