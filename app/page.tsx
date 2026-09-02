@@ -4,6 +4,7 @@ import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
 import HeroCarousel from "@/components/hero-carousel";
 import CampaignHero from "@/components/campaign-hero";
+import ImportExportCompare from "@/components/import-export-compare";
 import { products, getDisplayPrice } from "@/lib/mock-products";
 
 export default function HomePage() {
@@ -12,6 +13,11 @@ export default function HomePage() {
       <SiteHeader transparentOnHero />
       <main className="bg-ivory">
         <CampaignHero />
+
+        {/* Import vs Export comparison — sits right below the header/hero,
+            per client request. Three gold tones, import design vs export
+            design, matched tone-for-tone with large images. */}
+        <ImportExportCompare />
 
         {/* Editorial quote — breathing space between the campaign hero and the
             product carousel below, per client request. Placeholder copy —
