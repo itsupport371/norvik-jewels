@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { products } from '@/lib/mock-products';
 
-export default function SearchTrigger() {
+export default function SearchTrigger({ light = false }: { light?: boolean }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const router = useRouter();
@@ -40,7 +40,11 @@ export default function SearchTrigger() {
       <button
         onClick={() => setOpen(true)}
         aria-label="Search"
-        className="text-charcoal transition-colors hover:text-[#B8935A]"
+        className={
+          light
+            ? 'text-ivory transition-colors hover:text-antiquegold'
+            : 'text-charcoal transition-colors hover:text-[#B8935A]'
+        }
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
           <circle cx="11" cy="11" r="7" />

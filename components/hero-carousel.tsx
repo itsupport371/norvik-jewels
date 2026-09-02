@@ -135,6 +135,9 @@ export default function HeroCarousel() {
       </div>
 
       <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/20 to-ink/10" />
+      {/* Constant top scrim so the transparent header's ivory logo/nav stays
+          readable regardless of how bright any given slide is near the top. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-ink/50 to-transparent" />
       {/* Extra darkening behind the mobile text block only — the photo's bright
           highlights (diamonds/metal) can sit right where the text lives on a
           portrait crop, so this guarantees contrast regardless of the slide. */}

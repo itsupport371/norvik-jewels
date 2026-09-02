@@ -265,15 +265,24 @@ export const products: Product[] = [
     slug: 'solitaire-band',
     name: 'Solitaire Band',
     category: 'Rings',
-    images: ['/images/product-ring-1.jpg', '/images/product-ring-2.jpg'],
+    images: [
+      '/images/toi-et-moi-yellow-gold.jpg',
+      '/images/toi-et-moi-white-gold.jpg',
+      '/images/toi-et-moi-rose-gold.jpg',
+    ],
+    metalImages: {
+      yellow: '/images/toi-et-moi-yellow-gold.jpg',
+      white: '/images/toi-et-moi-white-gold.jpg',
+      rose: '/images/toi-et-moi-rose-gold.jpg',
+    },
     basePrice: 73500,
     currency: '₹',
     description:
       'A single brilliant-cut diamond on a clean, tapered band — a quiet, everyday classic.',
     metalOptions: [
-      { label: '14 KT Yellow Gold', priceModifier: 0, stock: 'In Stock' },
-      { label: '18 KT White Gold', priceModifier: 300, stock: 'Made to Order' },
-      { label: '9 KT Rose Gold', priceModifier: -150, stock: 'In Stock' },
+      { label: '14 KT Yellow Gold', priceModifier: 0, stock: 'In Stock', metalColor: 'yellow' },
+      { label: '18 KT White Gold', priceModifier: 300, stock: 'Made to Order', metalColor: 'white' },
+      { label: '9 KT Rose Gold', priceModifier: -150, stock: 'In Stock', metalColor: 'rose' },
     ],
     sizeOptions: [
       { label: '5', sublabel: '44.8 mm', priceModifier: 0, stock: 'In Stock' },

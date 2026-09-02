@@ -8,7 +8,7 @@ import { products, getDisplayPrice } from "@/lib/mock-products";
 export default function HomePage() {
   return (
     <>
-      <SiteHeader />
+      <SiteHeader transparentOnHero />
       <main className="bg-ivory">
         <HeroCarousel />
 
@@ -48,14 +48,14 @@ export default function HomePage() {
               <Link
                 key={c.label}
                 href={c.href}
-                className="group relative block aspect-square overflow-hidden border border-warmstone bg-white p-4 transition-colors hover:border-antiquegold"
+                className="group relative block aspect-square overflow-hidden border border-warmstone bg-white p-4"
               >
                 <div className="relative h-[calc(100%-40px)] overflow-hidden sm:h-[calc(100%-48px)]">
                   <Image
                     src={c.image}
                     alt={`${c.label} collection`}
                     fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="object-contain transition-transform duration-500 group-hover:scale-105"
                     sizes="(min-width: 640px) 25vw, 50vw"
                   />
                 </div>
@@ -123,14 +123,14 @@ export default function HomePage() {
                 <Link
                   href={`/product/${product.slug}`}
                   key={product.slug}
-                  className="group relative block aspect-square overflow-hidden border border-warmstone bg-white p-3 transition-colors hover:border-antiquegold"
+                  className="group relative block aspect-square overflow-hidden border border-warmstone bg-white p-3"
                 >
                   <div className="relative h-[calc(100%-88px)] overflow-hidden sm:h-[calc(100%-104px)]">
                     <Image
                       src={product.images[0]}
                       alt={product.name}
                       fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="object-contain transition-transform duration-500 group-hover:scale-105"
                       sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
                     />
                   </div>

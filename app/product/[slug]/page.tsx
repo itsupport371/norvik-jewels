@@ -37,14 +37,14 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                 <Link
                   href={`/product/${p.slug}`}
                   key={p.slug}
-                  className="group relative block aspect-square overflow-hidden border border-warmstone bg-white p-2 transition-colors hover:border-antiquegold sm:p-3"
+                  className="group relative block aspect-square overflow-hidden border border-warmstone bg-white p-2 sm:p-3"
                 >
                   <div className="relative h-[calc(100%-64px)] overflow-hidden sm:h-[calc(100%-76px)]">
                     <Image
                       src={p.images[0]}
                       alt={p.name}
                       fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="object-contain transition-transform duration-500 group-hover:scale-105"
                       sizes="(min-width: 1024px) 25vw, 50vw"
                     />
                   </div>

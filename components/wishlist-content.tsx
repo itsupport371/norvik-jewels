@@ -34,14 +34,14 @@ export default function WishlistContent() {
             <div key={product.slug} className="group relative">
               <Link
                 href={`/product/${product.slug}`}
-                className="relative block aspect-square overflow-hidden border border-warmstone bg-white p-2 transition-colors hover:border-antiquegold sm:p-3"
+                className="relative block aspect-square overflow-hidden border border-warmstone bg-white p-2 sm:p-3"
               >
                 <div className="relative h-[calc(100%-88px)] overflow-hidden sm:h-[calc(100%-104px)]">
                   <Image
                     src={product.images[0]}
                     alt={product.name}
                     fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="object-contain transition-transform duration-500 group-hover:scale-105"
                     sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
                   />
                 </div>

@@ -218,7 +218,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
             alt={product.name}
             fill
             priority
-            className="object-cover"
+            className="object-contain"
             sizes="(min-width: 1024px) 45vw, 100vw"
           />
         </div>
@@ -232,7 +232,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
                   activeImage === i ? 'opacity-100 ring-1 ring-black' : 'opacity-60 hover:opacity-90'
                 }`}
               >
-                <Image src={img} alt="" fill className="object-cover" sizes="80px" />
+                <Image src={img} alt="" fill className="object-contain" sizes="80px" />
               </button>
             ))}
           </div>
