@@ -61,7 +61,15 @@ export default function CampaignHero() {
             alt="Norvik Jewels fine jewellery"
             fill
             priority={i === 0}
-            className="object-cover"
+            // These are wide landscape studio shots with the model on the
+            // right side of the frame. Plain object-cover centers the crop,
+            // which on a narrow/tall mobile screen crops the model almost
+            // entirely out and leaves just the empty backdrop. Biasing the
+            // crop toward the right (and slightly above center vertically)
+            // keeps her face and the jewellery in frame on phones/tablets;
+            // it's a no-op on wide desktop screens since nothing gets
+            // cropped horizontally there.
+            className="object-cover object-[78%_25%]"
             sizes="100vw"
           />
         </div>

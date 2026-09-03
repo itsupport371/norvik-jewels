@@ -18,6 +18,31 @@ body {
   color: #ffffff;
 }
 
+/* Themed scrollbar — the browser's own scrollbar reserves a gutter on the
+   right edge (Windows/Chrome/Edge default). It can't be removed without
+   breaking scrolling, but styling it dark/gold instead of the default light
+   gray keeps it from reading as a stray white strip next to the dark hero. */
+html {
+  scrollbar-color: #b48851 #091528;
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #091528;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #b48851;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #cfa772;
+}
+
 input:focus-visible,
 button:focus-visible,
 a:focus-visible {

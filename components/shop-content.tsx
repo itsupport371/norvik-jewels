@@ -192,8 +192,9 @@ export default function ShopContent() {
         )}
       </div>
 
-      <FilterGroup title="Product Type">
-        {options.categories.map((cat) => {
+      <ExpandableFilterGroup
+        title="Product Type"
+        items={options.categories.map((cat) => {
           const count = products.filter(
             (p) => p.category === cat && productMatches(p, filters, "categories")
           ).length;
@@ -209,10 +210,11 @@ export default function ShopContent() {
             />
           );
         })}
-      </FilterGroup>
+      />
 
-      <FilterGroup title="Metal">
-        {options.metals.map((metal) => {
+      <ExpandableFilterGroup
+        title="Metal"
+        items={options.metals.map((metal) => {
           const count = products.filter(
             (p) =>
               p.metalOptions.some((m) => m.label === metal) &&
@@ -228,7 +230,7 @@ export default function ShopContent() {
             />
           );
         })}
-      </FilterGroup>
+      />
 
       <FilterGroup title="Price">
         {PRICE_RANGES.map((range) => {
@@ -252,8 +254,9 @@ export default function ShopContent() {
       </FilterGroup>
 
       {options.sizes.length > 0 && (
-        <FilterGroup title="Ring Size">
-          {options.sizes.map((size) => {
+        <ExpandableFilterGroup
+          title="Ring Size"
+          items={options.sizes.map((size) => {
             const label = String(size);
             const count = products.filter(
               (p) =>
@@ -271,29 +274,37 @@ export default function ShopContent() {
               />
             );
           })}
-        </FilterGroup>
+        />
       )}
 
-      <FilterGroup title="Diamond">
-        <FilterCheckbox
-          checked={filters.diamondOnly}
-          onChange={() => setFilters((f) => ({ ...f, diamondOnly: !f.diamondOnly }))}
-          label="With Diamond"
-          count={products.filter((p) => Boolean(p.diamond) && productMatches(p, filters, "diamondOnly")).length}
-        />
-      </FilterGroup>
+      <ExpandableFilterGroup
+        title="Diamond"
+        items={[
+          <FilterCheckbox
+            key="diamond"
+            checked={filters.diamondOnly}
+            onChange={() => setFilters((f) => ({ ...f, diamondOnly: !f.diamondOnly }))}
+            label="With Diamond"
+            count={products.filter((p) => Boolean(p.diamond) && productMatches(p, filters, "diamondOnly")).length}
+          />,
+        ]}
+      />
 
-      <FilterGroup title="Collections">
-        <FilterCheckbox
-          checked={filters.signatureOnly}
-          onChange={() => setFilters((f) => ({ ...f, signatureOnly: !f.signatureOnly }))}
-          label="Signature Collection"
-          count={
-            products.filter((p) => Boolean(p.isSignature) && productMatches(p, filters, "signatureOnly"))
-              .length
-          }
-        />
-      </FilterGroup>
+      <ExpandableFilterGroup
+        title="Collections"
+        items={[
+          <FilterCheckbox
+            key="signature"
+            checked={filters.signatureOnly}
+            onChange={() => setFilters((f) => ({ ...f, signatureOnly: !f.signatureOnly }))}
+            label="Signature Collection"
+            count={
+              products.filter((p) => Boolean(p.isSignature) && productMatches(p, filters, "signatureOnly"))
+                .length
+            }
+          />,
+        ]}
+      />
     </div>
   );
 
@@ -388,7 +399,7 @@ export default function ShopContent() {
                 <Link
                   href={`/product/${product.slug}`}
                   key={product.slug}
-                  className="group relative block aspect-square overflow-hidden border border-warmstone bg-white p-2 sm:p-3 lg:p-2.5"
+                  className="group relative block aspect-square overflow-hidden bg-white p-2 sm:p-3 lg:p-2.5"
                 >
                   <div className="relative h-[calc(100%-88px)] overflow-hidden sm:h-[calc(100%-104px)] lg:h-[calc(100%-80px)]">
                     <Image
@@ -426,6 +437,41 @@ function FilterGroup({ title, children }: { title: string; children: React.React
     <div className="mt-6 border-t border-line pt-6 first:mt-6 first:border-t-0 first:pt-0">
       <p className="mb-3 font-display text-[16px] font-medium leading-[1.1] text-ink">{title}</p>
       <div className="space-y-3">{children}</div>
+    </div>
+  );
+}
+
+// Same as FilterGroup, but only shows the first `limit` options and hides the
+// rest behind a "View More" toggle — for groups that can grow long (ring
+// sizes, metals, categories as the catalogue grows). Price intentionally
+// keeps using plain FilterGroup above since its 5 fixed ranges should always
+// be fully visible.
+function ExpandableFilterGroup({
+  title,
+  items,
+  limit = 4,
+}: {
+  title: string;
+  items: React.ReactNode[];
+  limit?: number;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const visible = expanded ? items : items.slice(0, limit);
+  const hiddenCount = items.length - limit;
+
+  return (
+    <div className="mt-6 border-t border-line pt-6 first:mt-6 first:border-t-0 first:pt-0">
+      <p className="mb-3 font-display text-[16px] font-medium leading-[1.1] text-ink">{title}</p>
+      <div className="space-y-3">{visible}</div>
+      {hiddenCount > 0 && (
+        <button
+          type="button"
+          onClick={() => setExpanded((e) => !e)}
+          className="mt-3 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-antiquegold underline underline-offset-4"
+        >
+          {expanded ? "View Less" : `View More (+${hiddenCount})`}
+        </button>
+      )}
     </div>
   );
 }

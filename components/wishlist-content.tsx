@@ -34,7 +34,7 @@ export default function WishlistContent() {
             <div key={product.slug} className="group relative">
               <Link
                 href={`/product/${product.slug}`}
-                className="relative block aspect-square overflow-hidden border border-warmstone bg-white p-2 sm:p-3"
+                className="relative block aspect-square overflow-hidden bg-white p-2 sm:p-3"
               >
                 <div className="relative h-[calc(100%-88px)] overflow-hidden sm:h-[calc(100%-104px)]">
                   <Image

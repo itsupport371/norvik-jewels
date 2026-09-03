@@ -4,7 +4,6 @@ import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
 import HeroCarousel from "@/components/hero-carousel";
 import CampaignHero from "@/components/campaign-hero";
-import ImportExportCompare from "@/components/import-export-compare";
 import { products, getDisplayPrice } from "@/lib/mock-products";
 
 export default function HomePage() {
@@ -13,11 +12,6 @@ export default function HomePage() {
       <SiteHeader transparentOnHero />
       <main className="bg-ivory">
         <CampaignHero />
-
-        {/* Import vs Export comparison — sits right below the header/hero,
-            per client request. Three gold tones, import design vs export
-            design, matched tone-for-tone with large images. */}
-        <ImportExportCompare />
 
         {/* Editorial quote — breathing space between the campaign hero and the
             product carousel below, per client request. Placeholder copy —
@@ -69,7 +63,7 @@ export default function HomePage() {
               },
             ].map((c) => (
               <Link key={c.label} href={c.href} className="group flex flex-col items-center gap-3 text-center">
-                <div className="relative h-24 w-24 overflow-hidden rounded-full border border-warmstone transition-colors duration-300 group-hover:border-antiquegold sm:h-32 sm:w-32 lg:h-36 lg:w-36">
+                <div className="relative h-24 w-24 overflow-hidden rounded-full sm:h-32 sm:w-32 lg:h-36 lg:w-36">
                   <Image
                     src={c.image}
                     alt={`${c.label} collection`}
@@ -142,7 +136,7 @@ export default function HomePage() {
                 <Link
                   href={`/product/${product.slug}`}
                   key={product.slug}
-                  className="group relative block aspect-square overflow-hidden border border-warmstone bg-white p-3"
+                  className="group relative block aspect-square overflow-hidden bg-white p-3"
                 >
                   <div className="relative h-[calc(100%-88px)] overflow-hidden sm:h-[calc(100%-104px)]">
                     <Image

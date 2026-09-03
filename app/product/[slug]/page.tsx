@@ -37,7 +37,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                 <Link
                   href={`/product/${p.slug}`}
                   key={p.slug}
-                  className="group relative block aspect-square overflow-hidden border border-warmstone bg-white p-2 sm:p-3"
+                  className="group relative block aspect-square overflow-hidden bg-white p-2 sm:p-3"
                 >
                   <div className="relative h-[calc(100%-64px)] overflow-hidden sm:h-[calc(100%-76px)]">
                     <Image
