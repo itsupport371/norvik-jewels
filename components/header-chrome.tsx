@@ -6,6 +6,12 @@ import Link from 'next/link';
 import WishlistBadge from '@/components/wishlist-badge';
 import CartBadge from '@/components/cart-badge';
 import SearchTrigger from '@/components/search-trigger';
+import { products } from '@/lib/mock-products';
+
+// Same source the Shop page filters use — a category shows up here the
+// moment a product exists with it, so this list never needs manual upkeep
+// as categories are added/renamed in lib/mock-products.ts.
+const SHOP_CATEGORIES = Array.from(new Set(products.map((p) => p.category)));
 
 const CHEVRON = (
   <svg
@@ -37,6 +43,7 @@ export default function HeaderChrome({
   // hovers over it, so the nav is always easy to read once they interact.
   const [scrolled, setScrolled] = useState(!transparentOnHero);
   const [hovered, setHovered] = useState(false);
+  const [shopOpen, setShopOpen] = useState(false);
 
   useEffect(() => {
     if (!transparentOnHero) return;
@@ -114,10 +121,29 @@ export default function HeaderChrome({
               solid ? 'text-inknavy/85' : 'text-ivory'
             }`}
           >
-            <Link href="/shop" className="flex items-center transition-colors hover:text-antiquegold">
-              Shop
-              {CHEVRON}
-            </Link>
+            <div
+              className="relative flex h-full items-center self-stretch"
+              onMouseEnter={() => setShopOpen(true)}
+              onMouseLeave={() => setShopOpen(false)}
+            >
+              <Link href="/shop" className="flex items-center transition-colors hover:text-antiquegold">
+                Shop
+                {CHEVRON}
+              </Link>
+              {shopOpen && (
+                <div className="absolute left-0 top-full z-50 min-w-[200px] border border-warmstone bg-white py-2 normal-case tracking-normal shadow-lg">
+                  {SHOP_CATEGORIES.map((cat) => (
+                    <Link
+                      key={cat}
+                      href={`/shop?category=${encodeURIComponent(cat.toLowerCase())}`}
+                      className="block px-5 py-2.5 text-[12px] font-medium uppercase leading-[1.2] tracking-[0.06em] text-inknavy transition-colors hover:bg-softwhite hover:text-antiquegold"
+                    >
+                      {cat}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
             <Link href="/collections" className="flex items-center transition-colors hover:text-antiquegold">
               Collections
               {CHEVRON}

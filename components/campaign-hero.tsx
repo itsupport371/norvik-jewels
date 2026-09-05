@@ -49,7 +49,7 @@ export default function CampaignHero() {
   const [index, setIndex] = useCarousel(SLIDES.length);
 
   return (
-    <section className="relative h-[86vh] min-h-[560px] w-full overflow-hidden bg-ink">
+    <section className="relative h-[92vh] min-h-[640px] w-full overflow-hidden bg-ink">
       {SLIDES.map((slide, i) => (
         <div
           key={slide.image}

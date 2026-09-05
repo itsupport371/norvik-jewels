@@ -25,7 +25,20 @@ export type DiamondConfig = {
 export type Product = {
   slug: string;
   name: string;
-  category: 'Rings' | 'Earrings' | 'Necklaces' | 'Nose Pin';
+  // Client-requested category list (Sep 2026). "Necklaces" was renamed to
+  // "Pendants" to match the client's own naming — the existing swan-pendant
+  // products didn't change, just their category label. The last four are
+  // brand-new placeholder categories (see the products below) pending real
+  // catalogue data and photography from the client.
+  category:
+    | 'Rings'
+    | 'Earrings'
+    | 'Pendants'
+    | 'Pendant Set'
+    | 'Nose Pin'
+    | 'Baby Earrings'
+    | 'Tanmaniya'
+    | 'Bracelet';
   images: string[];
   metalImages?: Record<string, string>; // maps metal color key -> image path
   basePrice: number;
@@ -424,7 +437,7 @@ export const products: Product[] = [
   {
     slug: 'swan-pendant-classic',
     name: 'Swan Pendant Necklace — Classic',
-    category: 'Necklaces',
+    category: 'Pendants',
     images: [
       '/images/swan-pendant-a-white.jpg',
       '/images/swan-pendant-a-yellow.jpg',
@@ -450,7 +463,7 @@ export const products: Product[] = [
   {
     slug: 'swan-pendant-signature',
     name: 'Swan Pendant Necklace — Signature',
-    category: 'Necklaces',
+    category: 'Pendants',
     images: [
       '/images/swan-pendant-b-rose.jpg',
       '/images/swan-pendant-b-yellow.jpg',
@@ -503,6 +516,86 @@ export const products: Product[] = [
     sizeOptions: [{ label: 'One Size', priceModifier: 0, stock: 'In Stock' }],
     goldWeightGrams: 0.8,
     isSignature: true,
+  },
+
+  // ---------- Placeholder entries for new categories (Sep 2026) ----------
+  // Client asked for these 4 new categories to exist on the site. There's no
+  // real product data or photography for them yet, so each one below is a
+  // single stand-in SKU built from images already in the catalogue — just
+  // enough for the category to actually show up in the Shop filters and the
+  // homepage "Shop by Collection" tiles, so the client can confirm the
+  // category list and naming before real catalogue data comes in. Every
+  // field (name, price, images, description) here is a placeholder to be
+  // replaced once the client sends real SKUs.
+  {
+    slug: 'pendant-set-placeholder',
+    name: 'Pendant & Earring Set (Placeholder)',
+    category: 'Pendant Set',
+    images: ['/images/swan-pendant-b-white.jpg', '/images/swan-pendant-b-yellow.jpg'],
+    metalImages: {
+      white: '/images/swan-pendant-b-white.jpg',
+      yellow: '/images/swan-pendant-b-yellow.jpg',
+    },
+    basePrice: 95000,
+    currency: '₹',
+    description:
+      'PLACEHOLDER — reusing the Swan Pendant Signature photos until real matching-set photography is provided. A pendant-and-earring set is meant to pair two coordinated pieces sold together; swap in the real SKU once the client confirms this category.',
+    metalOptions: [
+      { label: '18 KT White Gold', priceModifier: 0, stock: 'Made to Order', metalColor: 'white' },
+      { label: '18 KT Yellow Gold', priceModifier: 300, stock: 'Made to Order', metalColor: 'yellow' },
+    ],
+    sizeOptions: [{ label: 'One Size', priceModifier: 0, stock: 'Made to Order' }],
+    goldWeightGrams: 4.5,
+  },
+  {
+    slug: 'baby-earrings-placeholder',
+    name: 'Baby Stud Earrings (Placeholder)',
+    category: 'Baby Earrings',
+    images: ['/images/product-earring-1.jpg'],
+    basePrice: 12500,
+    currency: '₹',
+    description:
+      'PLACEHOLDER — reusing an existing stud earring photo. Real baby/kids-sized earring SKUs (smaller stone sizes, safety backs) to be added once the client confirms this category and sends product details.',
+    metalOptions: [
+      { label: '18 KT Yellow Gold', priceModifier: 0, stock: 'In Stock' },
+    ],
+    sizeOptions: [{ label: 'One Size', priceModifier: 0, stock: 'In Stock' }],
+    goldWeightGrams: 0.6,
+  },
+  {
+    slug: 'tanmaniya-placeholder',
+    name: 'Tanmaniya Pendant (Placeholder)',
+    category: 'Tanmaniya',
+    images: ['/images/swan-pendant-a-yellow.jpg'],
+    basePrice: 42000,
+    currency: '₹',
+    description:
+      'PLACEHOLDER — reusing an existing pendant photo; a real tanmaniya (traditional black-bead gold pendant) design and photo are needed from the client, this is only to hold the category slot.',
+    metalOptions: [
+      { label: '18 KT Yellow Gold', priceModifier: 0, stock: 'Made to Order', metalColor: 'yellow' },
+    ],
+    sizeOptions: [{ label: 'One Size', priceModifier: 0, stock: 'Made to Order' }],
+    goldWeightGrams: 3.0,
+  },
+  {
+    slug: 'bracelet-placeholder',
+    name: 'Gold Bracelet (Placeholder)',
+    category: 'Bracelet',
+    // No bracelet/bangle photo exists anywhere in the current image library —
+    // this reuses a RING photo purely so the category isn't broken with a
+    // missing image. This is the one placeholder that needs a real photo
+    // before showing the client, everything else at least reuses a
+    // same-family (pendant/earring) photo.
+    images: ['/images/ring-yellow-gold.jpg'],
+    basePrice: 65000,
+    currency: '₹',
+    description:
+      'PLACEHOLDER — no bracelet photo exists yet in the asset library, this is temporarily using a ring photo just to hold the category slot. Needs a real bracelet photo and SKU before this is client-ready.',
+    metalOptions: [
+      { label: '18 KT Yellow Gold', priceModifier: 0, stock: 'Made to Order' },
+    ],
+    sizeOptions: [{ label: 'One Size', priceModifier: 0, stock: 'Made to Order' }],
+    goldWeightGrams: 5.0,
   },
 ];
 

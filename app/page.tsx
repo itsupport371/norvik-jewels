@@ -2,7 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
-import HeroCarousel from "@/components/hero-carousel";
 import CampaignHero from "@/components/campaign-hero";
 import { products, getDisplayPrice } from "@/lib/mock-products";
 
@@ -13,23 +12,11 @@ export default function HomePage() {
       <main className="bg-ivory">
         <CampaignHero />
 
-        {/* Editorial quote — breathing space between the campaign hero and the
-            product carousel below, per client request. Placeholder copy —
-            swap the line if the client wants different wording. */}
-        <section className="bg-white px-6 py-16 text-center sm:py-20">
-          <p className="mx-auto mb-4 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
-            Our Philosophy
-          </p>
-          <p className="font-display mx-auto max-w-2xl text-[22px] font-medium italic leading-[1.3] tracking-[-0.01em] text-inknavy sm:text-[28px]">
-            &ldquo;Fine jewellery, designed in Dubai, made to become part of your story — worn every day, treasured for a lifetime.&rdquo;
-          </p>
-        </section>
-
-        {/* Original product hero carousel — moved below the campaign hero
-            photos per client request, still a full banner section. */}
-        <HeroCarousel />
-
-        {/* Shop by Collection — row layout, Soft White cards */}
+        {/* Shop by Collection — row layout, Soft White cards. Sits right
+            after the campaign hero now — the "Our Philosophy" quote section
+            and the second product hero carousel (HeroCarousel, still in
+            components/hero-carousel.tsx if it's ever wanted back) were both
+            removed per client request. */}
         <section id="shop-collection" className="mx-auto max-w-7xl px-6 py-20 lg:px-10">
           <div className="mb-10 text-center">
             <p className="mb-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
@@ -52,15 +39,38 @@ export default function HomePage() {
                 image: '/images/product-earring-1.jpg',
               },
               {
-                href: '/shop?category=necklaces',
-                label: 'Necklaces',
+                href: '/shop?category=pendants',
+                label: 'Pendants',
                 image: '/images/swan-pendant-a-white.jpg',
+              },
+              {
+                href: '/shop?category=pendant set',
+                label: 'Pendant Set',
+                image: '/images/swan-pendant-b-white.jpg',
               },
               {
                 href: '/shop?category=nose pin',
                 label: 'Nose Pin',
                 image: '/images/nose-pin-yellow.jpg',
               },
+              {
+                href: '/shop?category=baby earrings',
+                label: 'Baby Earrings',
+                image: '/images/product-earring-1.jpg',
+              },
+              {
+                href: '/shop?category=tanmaniya',
+                label: 'Tanmaniya',
+                image: '/images/swan-pendant-a-yellow.jpg',
+              },
+              {
+                href: '/shop?category=bracelet',
+                label: 'Bracelet',
+                image: '/images/ring-yellow-gold.jpg',
+              },
+              // New categories above are placeholders pending client
+              // confirmation (see lib/mock-products.ts) — same reused
+              // images as their placeholder product entries.
             ].map((c) => (
               <Link key={c.label} href={c.href} className="group flex flex-col items-center gap-3 text-center">
                 <div className="relative h-24 w-24 overflow-hidden rounded-full sm:h-32 sm:w-32 lg:h-36 lg:w-36">

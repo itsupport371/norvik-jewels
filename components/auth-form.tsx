@@ -198,19 +198,19 @@ export default function AuthForm({ mode }: { mode: Mode }) {
 
   return (
     <div className="w-full max-w-sm">
-      <h1 className="font-display text-[26px] font-medium leading-[1.05] tracking-[-0.01em] text-ink sm:text-[36px]">{heading}</h1>
-      <p className="mt-2 text-[14px] leading-[1.6] text-muted">
+      <h1 className="text-center font-display text-[28px] font-semibold leading-[1.05] tracking-[-0.01em] text-white sm:text-[34px]">{heading}</h1>
+      <p className="mt-2 text-center text-[13px] font-medium leading-[1.6] text-white/80">
         {mode === 'login' ? (
           <>
             New here?{' '}
-            <Link href="/signup" className="text-ink underline underline-offset-4">
+            <Link href="/signup" className="font-semibold text-white underline decoration-antiquegold underline-offset-4 hover:text-antiquegold">
               Create an account
             </Link>
           </>
         ) : (
           <>
             Already have one?{' '}
-            <Link href="/login" className="text-ink underline underline-offset-4">
+            <Link href="/login" className="font-semibold text-white underline decoration-antiquegold underline-offset-4 hover:text-antiquegold">
               Sign in
             </Link>
           </>
@@ -219,7 +219,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
 
       {/* Email / Phone tabs — Phone hidden until Twilio is configured */}
       {PHONE_AUTH_ENABLED && (
-        <div className="mt-8 flex border border-line">
+        <div className="mt-6 flex border border-white/25">
           <button
             type="button"
             onClick={() => {
@@ -228,7 +228,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
               setNotice(null);
             }}
             className={`flex-1 py-2.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] transition-colors sm:text-[12px] ${
-              tab === 'email' ? 'bg-ink text-white' : 'bg-ivory text-muted'
+              tab === 'email' ? 'bg-antiquegold text-inknavy' : 'bg-transparent text-white/70'
             }`}
           >
             Email
@@ -241,7 +241,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
               setNotice(null);
             }}
             className={`flex-1 py-2.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] transition-colors sm:text-[12px] ${
-              tab === 'phone' ? 'bg-ink text-white' : 'bg-ivory text-muted'
+              tab === 'phone' ? 'bg-antiquegold text-inknavy' : 'bg-transparent text-white/70'
             }`}
           >
             Phone
@@ -252,11 +252,11 @@ export default function AuthForm({ mode }: { mode: Mode }) {
       {(!PHONE_AUTH_ENABLED || tab === 'email') ? (
         <form
           onSubmit={handleEmailSubmit}
-          className={`space-y-5 ${PHONE_AUTH_ENABLED ? 'mt-6' : 'mt-8'}`}
+          className={`space-y-4 ${PHONE_AUTH_ENABLED ? 'mt-5' : 'mt-7'}`}
         >
           {mode === 'signup' && (
             <div>
-              <label htmlFor="name" className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
+              <label htmlFor="name" className="mb-1.5 block text-[10px] font-semibold uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                 Full name
               </label>
               <input
@@ -266,13 +266,13 @@ export default function AuthForm({ mode }: { mode: Mode }) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Aditi Sharma"
-                className="w-full border border-line bg-ivory px-4 py-3 text-base text-ink outline-none sm:text-sm transition-colors focus:border-ink"
+                className="w-full border-b-2 border-white/50 bg-transparent px-0 py-2.5 text-base font-medium text-white outline-none transition-colors placeholder:font-normal placeholder:text-white/50 focus:border-antiquegold sm:text-sm"
               />
             </div>
           )}
 
           <div>
-            <label htmlFor="email" className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
+            <label htmlFor="email" className="mb-1.5 block text-[10px] font-semibold uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
               Email
             </label>
             <input
@@ -282,17 +282,17 @@ export default function AuthForm({ mode }: { mode: Mode }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@example.com"
-              className="w-full border border-line bg-ivory px-4 py-3 text-base text-ink outline-none sm:text-sm transition-colors focus:border-ink"
+              className="w-full border-b-2 border-white/50 bg-transparent px-0 py-2.5 text-base font-medium text-white outline-none transition-colors placeholder:font-normal placeholder:text-white/50 focus:border-antiquegold sm:text-sm"
             />
           </div>
 
           <div>
             <div className="mb-1.5 flex items-center justify-between">
-              <label htmlFor="password" className="block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
+              <label htmlFor="password" className="block text-[10px] font-semibold uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                 Password
               </label>
               {mode === 'login' && (
-                <Link href="/reset-password" className="text-[13px] leading-[1.35] text-muted underline underline-offset-4 hover:text-ink">
+                <Link href="/reset-password" className="text-[12px] font-medium leading-[1.35] text-white/70 underline underline-offset-4 hover:text-antiquegold">
                   Forgot?
                 </Link>
               )}
@@ -304,27 +304,27 @@ export default function AuthForm({ mode }: { mode: Mode }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder={mode === 'signup' ? 'At least 8 characters' : '••••••••'}
-              className="w-full border border-line bg-ivory px-4 py-3 text-base text-ink outline-none sm:text-sm transition-colors focus:border-ink"
+              className="w-full border-b-2 border-white/50 bg-transparent px-0 py-2.5 text-base font-medium text-white outline-none transition-colors placeholder:font-normal placeholder:text-white/50 focus:border-antiquegold sm:text-sm"
             />
           </div>
 
           <TermsCheckbox agreed={agreed} setAgreed={setAgreed} />
 
-          {error && <p className="text-[14px] leading-[1.6] text-red-700" role="alert">{error}</p>}
-          {notice && <p className="text-[14px] leading-[1.6] text-charcoal">{notice}</p>}
+          {error && <p className="text-[13px] font-medium leading-[1.5] text-red-300" role="alert">{error}</p>}
+          {notice && <p className="text-[13px] font-medium leading-[1.5] text-white/90">{notice}</p>}
 
           <button
             type="submit"
             disabled={loading || !agreed}
-            className="w-full bg-ink py-3.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30 sm:text-[12px]"
+            className="w-full bg-antiquegold py-3.5 text-[11px] font-bold uppercase leading-[1.2] tracking-[0.08em] text-inknavy transition-colors hover:bg-champagnegold disabled:cursor-not-allowed disabled:bg-white/15 disabled:text-white/40 sm:text-[12px]"
           >
             {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
           </button>
         </form>
       ) : (
-        <div className="mt-6 space-y-5">
+        <div className="mt-5 space-y-4">
           {!otpSent ? (
-            <form onSubmit={handleSendOtp} className="space-y-5">
+            <form onSubmit={handleSendOtp} className="space-y-4">
               <div>
                 <label htmlFor="phone" className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                   Phone number
@@ -336,24 +336,24 @@ export default function AuthForm({ mode }: { mode: Mode }) {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+91 98765 43210"
-                  className="w-full border border-line bg-ivory px-4 py-3 text-base text-ink outline-none sm:text-sm transition-colors focus:border-ink"
+                  className="w-full border-b-2 border-white/50 bg-transparent px-0 py-2.5 text-base font-medium text-white outline-none transition-colors placeholder:font-normal placeholder:text-white/50 focus:border-antiquegold sm:text-sm"
                 />
               </div>
 
               <TermsCheckbox agreed={agreed} setAgreed={setAgreed} />
 
-              {error && <p className="text-[14px] leading-[1.6] text-red-700" role="alert">{error}</p>}
+              {error && <p className="text-[13px] font-medium leading-[1.5] text-red-300" role="alert">{error}</p>}
 
               <button
                 type="submit"
                 disabled={loading || !agreed}
-                className="w-full bg-ink py-3.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30 sm:text-[12px]"
+                className="w-full bg-antiquegold py-3.5 text-[11px] font-bold uppercase leading-[1.2] tracking-[0.08em] text-inknavy transition-colors hover:bg-champagnegold disabled:cursor-not-allowed disabled:bg-white/15 disabled:text-white/40 sm:text-[12px]"
               >
                 {loading ? 'Sending…' : 'Send OTP'}
               </button>
             </form>
           ) : (
-            <form onSubmit={handleVerifyOtp} className="space-y-5">
+            <form onSubmit={handleVerifyOtp} className="space-y-4">
               <div>
                 <label htmlFor="otp" className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                   Enter OTP
@@ -366,17 +366,17 @@ export default function AuthForm({ mode }: { mode: Mode }) {
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
                   placeholder="6-digit code"
-                  className="w-full border border-line bg-ivory px-4 py-3 text-center text-lg tracking-[0.3em] text-ink outline-none transition-colors focus:border-ink"
+                  className="w-full border-b-2 border-white/50 bg-transparent px-0 py-2.5 text-center text-lg font-semibold tracking-[0.3em] text-white outline-none transition-colors focus:border-antiquegold"
                 />
               </div>
 
-              {notice && <p className="text-[14px] leading-[1.6] text-charcoal">{notice}</p>}
-              {error && <p className="text-[14px] leading-[1.6] text-red-700" role="alert">{error}</p>}
+              {notice && <p className="text-[13px] font-medium leading-[1.5] text-white/90">{notice}</p>}
+              {error && <p className="text-[13px] font-medium leading-[1.5] text-red-300" role="alert">{error}</p>}
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-ink py-3.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-white transition-opacity hover:opacity-90 disabled:opacity-50 sm:text-[12px]"
+                className="w-full bg-antiquegold py-3.5 text-[11px] font-bold uppercase leading-[1.2] tracking-[0.08em] text-inknavy transition-colors hover:bg-champagnegold disabled:opacity-50 sm:text-[12px]"
               >
                 {loading ? 'Verifying…' : 'Verify and continue'}
               </button>
@@ -388,7 +388,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
                   setOtp('');
                   setNotice(null);
                 }}
-                className="w-full text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-muted underline underline-offset-4 sm:text-[12px]"
+                className="w-full text-[11px] font-semibold uppercase leading-[1.2] tracking-[0.08em] text-white/70 underline underline-offset-4 hover:text-antiquegold sm:text-[12px]"
               >
                 Use a different number
               </button>
@@ -397,10 +397,10 @@ export default function AuthForm({ mode }: { mode: Mode }) {
         </div>
       )}
 
-      <div className="my-6 flex items-center gap-3">
-        <span className="h-px flex-1 bg-line" />
-        <span className="text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">Or continue with</span>
-        <span className="h-px flex-1 bg-line" />
+      <div className="my-5 flex items-center gap-3">
+        <span className="h-px flex-1 bg-white/35" />
+        <span className="text-[10px] font-semibold uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">Or continue with</span>
+        <span className="h-px flex-1 bg-white/35" />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -408,7 +408,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
           type="button"
           onClick={() => handleOAuth('google')}
           disabled={!agreed}
-          className="flex items-center justify-center gap-2 border border-line py-3 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-ink transition-colors hover:border-ink disabled:cursor-not-allowed disabled:opacity-30 sm:text-[12px]"
+          className="flex items-center justify-center gap-2 border-2 border-white/45 bg-transparent py-3 text-[11px] font-semibold uppercase leading-[1.2] tracking-[0.08em] text-white transition-colors hover:border-antiquegold disabled:cursor-not-allowed disabled:opacity-30 sm:text-[12px]"
         >
           {GOOGLE_ICON}
           Google
@@ -417,7 +417,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
           type="button"
           onClick={() => handleOAuth('facebook')}
           disabled={!agreed}
-          className="flex items-center justify-center gap-2 border border-line py-3 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-ink transition-colors hover:border-ink disabled:cursor-not-allowed disabled:opacity-30 sm:text-[12px]"
+          className="flex items-center justify-center gap-2 border-2 border-white/45 bg-transparent py-3 text-[11px] font-semibold uppercase leading-[1.2] tracking-[0.08em] text-white transition-colors hover:border-antiquegold disabled:cursor-not-allowed disabled:opacity-30 sm:text-[12px]"
         >
           {FACEBOOK_ICON}
           Facebook
@@ -435,20 +435,20 @@ function TermsCheckbox({
   setAgreed: (v: boolean) => void;
 }) {
   return (
-    <label className="flex cursor-pointer items-start gap-2.5 text-[13px] leading-[1.35] text-muted">
+    <label className="flex cursor-pointer items-start gap-2.5 text-[12.5px] font-medium leading-[1.35] text-white/80">
       <input
         type="checkbox"
         checked={agreed}
         onChange={(e) => setAgreed(e.target.checked)}
-        className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer border-line accent-black"
+        className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer border-white/55 accent-antiquegold"
       />
       <span>
         I agree to NORVIK JEWELS&apos;{' '}
-        <Link href="/policies/terms" className="text-ink underline underline-offset-4">
+        <Link href="/policies/terms" className="font-semibold text-white underline decoration-antiquegold underline-offset-4 hover:text-antiquegold">
           Terms
         </Link>{' '}
         and{' '}
-        <Link href="/policies/privacy" className="text-ink underline underline-offset-4">
+        <Link href="/policies/privacy" className="font-semibold text-white underline decoration-antiquegold underline-offset-4 hover:text-antiquegold">
           Privacy Policy
         </Link>
         .
