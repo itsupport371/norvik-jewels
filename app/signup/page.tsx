@@ -24,7 +24,12 @@ export default function SignupPage() {
           alt="NORVIK JEWELS diamond halo ring"
           fill
           priority
-          className="object-cover sm:hidden"
+          // The ring sits in the right half of this portrait photo (roughly
+          // 55-90% across). On tall/narrow phones (aspect narrower than the
+          // photo's own ~9:16) object-cover crops from the sides, and a
+          // centered crop was slicing the ring's right edge off. Biasing the
+          // crop right keeps the whole ring in frame on every phone size.
+          className="object-cover object-[68%_50%] sm:hidden"
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_65%_55%_at_50%_50%,rgba(5,8,18,0.85)_0%,rgba(5,8,18,0.6)_55%,rgba(5,8,18,0.2)_100%)]" />
