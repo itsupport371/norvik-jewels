@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { getProductBySlug } from '@/lib/mock-products';
-import { useCart } from '@/lib/cart-context';
+import { useCart, getCartBreakdown } from '@/lib/cart-context';
 import { createClient } from '@/lib/supabase/client';
 
 type SavedAddress = {
@@ -28,6 +28,14 @@ export default function CheckoutContent() {
   const color = searchParams.get('color');
   const size = searchParams.get('size');
   const singlePrice = Number(searchParams.get('price') ?? 0);
+  // Price Details breakdown for a "Buy Now" (single-item) purchase — passed
+  // through from product-configurator.tsx so this page doesn't need to
+  // re-run the pricing engine. Cart-mode gets the same breakdown from
+  // getCartBreakdown(cart) further down instead.
+  const singleGoldValue = Number(searchParams.get('goldValue') ?? 0);
+  const singleDiamondCharge = Number(searchParams.get('diamondCharge') ?? 0);
+  const singleMakingCharge = Number(searchParams.get('makingCharge') ?? 0);
+  const singleGstAmount = Number(searchParams.get('gstAmount') ?? 0);
 
   const singleProduct = !isCartMode ? getProductBySlug(slug) : undefined;
   const { cart, totalPrice: cartTotal } = useCart();
@@ -136,6 +144,12 @@ export default function CheckoutContent() {
   const currency = isCartMode ? cart[0]?.currency ?? '₹' : singleProduct?.currency ?? '₹';
   const shipping = 0;
   const total = price + shipping;
+
+  // Price Details — a short breakdown (Item Value / Making / GST), not the
+  // full line-by-line table the product page's Specifications panel shows.
+  const priceDetails = isCartMode
+    ? getCartBreakdown(cart)
+    : { itemValue: singleGoldValue + singleDiamondCharge, making: singleMakingCharge, gst: singleGstAmount };
   const isAddressComplete =
     /^\S+@\S+\.\S+$/.test(email.trim()) &&
     name.trim() !== '' &&
@@ -424,12 +438,30 @@ export default function CheckoutContent() {
               </div>
             )}
 
+            {/* Price Details — short breakdown so the shopper can see roughly
+                how much of the price is gold+diamond value vs. making vs.
+                GST, without the full per-line table from the product page's
+                Specifications panel. */}
             <div className="mt-5 space-y-2 border-t border-line pt-4 text-[13px] leading-[1.35]">
               <div className="flex justify-between text-charcoal">
-                <span>Subtotal</span>
+                <span>Item Value (Gold + Diamond)</span>
                 <span>
                   {currency}
-                  {price.toLocaleString('en-IN')}
+                  {Math.round(priceDetails.itemValue).toLocaleString('en-IN')}
+                </span>
+              </div>
+              <div className="flex justify-between text-charcoal">
+                <span>Making Charges</span>
+                <span>
+                  {currency}
+                  {Math.round(priceDetails.making).toLocaleString('en-IN')}
+                </span>
+              </div>
+              <div className="flex justify-between text-charcoal">
+                <span>GST (3%)</span>
+                <span>
+                  {currency}
+                  {Math.round(priceDetails.gst).toLocaleString('en-IN')}
                 </span>
               </div>
               <div className="flex justify-between text-charcoal">

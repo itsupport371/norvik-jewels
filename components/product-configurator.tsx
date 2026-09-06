@@ -159,6 +159,10 @@ export default function ProductConfigurator({ product }: { product: Product }) {
       colorKey: hasDiamond ? colorKey : undefined,
       sizeKey: sizeKey ?? undefined,
       price: grandTotal,
+      goldValue,
+      diamondCharge,
+      makingCharge,
+      gstAmount,
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
@@ -175,6 +179,13 @@ export default function ProductConfigurator({ product }: { product: Product }) {
       slug: product.slug,
       metal: metalKey,
       price: String(grandTotal),
+      // Passed through so the checkout page's Price Details block can show
+      // Item Value / Making / GST for a "Buy Now" purchase without having
+      // to re-run the pricing engine there.
+      goldValue: String(goldValue),
+      diamondCharge: String(diamondCharge),
+      makingCharge: String(makingCharge),
+      gstAmount: String(gstAmount),
     });
     if (hasDiamond) params.set('color', colorKey);
     if (sizeKey) params.set('size', sizeKey);

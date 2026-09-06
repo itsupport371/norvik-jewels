@@ -3,11 +3,15 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useCart } from '@/lib/cart-context';
+import { useCart, getCartBreakdown } from '@/lib/cart-context';
 
 export default function CartContent() {
   const { cart, removeFromCart, updateQuantity, totalPrice } = useCart();
   const router = useRouter();
+  // Short "Price Details" breakdown (Item Value / Making / GST) — a summary,
+  // not the full per-line table the product page's Specifications panel
+  // shows.
+  const priceDetails = getCartBreakdown(cart);
 
   if (cart.length === 0) {
     return (
@@ -87,7 +91,30 @@ export default function CartContent() {
       </div>
 
       <div className="mt-8 flex flex-col items-center gap-4 sm:items-end">
-        <div className="flex w-full max-w-xs justify-between text-base font-semibold text-ink sm:w-72">
+        <div className="w-full max-w-xs space-y-2 border-t border-line pt-4 text-[13px] leading-[1.35] sm:w-72">
+          <div className="flex justify-between text-charcoal">
+            <span>Item Value (Gold + Diamond)</span>
+            <span>
+              {cart[0]?.currency ?? '₹'}
+              {Math.round(priceDetails.itemValue).toLocaleString('en-IN')}
+            </span>
+          </div>
+          <div className="flex justify-between text-charcoal">
+            <span>Making Charges</span>
+            <span>
+              {cart[0]?.currency ?? '₹'}
+              {Math.round(priceDetails.making).toLocaleString('en-IN')}
+            </span>
+          </div>
+          <div className="flex justify-between text-charcoal">
+            <span>GST (3%)</span>
+            <span>
+              {cart[0]?.currency ?? '₹'}
+              {Math.round(priceDetails.gst).toLocaleString('en-IN')}
+            </span>
+          </div>
+        </div>
+        <div className="flex w-full max-w-xs justify-between border-t border-line pt-4 text-base font-semibold text-ink sm:w-72">
           <span>Total</span>
           <span>
             {cart[0]?.currency ?? '₹'}

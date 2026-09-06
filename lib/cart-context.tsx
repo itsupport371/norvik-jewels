@@ -15,7 +15,44 @@ export type CartItem = {
   sizeKey?: string;
   price: number;
   quantity: number;
+  // Price breakdown at the moment this was added — lets the bag/checkout
+  // show "Item Value / Making / GST" without recomputing the pricing engine.
+  // Optional because carts saved to localStorage before this field existed
+  // won't have it; getCartBreakdown() below falls back gracefully for those.
+  goldValue?: number;
+  diamondCharge?: number;
+  makingCharge?: number;
+  gstAmount?: number;
 };
+
+// Splits one cart line into { itemValue (gold + diamond), making, gst },
+// always adding up to exactly `price` — for items added before this field
+// existed (no makingCharge/gstAmount stored), GST is reverse-derived from
+// the always-3%-flat rule in lib/pricing.ts and Making falls back to 0, so
+// the numbers shown never drift from the price the shopper actually sees.
+function splitItemPrice(item: CartItem) {
+  const gst = item.gstAmount ?? Math.round(item.price - item.price / 1.03);
+  const making = item.makingCharge ?? 0;
+  const itemValue = item.price - making - gst;
+  return { itemValue, making, gst };
+}
+
+// Aggregates the whole bag into one "Price Details" breakdown (quantity-
+// weighted) for the bag and checkout pages — a shorter summary than the
+// full line-by-line table on the product page's Specifications panel.
+export function getCartBreakdown(cart: CartItem[]) {
+  return cart.reduce(
+    (acc, item) => {
+      const { itemValue, making, gst } = splitItemPrice(item);
+      return {
+        itemValue: acc.itemValue + itemValue * item.quantity,
+        making: acc.making + making * item.quantity,
+        gst: acc.gst + gst * item.quantity,
+      };
+    },
+    { itemValue: 0, making: 0, gst: 0 }
+  );
+}
 
 type CartContextType = {
   cart: CartItem[];
