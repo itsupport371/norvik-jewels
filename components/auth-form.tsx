@@ -407,8 +407,13 @@ export default function AuthForm({ mode }: { mode: Mode }) {
         <button
           type="button"
           onClick={() => handleOAuth('google')}
-          disabled={!agreed}
-          className="flex items-center justify-center gap-2 border-2 border-white/45 bg-transparent py-3 text-[11px] font-semibold uppercase leading-[1.2] tracking-[0.08em] text-white transition-colors hover:border-antiquegold disabled:cursor-not-allowed disabled:opacity-30 sm:text-[12px]"
+          // Unlike the primary Sign in/Create account button, these stay
+          // active from the moment the page loads — they're not gated on
+          // the Terms checkbox the way the main submit button is. Clicking
+          // without agreeing still surfaces the "accept terms" error via
+          // requireAgreement() inside handleOAuth, it just isn't visually
+          // greyed out beforehand.
+          className="flex items-center justify-center gap-2 border border-transparent bg-antiquegold py-3 text-[11px] font-bold uppercase leading-[1.2] tracking-[0.08em] text-inknavy transition-colors hover:bg-champagnegold sm:text-[12px]"
         >
           {GOOGLE_ICON}
           Google
@@ -416,8 +421,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
         <button
           type="button"
           onClick={() => handleOAuth('facebook')}
-          disabled={!agreed}
-          className="flex items-center justify-center gap-2 border-2 border-white/45 bg-transparent py-3 text-[11px] font-semibold uppercase leading-[1.2] tracking-[0.08em] text-white transition-colors hover:border-antiquegold disabled:cursor-not-allowed disabled:opacity-30 sm:text-[12px]"
+          className="flex items-center justify-center gap-2 border border-transparent bg-antiquegold py-3 text-[11px] font-bold uppercase leading-[1.2] tracking-[0.08em] text-inknavy transition-colors hover:bg-champagnegold sm:text-[12px]"
         >
           {FACEBOOK_ICON}
           Facebook

@@ -23,7 +23,7 @@ export default function HomePage() {
               Explore
             </p>
             <h2 className="font-display text-[26px] font-medium leading-[1.05] tracking-[-0.01em] text-inknavy sm:text-[36px]">
-              Shop by Collection
+              Shop by Category
             </h2>
           </div>
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-10 sm:gap-x-10 lg:gap-x-14">

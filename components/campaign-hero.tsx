@@ -5,7 +5,15 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 type Slide = {
-  image: string;
+  // Client now supplies a dedicated portrait crop for phones alongside the
+  // landscape desktop shot (previously this was one 16:9 image stretched
+  // across every breakpoint, which is what was cropping the model's face —
+  // an eye in particular — out on narrow phones). Each gets its own tuned
+  // object-position based on where the face actually sits in that crop.
+  desktopImage: string;
+  desktopPosition: string;
+  mobileImage: string;
+  mobilePosition: string;
   eyebrow: string;
   heading: [string, string];
   ctaLabel: string;
@@ -14,14 +22,26 @@ type Slide = {
 
 const SLIDES: Slide[] = [
   {
-    image: '/images/campaign-navy.jpg',
+    desktopImage: '/images/campaign-navy-desktop.jpg',
+    // Wide shot: object-cover crops top/bottom on wide screens (image is
+    // 16:9, most monitors are wider) — her face sits in the upper third, so
+    // bias low to keep the crop coming from the bottom instead of the top.
+    desktopPosition: 'object-[80%_28%]',
+    mobileImage: '/images/campaign-navy-mobile.jpg',
+    // Portrait shot: object-cover crops the sides on phones (taller than
+    // this photo's own ~9:16). Her face/visible eye sit around 60-70% across
+    // the frame — bias right so the crop comes from the left instead.
+    mobilePosition: 'object-[62%_42%]',
     eyebrow: 'Fine Diamond Jewellery',
     heading: ['Radiance,', 'Redefined.'],
     ctaLabel: 'Explore Earrings',
     ctaHref: '/shop?category=earrings',
   },
   {
-    image: '/images/campaign-gold.jpg',
+    desktopImage: '/images/campaign-gold-desktop.jpg',
+    desktopPosition: 'object-[75%_22%]',
+    mobileImage: '/images/campaign-gold-mobile.jpg',
+    mobilePosition: 'object-[62%_42%]',
     eyebrow: 'Crafted in 18K Gold',
     heading: ['Details That', 'Endure.'],
     ctaLabel: 'Explore Rings',
@@ -52,24 +72,24 @@ export default function CampaignHero() {
     <section className="relative h-[92vh] min-h-[640px] w-full overflow-hidden bg-ink">
       {SLIDES.map((slide, i) => (
         <div
-          key={slide.image}
+          key={slide.desktopImage}
           className="absolute inset-0 transition-opacity duration-1000"
           style={{ opacity: i === index ? 1 : 0 }}
         >
           <Image
-            src={slide.image}
+            src={slide.desktopImage}
             alt="Norvik Jewels fine jewellery"
             fill
             priority={i === 0}
-            // These are wide landscape studio shots with the model on the
-            // right side of the frame. Plain object-cover centers the crop,
-            // which on a narrow/tall mobile screen crops the model almost
-            // entirely out and leaves just the empty backdrop. Biasing the
-            // crop toward the right (and slightly above center vertically)
-            // keeps her face and the jewellery in frame on phones/tablets;
-            // it's a no-op on wide desktop screens since nothing gets
-            // cropped horizontally there.
-            className="object-cover object-[78%_25%]"
+            className={`hidden object-cover sm:block ${slide.desktopPosition}`}
+            sizes="100vw"
+          />
+          <Image
+            src={slide.mobileImage}
+            alt="Norvik Jewels fine jewellery"
+            fill
+            priority={i === 0}
+            className={`object-cover sm:hidden ${slide.mobilePosition}`}
             sizes="100vw"
           />
         </div>
@@ -102,7 +122,7 @@ export default function CampaignHero() {
         <div className="relative flex min-h-[260px] w-full max-w-2xl flex-col items-start justify-end">
           {SLIDES.map((slide, i) => (
             <div
-              key={slide.image}
+              key={slide.desktopImage}
               className="absolute inset-0 flex flex-col items-start justify-end transition-opacity duration-1000"
               style={{ opacity: i === index ? 1 : 0 }}
             >
