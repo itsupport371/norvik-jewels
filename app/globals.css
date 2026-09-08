@@ -73,3 +73,20 @@ body {
   background: none !important;
   box-shadow: none !important;
 }
+
+/* Hides the scrollbar on an element while leaving it scrollable — used on the
+   New Arrivals row (components/new-arrivals-row.tsx) so only the gold arrow
+   buttons are visible for navigation, not a bar underneath. This class was
+   already referenced there but the rule itself was missing, so the row's
+   native horizontal scrollbar was still showing — inheriting the same
+   dark-navy/gold theme set globally above for the page's own scrollbar,
+   which is why it looked like a track+thumb bar rather than a plain default
+   scrollbar (client, Sep 2026). */
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* older Edge/IE */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Chromium-based Edge */
+}
