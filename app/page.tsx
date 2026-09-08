@@ -3,7 +3,8 @@ import Image from "next/image";
 import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
 import CampaignHero from "@/components/campaign-hero";
-import { products, getDisplayPrice } from "@/lib/mock-products";
+import NewArrivalsRow from "@/components/new-arrivals-row";
+import { products } from "@/lib/mock-products";
 
 export default function HomePage() {
   return (
@@ -141,37 +142,12 @@ export default function HomePage() {
                 View All
               </Link>
             </div>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
-              {products.map((product) => (
-                <Link
-                  href={`/product/${product.slug}`}
-                  key={product.slug}
-                  className="group relative block aspect-square overflow-hidden bg-white p-3"
-                >
-                  <div className="relative h-[calc(100%-88px)] overflow-hidden sm:h-[calc(100%-104px)]">
-                    <Image
-                      src={product.images[0]}
-                      alt={product.name}
-                      fill
-                      className="object-contain transition-transform duration-500 group-hover:scale-105"
-                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-                    />
-                  </div>
-                  <div className="flex h-[88px] flex-col items-center justify-center overflow-hidden px-1 text-center sm:h-[104px]">
-                    <p className="text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
-                      {product.category}
-                    </p>
-                    <p className="mt-1 line-clamp-2 w-full text-[13px] font-medium leading-[1.35] text-inknavy sm:text-[14px]">
-                      {product.name}
-                    </p>
-                    <p className="mt-1 text-[13px] leading-[1.35] text-inknavy/60">
-                      {product.currency}
-                      {getDisplayPrice(product).toLocaleString("en-IN")}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
+            {/* Single scrollable row (not a wrapping grid) — client wanted the
+                products to stay side-by-side, not stack into more rows. The
+                row + its glowing gold/navy triangle nav arrows live in
+                NewArrivalsRow (a client component, needed for the scroll
+                ref/handlers) since this page itself is a server component. */}
+            <NewArrivalsRow products={products} />
           </div>
         </section>
 

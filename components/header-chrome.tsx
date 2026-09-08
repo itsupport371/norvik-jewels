@@ -6,6 +6,7 @@ import Link from 'next/link';
 import WishlistBadge from '@/components/wishlist-badge';
 import CartBadge from '@/components/cart-badge';
 import SearchTrigger from '@/components/search-trigger';
+import LocaleSwitcher from '@/components/locale-switcher';
 import { products } from '@/lib/mock-products';
 
 // Same source the Shop page filters use — a category shows up here the
@@ -112,10 +113,7 @@ export default function HeaderChrome({
           <span>Free insured shipping on all orders</span>
         </div>
         <div className="flex items-center gap-5">
-          <span className="flex items-center">
-            INR
-            {CHEVRON}
-          </span>
+          <LocaleSwitcher />
         </div>
       </div>
 
@@ -264,7 +262,15 @@ export default function HeaderChrome({
               </button>
             </div>
 
-            <nav className="flex flex-col px-6 py-2 text-[13px] font-medium uppercase leading-[1.2] tracking-[0.06em] text-inknavy">
+            {/* Client (Sep 2026): all these mobile-drawer links except the
+                category submenu were forced ALL CAPS by this `uppercase`
+                utility (a CSS text-transform, which cascades to every
+                descendant unless a child overrides it — the category
+                submenu below already opts out with its own `normal-case`).
+                Dropped it here so every link matches that same Title Case
+                the categories already use, instead of one being different
+                from the rest. */}
+            <nav className="flex flex-col px-6 py-2 text-[13px] font-medium leading-[1.2] tracking-[0.06em] text-inknavy">
               <div className="border-b border-warmstone/60">
                 <button
                   type="button"
@@ -289,7 +295,7 @@ export default function HeaderChrome({
                     <Link
                       href="/shop"
                       onClick={closeMobileMenu}
-                      className="py-2 text-[12.5px] font-semibold uppercase tracking-[0.06em] text-antiquegold"
+                      className="py-2 text-[12.5px] font-semibold tracking-[0.06em] text-antiquegold"
                     >
                       All Shop
                     </Link>
@@ -318,9 +324,10 @@ export default function HeaderChrome({
               <Link href="/our-world" onClick={closeMobileMenu} className="border-b border-warmstone/60 py-3.5">
                 Our World
               </Link>
-              <Link href="/about" onClick={closeMobileMenu} className="py-3.5">
+              <Link href="/about" onClick={closeMobileMenu} className="border-b border-warmstone/60 py-3.5">
                 About Norvik
               </Link>
+              <LocaleSwitcher variant="mobile" />
             </nav>
           </div>
         </div>

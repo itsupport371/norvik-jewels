@@ -4,7 +4,8 @@ import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ProductConfigurator from '@/components/product-configurator';
-import { getProductBySlug, products } from '@/lib/mock-products';
+import PriceTag from '@/components/price-tag';
+import { getProductBySlug, products, getDisplayPrice } from '@/lib/mock-products';
 
 export function generateStaticParams() {
   return products.map((p) => ({ slug: p.slug }));
@@ -51,7 +52,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                   <div className="flex h-16 flex-col items-center justify-center overflow-hidden px-1 text-center sm:h-[76px]">
                     <p className="line-clamp-2 w-full text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">{p.name}</p>
                     <p className="mt-1 text-[13px] leading-[1.35] text-muted">
-                      {p.currency}{p.basePrice.toLocaleString('en-IN')}
+                      <PriceTag amountInInr={getDisplayPrice(p)} />
                     </p>
                   </div>
                 </Link>

@@ -5,42 +5,39 @@ import AuthForm from "@/components/auth-form";
 export default function LoginPage() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-ink">
-      {/* Full-bleed background — the client's ring banner covers the whole
-          screen. Swaps to the portrait crop below the sm breakpoint. A soft
-          radial vignette (not a hard rectangle) darkens the centre just
-          enough for the form to read, so it never looks like a "card"
-          dropped on the photo. */}
+      {/* Full-bleed background — the client's navy-velvet butterfly-jewellery
+          banner covers the whole screen. Swaps to the portrait crop below the
+          sm breakpoint. A soft radial vignette (not a hard rectangle) darkens
+          the centre just enough for the form to read, so it never looks like
+          a "card" dropped on the photo. */}
       <div className="absolute inset-0">
         <Image
           src="/images/auth-visual-desktop.jpg"
-          alt="NORVIK JEWELS diamond halo ring"
+          alt="NORVIK JEWELS butterfly diamond earrings and ring"
           fill
           priority
-          className="hidden object-cover sm:block"
+          // Model sits in the right ~45% of this landscape photo, face/hands
+          // around x 78%, y 35% down. The photo's own aspect (~16:9) already
+          // matches most monitors, so this mainly protects ultrawide screens
+          // (which crop top/bottom) from losing her face, and narrow desktop
+          // windows (which crop left/right) from losing her to the left edge.
+          className="hidden object-cover object-[75%_35%] sm:block"
           sizes="100vw"
         />
         <Image
           src="/images/auth-visual-mobile.jpg"
-          alt="NORVIK JEWELS diamond halo ring"
+          alt="NORVIK JEWELS butterfly diamond earrings and ring"
           fill
           priority
-          // The ring sits in the right half of this portrait photo (roughly
-          // 55-90% across). On tall/narrow phones (aspect narrower than the
-          // photo's own ~9:16) object-cover crops from the sides, and a
-          // centered crop was slicing the ring's right edge off. Biasing the
-          // crop right keeps the whole ring in frame on every phone size.
+          // Face/hands sit around x 65-75% across this portrait crop. On
+          // tall/narrow phones (aspect narrower than the photo's own ~9:16)
+          // object-cover crops from the sides — biasing the crop right keeps
+          // her fully in frame instead of a centered crop trimming her out.
           className="object-cover object-[68%_50%] sm:hidden"
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_65%_55%_at_50%_50%,rgba(5,8,18,0.85)_0%,rgba(5,8,18,0.6)_55%,rgba(5,8,18,0.2)_100%)]" />
       </div>
-
-      {/* Brand quote — desktop only, bottom-left, well clear of the form */}
-      <blockquote className="absolute bottom-10 left-10 z-10 hidden max-w-md font-display text-[26px] font-medium leading-[1.1] tracking-[-0.01em] text-white/90 lg:block">
-        Jewellery is worn every day.
-        <br />
-        It should be made for exactly that.
-      </blockquote>
 
       {/* Form — sits directly on the photo, no card, no border, no shadow */}
       <div className="relative z-10 flex min-h-screen items-center justify-center px-6 py-14">

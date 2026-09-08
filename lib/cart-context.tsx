@@ -25,12 +25,17 @@ export type CartItem = {
   gstAmount?: number;
 };
 
-// Splits one cart line into { itemValue (gold + diamond), making, gst },
-// always adding up to exactly `price` — for items added before this field
-// existed (no makingCharge/gstAmount stored), GST is reverse-derived from
-// the always-3%-flat rule in lib/pricing.ts and Making falls back to 0, so
-// the numbers shown never drift from the price the shopper actually sees.
-function splitItemPrice(item: CartItem) {
+// Splits one cart line into { itemValue (gold + diamond), making, gst } —
+// per unit, not multiplied by quantity — always adding up to exactly
+// `price` — for items added before this field existed (no
+// makingCharge/gstAmount stored), GST is reverse-derived from the
+// always-3%-flat rule in lib/pricing.ts and Making falls back to 0, so the
+// numbers shown never drift from the price the shopper actually sees.
+// Exported so the bag/checkout pages can show each product's OWN breakdown
+// separately (client ask, Sep 2026 — with multiple products in the bag,
+// each one's price/GST should be visible per item, not only as one lumped
+// total for the whole cart).
+export function getItemBreakdown(item: CartItem) {
   const gst = item.gstAmount ?? Math.round(item.price - item.price / 1.03);
   const making = item.makingCharge ?? 0;
   const itemValue = item.price - making - gst;
@@ -38,12 +43,12 @@ function splitItemPrice(item: CartItem) {
 }
 
 // Aggregates the whole bag into one "Price Details" breakdown (quantity-
-// weighted) for the bag and checkout pages — a shorter summary than the
-// full line-by-line table on the product page's Specifications panel.
+// weighted) — the grand-total summary shown under the per-item breakdowns
+// on the bag and checkout pages.
 export function getCartBreakdown(cart: CartItem[]) {
   return cart.reduce(
     (acc, item) => {
-      const { itemValue, making, gst } = splitItemPrice(item);
+      const { itemValue, making, gst } = getItemBreakdown(item);
       return {
         itemValue: acc.itemValue + itemValue * item.quantity,
         making: acc.making + making * item.quantity,

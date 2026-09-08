@@ -5,8 +5,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { getProductBySlug } from '@/lib/mock-products';
-import { useCart, getCartBreakdown } from '@/lib/cart-context';
+import { useCart, getCartBreakdown, getItemBreakdown } from '@/lib/cart-context';
 import { createClient } from '@/lib/supabase/client';
+import { useLocale } from '@/lib/locale-context';
 
 type SavedAddress = {
   id: string;
@@ -39,6 +40,7 @@ export default function CheckoutContent() {
 
   const singleProduct = !isCartMode ? getProductBySlug(slug) : undefined;
   const { cart, totalPrice: cartTotal } = useCart();
+  const { currency, formatPrice } = useLocale();
 
   const [email, setEmail] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -141,7 +143,6 @@ export default function CheckoutContent() {
   }
 
   const price = isCartMode ? cartTotal : singlePrice;
-  const currency = isCartMode ? cart[0]?.currency ?? '₹' : singleProduct?.currency ?? '₹';
   const shipping = 0;
   const total = price + shipping;
 
@@ -404,21 +405,40 @@ export default function CheckoutContent() {
           <div className="border border-line p-5">
             {isCartMode ? (
               <div className="space-y-4">
-                {cart.map((item) => (
-                  <div key={item.id} className="flex gap-3">
-                    <div className="relative h-16 w-16 shrink-0 overflow-hidden bg-white">
-                      <Image src={item.image} alt={item.name} fill className="object-cover" sizes="64px" />
+                {cart.map((item) => {
+                  // Each product's own breakdown, shown right under it —
+                  // with multiple different products in the bag it should
+                  // be clear which part of the total came from which item,
+                  // matching the same per-item breakdown now on the bag page.
+                  const { itemValue, making, gst } = getItemBreakdown(item);
+                  return (
+                    <div key={item.id} className="border-b border-line/60 pb-4 last:border-0 last:pb-0">
+                      <div className="flex gap-3">
+                        <div className="relative h-16 w-16 shrink-0 overflow-hidden bg-white">
+                          <Image src={item.image} alt={item.name} fill className="object-cover" sizes="64px" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">{item.name}</p>
+                          <p className="text-[13px] leading-[1.35] text-muted">Qty: {item.quantity}</p>
+                        </div>
+                        <p className="shrink-0 text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">
+                          {formatPrice(item.price * item.quantity)}
+                        </p>
+                      </div>
+                      <div className="mt-2.5 grid grid-cols-3 gap-1 text-[10.5px] leading-[1.35] text-muted sm:gap-2 sm:pl-[76px] sm:text-[11px]">
+                        <span className="truncate">
+                          Item {formatPrice(itemValue * item.quantity)}
+                        </span>
+                        <span className="truncate">
+                          Making {formatPrice(making * item.quantity)}
+                        </span>
+                        <span className="truncate">
+                          GST {formatPrice(gst * item.quantity)}
+                        </span>
+                      </div>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">{item.name}</p>
-                      <p className="text-[13px] leading-[1.35] text-muted">Qty: {item.quantity}</p>
-                    </div>
-                    <p className="shrink-0 text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">
-                      {item.currency}
-                      {(item.price * item.quantity).toLocaleString('en-IN')}
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="flex gap-4">
@@ -432,8 +452,7 @@ export default function CheckoutContent() {
                   {size && <p className="text-[13px] leading-[1.35] text-muted">Size: {size}</p>}
                 </div>
                 <p className="shrink-0 text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">
-                  {currency}
-                  {price.toLocaleString('en-IN')}
+                  {formatPrice(price)}
                 </p>
               </div>
             )}
@@ -445,24 +464,15 @@ export default function CheckoutContent() {
             <div className="mt-5 space-y-2 border-t border-line pt-4 text-[13px] leading-[1.35]">
               <div className="flex justify-between text-charcoal">
                 <span>Item Value (Gold + Diamond)</span>
-                <span>
-                  {currency}
-                  {Math.round(priceDetails.itemValue).toLocaleString('en-IN')}
-                </span>
+                <span>{formatPrice(priceDetails.itemValue)}</span>
               </div>
               <div className="flex justify-between text-charcoal">
                 <span>Making Charges</span>
-                <span>
-                  {currency}
-                  {Math.round(priceDetails.making).toLocaleString('en-IN')}
-                </span>
+                <span>{formatPrice(priceDetails.making)}</span>
               </div>
               <div className="flex justify-between text-charcoal">
                 <span>GST (3%)</span>
-                <span>
-                  {currency}
-                  {Math.round(priceDetails.gst).toLocaleString('en-IN')}
-                </span>
+                <span>{formatPrice(priceDetails.gst)}</span>
               </div>
               <div className="flex justify-between text-charcoal">
                 <span>Shipping</span>
@@ -472,10 +482,7 @@ export default function CheckoutContent() {
 
             <div className="mt-4 flex justify-between border-t border-line pt-4 text-base font-semibold text-ink">
               <span>Total</span>
-              <span>
-                {currency}
-                {total.toLocaleString('en-IN')}
-              </span>
+              <span>{formatPrice(total)}</span>
             </div>
           </div>
 
@@ -486,6 +493,14 @@ export default function CheckoutContent() {
           >
             {paying ? 'Redirecting…' : 'Proceed to Payment'}
           </button>
+          {/* Payment always runs in INR (see api/create-checkout-session) —
+              a shopper browsing in another currency needs to know the actual
+              charge won't be in the currency they've been looking at. */}
+          {currency !== 'INR' && (
+            <p className="mt-2 text-center text-[13px] leading-[1.35] text-muted">
+              You&rsquo;ll be charged ₹{Math.round(total).toLocaleString('en-IN')} (INR) — the amount above is an approximate conversion.
+            </p>
+          )}
           {!isAddressComplete && !paying && (
             <p className="mt-2 text-center text-[13px] leading-[1.35] text-muted">
               Please fill in your delivery address to continue.

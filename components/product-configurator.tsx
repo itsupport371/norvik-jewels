@@ -9,6 +9,7 @@ import ProductSpecifications from '@/components/product-specifications';
 import { calculatePrice, TEST_GOLD_RATE_24K_PER_10G } from '@/lib/pricing';
 import { useWishlist } from '@/lib/wishlist-context';
 import { useCart } from '@/lib/cart-context';
+import { useLocale } from '@/lib/locale-context';
 
 const FIXED_CLARITY = 'SI1';
 
@@ -83,6 +84,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
   const [added, setAdded] = useState(false);
   const { isWishlisted, toggleWishlist } = useWishlist();
   const { addToCart } = useCart();
+  const { formatPrice } = useLocale();
   const wishlisted = isWishlisted(product.slug);
   const [customizing, setCustomizing] = useState(false);
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
@@ -260,8 +262,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
 
         <div className="mt-3 flex items-center justify-between gap-3">
           <span className="text-[15px] font-medium leading-[1.35] text-ink">
-            {product.currency}
-            {grandTotal.toLocaleString('en-IN')}
+            {formatPrice(grandTotal)}
           </span>
           <div className="flex gap-2">
             <button

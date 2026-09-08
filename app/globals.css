@@ -49,3 +49,27 @@ a:focus-visible {
   outline: 2px solid #0b1626;
   outline-offset: 2px;
 }
+
+/* Google Translate widget (see app/layout.tsx + components/locale-switcher.tsx)
+   is driven headlessly through our own dropdown — hide every bit of its
+   default UI (the top banner iframe it injects into <body>, the little
+   gadget icon/branding) so visitors only ever see our styled switcher. */
+.goog-te-banner-frame,
+.goog-te-gadget-icon,
+.skiptranslate > iframe {
+  display: none !important;
+}
+
+body {
+  top: 0 !important;
+}
+
+.goog-tooltip,
+.goog-tooltip:hover {
+  display: none !important;
+}
+
+.goog-text-highlight {
+  background: none !important;
+  box-shadow: none !important;
+}

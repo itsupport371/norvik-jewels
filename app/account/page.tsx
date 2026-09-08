@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import SignOutButton from './sign-out-button';
+import SiteHeader from '@/components/site-header';
+import SiteFooter from '@/components/site-footer';
+import AccountDashboard from '@/components/account-dashboard';
 
 export default async function AccountPage() {
   const supabase = createClient();
@@ -13,24 +15,21 @@ export default async function AccountPage() {
   }
 
   return (
-    <main className="min-h-screen bg-ivory px-6 py-16">
-      <div className="mx-auto max-w-lg">
-        <h1 className="font-display text-[26px] font-medium leading-[1.05] tracking-[-0.01em] text-ink sm:text-[36px]">
-          Your account
-        </h1>
-        <p className="mt-2 text-[14px] leading-[1.6] text-muted">Signed in as {user.email}</p>
+    <>
+      <SiteHeader />
+      <main className="min-h-screen bg-ivory px-6 py-12 lg:px-10 lg:py-16">
+        <div className="mx-auto max-w-5xl">
+          <h1 className="font-display text-[26px] font-medium leading-[1.05] tracking-[-0.01em] text-ink sm:text-[36px]">
+            Your Account
+          </h1>
+          <p className="mt-2 text-[14px] leading-[1.6] text-muted">Signed in as {user.email}</p>
 
-        <div className="mt-8 border border-line bg-paper p-6 text-[14px] leading-[1.6]">
-          <p className="text-muted">
-            Order history, saved addresses, and wishlist will live here once
-            the commerce backend is connected.
-          </p>
+          <div className="mt-8">
+            <AccountDashboard email={user.email ?? ''} />
+          </div>
         </div>
-
-        <div className="mt-6">
-          <SignOutButton />
-        </div>
-      </div>
-    </main>
+      </main>
+      <SiteFooter />
+    </>
   );
 }

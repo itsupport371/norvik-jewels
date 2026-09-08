@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import { Cormorant_Garamond, Manrope } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
 import ChatWidget from '@/components/chat-widget';
 import { WishlistProvider } from '@/lib/wishlist-context';
 import { CartProvider } from '@/lib/cart-context';
+import { LocaleProvider } from '@/lib/locale-context';
 
 const display = Cormorant_Garamond({
   subsets: ['latin'],
@@ -41,12 +43,35 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${display.variable} ${sans.variable}`}>
       <body className="font-sans antialiased">
-        <WishlistProvider>
-          <CartProvider>
-            {children}
-            <ChatWidget />
-          </CartProvider>
-        </WishlistProvider>
+        {/* Language switcher — Google's own translation engine does the actual
+            translating (100+ languages, zero manual copy work); the custom
+            globe dropdown in the header drives it, so the default Google
+            banner/toolbar is hidden and never shown to visitors.
+            See lib/locale-context.tsx for how the switcher talks to this. */}
+        <div id="google_translate_element" className="hidden" />
+        <Script id="google-translate-init" strategy="afterInteractive">
+          {`
+            function googleTranslateElementInit() {
+              new google.translate.TranslateElement(
+                { pageLanguage: 'en', autoDisplay: false },
+                'google_translate_element'
+              );
+            }
+          `}
+        </Script>
+        <Script
+          src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+          strategy="afterInteractive"
+        />
+
+        <LocaleProvider>
+          <WishlistProvider>
+            <CartProvider>
+              {children}
+              <ChatWidget />
+            </CartProvider>
+          </WishlistProvider>
+        </LocaleProvider>
       </body>
     </html>
   );

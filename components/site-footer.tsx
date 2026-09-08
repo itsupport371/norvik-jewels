@@ -3,8 +3,16 @@ import Link from "next/link";
 export default function SiteFooter() {
   return (
     <footer className="bg-ink text-white/70">
-      <div className="mx-auto max-w-7xl px-6 py-16 lg:px-10">
-        <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
+      {/* Was capped at max-w-7xl (~1280px) — on any screen wider than that
+          (most laptops/monitors) it left a huge dead navy margin on both
+          sides while the rest of the page used its own width, which is what
+          read as "bohot space" on the left/right (client, Sep 2026). Padding
+          now scales with the screen instead of a hard width cap, so the
+          footer's content actually spreads across the available width; kept
+          a very generous max-w only as a sanity ceiling for ultra-wide
+          monitors, not as the normal constraint. */}
+      <div className="mx-auto w-full max-w-[1920px] px-6 py-16 sm:px-10 lg:px-16 xl:px-24">
+        <div className="grid grid-cols-2 gap-10 sm:grid-cols-4 lg:gap-16">
           <div className="col-span-2 sm:col-span-1">
             <span className="font-display text-lg font-medium tracking-[0.22em] text-white">
               NORVIK

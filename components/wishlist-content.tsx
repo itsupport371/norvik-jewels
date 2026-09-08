@@ -4,9 +4,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useWishlist } from '@/lib/wishlist-context';
 import { products, getDisplayPrice } from '@/lib/mock-products';
+import { useLocale } from '@/lib/locale-context';
 
 export default function WishlistContent() {
   const { wishlist, toggleWishlist } = useWishlist();
+  const { formatPrice } = useLocale();
   const items = products.filter((p) => wishlist.includes(p.slug));
 
   return (
@@ -51,8 +53,7 @@ export default function WishlistContent() {
                   </p>
                   <p className="mt-1 line-clamp-2 w-full text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">{product.name}</p>
                   <p className="mt-1 text-[13px] leading-[1.35] text-muted">
-                    {product.currency}
-                    {getDisplayPrice(product).toLocaleString('en-IN')}
+                    {formatPrice(getDisplayPrice(product))}
                   </p>
                 </div>
               </Link>

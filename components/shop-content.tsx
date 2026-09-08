@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { products, getDisplayPrice, type Product } from "@/lib/mock-products";
+import { useLocale } from "@/lib/locale-context";
 
 type SortOption = "featured" | "price-low" | "price-high";
 
@@ -114,6 +115,8 @@ export default function ShopContent() {
   const isSignatureCollection = collectionParam === "signature";
   const isBestsellers = sortParam === "bestsellers";
   const isNewArrivals = sortParam === "new";
+
+  const { formatPrice } = useLocale();
 
   const options = useMemo(deriveFilterOptions, []);
 
@@ -418,8 +421,7 @@ export default function ShopContent() {
                       {product.name}
                     </p>
                     <p className="mt-1 text-[13px] leading-[1.35] text-muted">
-                      {product.currency}
-                      {getDisplayPrice(product).toLocaleString("en-IN")}
+                      {formatPrice(getDisplayPrice(product))}
                     </p>
                   </div>
                 </Link>

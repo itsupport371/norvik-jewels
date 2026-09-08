@@ -4,9 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { products, getDisplayPrice } from "@/lib/mock-products";
+import { useLocale } from "@/lib/locale-context";
 
 export default function SearchContent() {
   const searchParams = useSearchParams();
+  const { formatPrice } = useLocale();
   const q = searchParams.get("q") ?? "";
 
   const results = q.trim()
@@ -65,8 +67,7 @@ export default function SearchContent() {
                 {product.name}
               </p>
               <p className="mt-1 text-[13px] leading-[1.35] text-muted">
-                {product.currency}
-                {getDisplayPrice(product).toLocaleString("en-IN")}
+                {formatPrice(getDisplayPrice(product))}
               </p>
             </Link>
           ))}

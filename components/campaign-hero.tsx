@@ -23,15 +23,18 @@ type Slide = {
 const SLIDES: Slide[] = [
   {
     desktopImage: '/images/campaign-navy-desktop.jpg',
-    // Wide shot: object-cover crops top/bottom on wide screens (image is
-    // 16:9, most monitors are wider) — her face sits in the upper third, so
-    // bias low to keep the crop coming from the bottom instead of the top.
-    desktopPosition: 'object-[80%_28%]',
+    // New photo (Sep 2026, same butterfly-earring/ring shot now used on the
+    // login/signup pages — see auth-visual-desktop.jpg): she sits at roughly
+    // x 75-78%, y 20-46% (face to chin) in this ~16:9 crop. This section is
+    // taller than 16:9 on most desktop viewports (92vh, usually wider-aspect
+    // than the photo), so object-cover crops top/bottom — biasing y toward
+    // her face keeps her in frame instead of a centered crop clipping her.
+    desktopPosition: 'object-[75%_35%]',
     mobileImage: '/images/campaign-navy-mobile.jpg',
-    // Portrait shot: object-cover crops the sides on phones (taller than
-    // this photo's own ~9:16). Her face/visible eye sit around 60-70% across
-    // the frame — bias right so the crop comes from the left instead.
-    mobilePosition: 'object-[62%_42%]',
+    // Same photo's matching portrait crop. Face/hands sit around x 65-75%
+    // across — bias right so a narrow-phone horizontal crop doesn't push her
+    // out of frame the way a centered crop would.
+    mobilePosition: 'object-[68%_50%]',
     eyebrow: 'Fine Diamond Jewellery',
     heading: ['Radiance,', 'Redefined.'],
     ctaLabel: 'Explore Earrings',

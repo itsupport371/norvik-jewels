@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { Product } from '@/lib/mock-products';
+import { useLocale } from '@/lib/locale-context';
 
 export default function ProductSpecifications({
   product,
@@ -28,6 +29,7 @@ export default function ProductSpecifications({
 }) {
   const [open, setOpen] = useState(true);
   const hasDiamond = Boolean(product.diamond) && (product.diamondCaratTotal ?? 0) > 0;
+  const { formatPrice } = useLocale();
 
   return (
     <div className="mt-10 border-t border-line pt-6">
@@ -48,10 +50,7 @@ export default function ProductSpecifications({
           <div className="grid grid-cols-3 divide-x divide-line border-b border-line text-center text-[13px] leading-[1.35]">
             <div className="px-3 py-3 font-medium text-ink">Gold ({karat}K)</div>
             <div className="px-3 py-3 text-charcoal">{goldWeightGrams.toFixed(2)}gm</div>
-            <div className="px-3 py-3 text-charcoal">
-              {product.currency}
-              {goldValue.toLocaleString('en-IN')}
-            </div>
+            <div className="px-3 py-3 text-charcoal">{formatPrice(goldValue)}</div>
           </div>
 
           {hasDiamond && (
@@ -65,47 +64,32 @@ export default function ProductSpecifications({
                 <br />
                 {product.diamondCaratTotal} ct
               </div>
-              <div className="px-3 py-3 text-charcoal">
-                {product.currency}
-                {diamondCharge.toLocaleString('en-IN')}
-              </div>
+              <div className="px-3 py-3 text-charcoal">{formatPrice(diamondCharge)}</div>
             </div>
           )}
 
           <div className="grid grid-cols-3 divide-x divide-line border-b border-line text-center text-[13px] leading-[1.35]">
             <div className="px-3 py-3 font-medium text-ink">Making</div>
             <div className="px-3 py-3 text-charcoal">-</div>
-            <div className="px-3 py-3 text-charcoal">
-              {product.currency}
-              {makingCharge.toLocaleString('en-IN')}
-            </div>
+            <div className="px-3 py-3 text-charcoal">{formatPrice(makingCharge)}</div>
           </div>
 
           <div className="grid grid-cols-3 divide-x divide-line border-b border-line text-center text-[13px] leading-[1.35]">
             <div className="px-3 py-3 font-medium text-ink">Subtotal</div>
             <div className="px-3 py-3 text-charcoal">-</div>
-            <div className="px-3 py-3 text-charcoal">
-              {product.currency}
-              {subtotal.toLocaleString('en-IN')}
-            </div>
+            <div className="px-3 py-3 text-charcoal">{formatPrice(subtotal)}</div>
           </div>
 
           <div className="grid grid-cols-3 divide-x divide-line border-b border-line text-center text-[13px] leading-[1.35]">
             <div className="px-3 py-3 font-medium text-ink">GST (3%)</div>
             <div className="px-3 py-3 text-charcoal">-</div>
-            <div className="px-3 py-3 text-charcoal">
-              {product.currency}
-              {gstAmount.toLocaleString('en-IN')}
-            </div>
+            <div className="px-3 py-3 text-charcoal">{formatPrice(gstAmount)}</div>
           </div>
 
           <div className="grid grid-cols-3 divide-x divide-line text-center text-[13px] leading-[1.35]">
             <div className="px-3 py-3 font-semibold text-ink">Grand Total</div>
             <div className="px-3 py-3 text-charcoal">-</div>
-            <div className="px-3 py-3 font-semibold text-ink">
-              {product.currency}
-              {grandTotal.toLocaleString('en-IN')}
-            </div>
+            <div className="px-3 py-3 font-semibold text-ink">{formatPrice(grandTotal)}</div>
           </div>
 
           <p className="border-t border-line px-3 py-2 text-[12px] leading-[1.35] text-muted">
