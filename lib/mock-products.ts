@@ -116,6 +116,29 @@ export const COLOR_CHARGE_PERCENT: Record<string, number> = {
   'S-Z': -3,
 };
 
+// Same idea as COLOR_CHARGE_PERCENT, for Clarity — also a placeholder pending
+// exact percentages from the client. Added Sep 2026 when Clarity became a
+// user-selectable "Diamond Quality" option in the configurator (previously
+// fixed at SI1 with only Color selectable); before this, clarityChargePercent
+// was always passed as 0 to calculatePrice. NOTE: this is intentionally NOT
+// the same as each grade's `priceModifier` field on CLARITY_GRADES above —
+// those are flat placeholder numbers from an earlier, different pricing
+// sketch and aren't in % terms, so reusing them here directly would have
+// been wrong units (e.g. VVS2's +900 is not "+900%"). Kept in the same
+// modest range as COLOR_CHARGE_PERCENT above so combined color+clarity swings
+// stay sane until real numbers come from the client.
+export const CLARITY_CHARGE_PERCENT: Record<string, number> = {
+  I1: -3,
+  I2: -3,
+  I3: -3,
+  SI1: 0,
+  SI2: 0,
+  VS1: 2,
+  VS2: 2,
+  VVS1: 5,
+  VVS2: 5,
+};
+
 function extractKaratFromLabel(metalLabel: string): 9 | 14 | 18 {
   const match = metalLabel.match(/^(\d+)/);
   const num = match ? parseInt(match[1], 10) : 18;

@@ -27,10 +27,34 @@ function priceInRange(price: number, key: string) {
   return price >= range.min && price < range.max;
 }
 
+// ---------- Weight buckets ----------
+// Client asked to mirror the filter set CaratLane shows on their Rings page
+// (caratlane.com/jewellery/rings.html), which includes a gold-weight filter
+// (their buckets: 0-2g / 2-5g / 5-10g / 10-20g). Our current catalogue only
+// spans ~0.6g-5g (small pieces — studs, a nose pin, two rings), so those exact
+// buckets would leave most of them empty; scaled down to match what's
+// actually in `products` today. "Above 5g" is kept even though nothing's in
+// it yet so heavier future pieces (bangles, chains) have somewhere to land
+// without this needing another edit.
+const WEIGHT_RANGES = [
+  { key: "u1", label: "Under 1g", min: 0, max: 1 },
+  { key: "1-2", label: "1g – 2g", min: 1, max: 2 },
+  { key: "2-3", label: "2g – 3g", min: 2, max: 3 },
+  { key: "3-5", label: "3g – 5g", min: 3, max: 5 },
+  { key: "5plus", label: "Above 5g", min: 5, max: Infinity },
+] as const;
+
+function weightInRange(weight: number, key: string) {
+  const range = WEIGHT_RANGES.find((r) => r.key === key);
+  if (!range) return false;
+  return weight >= range.min && weight < range.max;
+}
+
 type Filters = {
   categories: string[];
   metals: string[];
   priceRanges: string[];
+  weights: string[];
   sizes: string[];
   diamondOnly: boolean;
   signatureOnly: boolean;
@@ -40,6 +64,7 @@ const EMPTY_FILTERS: Filters = {
   categories: [],
   metals: [],
   priceRanges: [],
+  weights: [],
   sizes: [],
   diamondOnly: false,
   signatureOnly: false,
@@ -69,6 +94,11 @@ function productMatches(p: Product, f: Filters, ignoreGroup?: keyof Filters) {
     f.priceRanges.length === 0 ||
     f.priceRanges.some((key) => priceInRange(price, key));
 
+  const weightOk =
+    ignoreGroup === "weights" ||
+    f.weights.length === 0 ||
+    f.weights.some((key) => weightInRange(p.goldWeightGrams, key));
+
   const sizeOk =
     ignoreGroup === "sizes" ||
     f.sizes.length === 0 ||
@@ -78,7 +108,7 @@ function productMatches(p: Product, f: Filters, ignoreGroup?: keyof Filters) {
 
   const signatureOk = ignoreGroup === "signatureOnly" || !f.signatureOnly || Boolean(p.isSignature);
 
-  return categoryOk && metalOk && priceOk && sizeOk && diamondOk && signatureOk;
+  return categoryOk && metalOk && priceOk && weightOk && sizeOk && diamondOk && signatureOk;
 }
 
 // Derives every filter option straight from the live catalogue — a new
@@ -166,6 +196,7 @@ export default function ShopContent() {
     filters.categories.length +
     filters.metals.length +
     filters.priceRanges.length +
+    filters.weights.length +
     filters.sizes.length +
     (filters.diamondOnly ? 1 : 0) +
     (filters.signatureOnly ? 1 : 0);
@@ -256,29 +287,51 @@ export default function ShopContent() {
         })}
       </FilterGroup>
 
-      {options.sizes.length > 0 && (
-        <ExpandableFilterGroup
-          title="Ring Size"
-          items={options.sizes.map((size) => {
-            const label = String(size);
-            const count = products.filter(
-              (p) =>
-                p.category === "Rings" &&
-                p.sizeOptions.some((s) => s.label === label) &&
-                productMatches(p, filters, "sizes")
-            ).length;
-            return (
-              <FilterCheckbox
-                key={label}
-                checked={filters.sizes.includes(label)}
-                onChange={() => setFilters((f) => ({ ...f, sizes: toggleInArray(f.sizes, label) }))}
-                label={label}
-                count={count}
-              />
-            );
-          })}
-        />
-      )}
+      <FilterGroup title="Weight">
+        {WEIGHT_RANGES.map((range) => {
+          const count = products.filter(
+            (p) =>
+              weightInRange(p.goldWeightGrams, range.key) &&
+              productMatches(p, filters, "weights")
+          ).length;
+          return (
+            <FilterCheckbox
+              key={range.key}
+              checked={filters.weights.includes(range.key)}
+              onChange={() =>
+                setFilters((f) => ({ ...f, weights: toggleInArray(f.weights, range.key) }))
+              }
+              label={range.label}
+              count={count}
+            />
+          );
+        })}
+      </FilterGroup>
+
+      {options.sizes.length > 0 &&
+        (filters.categories.length === 0 || filters.categories.includes("Rings")) && (
+          <ExpandableFilterGroup
+            title="Ring Size"
+            items={options.sizes.map((size) => {
+              const label = String(size);
+              const count = products.filter(
+                (p) =>
+                  p.category === "Rings" &&
+                  p.sizeOptions.some((s) => s.label === label) &&
+                  productMatches(p, filters, "sizes")
+              ).length;
+              return (
+                <FilterCheckbox
+                  key={label}
+                  checked={filters.sizes.includes(label)}
+                  onChange={() => setFilters((f) => ({ ...f, sizes: toggleInArray(f.sizes, label) }))}
+                  label={label}
+                  count={count}
+                />
+              );
+            })}
+          />
+        )}
 
       <ExpandableFilterGroup
         title="Diamond"

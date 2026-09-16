@@ -1,17 +1,28 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import type { Product, OptionChoice } from '@/lib/mock-products';
-import { CLARITY_ALLOWED_COLORS, stockFor, COLOR_CHARGE_PERCENT } from '@/lib/mock-products';
+import {
+  CLARITY_GRADES,
+  CLARITY_ALLOWED_COLORS,
+  stockFor,
+  COLOR_CHARGE_PERCENT,
+  CLARITY_CHARGE_PERCENT,
+} from '@/lib/mock-products';
 import ProductSpecifications from '@/components/product-specifications';
 import { calculatePrice, TEST_GOLD_RATE_24K_PER_10G } from '@/lib/pricing';
 import { useWishlist } from '@/lib/wishlist-context';
 import { useCart } from '@/lib/cart-context';
 import { useLocale } from '@/lib/locale-context';
 
-const FIXED_CLARITY = 'SI1';
+// Was a fixed constant (every product's diamond was hard-locked to SI1
+// clarity, only Color was pickable) — now just the starting value of the
+// `clarityKey` state below, since Clarity became user-selectable too (client
+// asked to mirror how CaratLane's "Customise" panel lets you pick a real
+// diamond-quality tier, not just a color swatch — Sep 2026).
+const DEFAULT_CLARITY = 'SI1';
 
 function extractKarat(metalLabel: string): 9 | 14 | 18 {
   const match = metalLabel.match(/^(\d+)/);
@@ -91,9 +102,25 @@ export default function ProductConfigurator({ product }: { product: Product }) {
   const [buyLoading, setBuyLoading] = useState(false);
 
   const hasDiamond = Boolean(product.diamond);
+  const [clarityKey, setClarityKey] = useState(DEFAULT_CLARITY);
   const [colorKey, setColorKey] = useState('D-F');
 
-  const allowedColors = useMemo(() => CLARITY_ALLOWED_COLORS[FIXED_CLARITY] ?? [], []);
+  const allowedColors = useMemo(
+    () => CLARITY_ALLOWED_COLORS[clarityKey] ?? [],
+    [clarityKey]
+  );
+
+  // Real sourcing constraint (see CLARITY_ALLOWED_COLORS in mock-products.ts):
+  // not every Color is available at every Clarity. If the shopper picks a
+  // Clarity that doesn't offer their currently-selected Color, fall back to
+  // the first Color that IS available at the new Clarity, instead of leaving
+  // them on a combination that was never actually purchasable.
+  useEffect(() => {
+    if (allowedColors.length > 0 && !allowedColors.includes(colorKey)) {
+      setColorKey(allowedColors[0]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clarityKey]);
 
   useMemo(() => {
     if (!product.metalImages) return;
@@ -126,6 +153,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
   const effectiveGoldWeight = Math.max(0.1, product.goldWeightGrams + sizeWeightDelta);
 
   const colorChargePercent = hasDiamond ? COLOR_CHARGE_PERCENT[colorKey] ?? 0 : 0;
+  const clarityChargePercent = hasDiamond ? CLARITY_CHARGE_PERCENT[clarityKey] ?? 0 : 0;
 
   const rawPricing = calculatePrice({
     goldRate24kPer10g: TEST_GOLD_RATE_24K_PER_10G,
@@ -134,8 +162,8 @@ export default function ProductConfigurator({ product }: { product: Product }) {
     makingChargePercent: 12, // placeholder — pending client confirmation
     diamondCaratRequired: product.diamondCaratTotal ?? 0,
     diamondBaseRatePerCarat: 100000, // placeholder — pending client confirmation
-    colorChargePercent, // now reacts to selected Diamond Quality — placeholder %s
-    clarityChargePercent: 0,
+    colorChargePercent, // reacts to selected Diamond Quality — placeholder %s
+    clarityChargePercent, // now also reacts to selected Clarity (was always 0)
     cutChargePercent: 0,
     gstPercent: 3,
   });
@@ -148,9 +176,16 @@ export default function ProductConfigurator({ product }: { product: Product }) {
 
   const canAddToBag = !needsSize || sizeKey !== null;
 
+  // Combined "Diamond Quality" label — Color and Clarity together, the way
+  // CaratLane shows a single tier pill like "GH-VS" rather than exposing
+  // Color and Clarity as two separate facts. `colorKey` is reused everywhere
+  // downstream (cart line id/display, checkout summary, Specifications) as
+  // this combined string so none of those needed their own schema change.
+  const diamondQualityLabel = hasDiamond ? `${colorKey} · ${clarityKey}` : null;
+
   function handleAddToBag() {
     if (!canAddToBag) return;
-    const id = [product.slug, metalKey, hasDiamond ? colorKey : '', sizeKey ?? ''].join('|');
+    const id = [product.slug, metalKey, hasDiamond ? diamondQualityLabel : '', sizeKey ?? ''].join('|');
     addToCart({
       id,
       slug: product.slug,
@@ -158,7 +193,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
       image: product.images[0],
       currency: product.currency,
       metalKey,
-      colorKey: hasDiamond ? colorKey : undefined,
+      colorKey: hasDiamond ? diamondQualityLabel ?? undefined : undefined,
       sizeKey: sizeKey ?? undefined,
       price: grandTotal,
       goldValue,
@@ -189,7 +224,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
       makingCharge: String(makingCharge),
       gstAmount: String(gstAmount),
     });
-    if (hasDiamond) params.set('color', colorKey);
+    if (hasDiamond && diamondQualityLabel) params.set('color', diamondQualityLabel);
     if (sizeKey) params.set('size', sizeKey);
 
     router.push(`/checkout?${params.toString()}`);
@@ -218,8 +253,6 @@ export default function ProductConfigurator({ product }: { product: Product }) {
       selected: o.label === selectedLabel,
     }));
   }
-
-  const diamondSummary = hasDiamond ? colorKey : null;
 
   return (
     <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-x-16 lg:gap-y-10">
@@ -321,7 +354,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
             {hasDiamond && (
               <div className="flex-1 px-3 py-3">
                 <p className="text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">Diamond Quality</p>
-                <p className="mt-0.5 text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">{diamondSummary}</p>
+                <p className="mt-0.5 text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">{diamondQualityLabel}</p>
               </div>
             )}
             <button
@@ -397,12 +430,30 @@ export default function ProductConfigurator({ product }: { product: Product }) {
                   Diamond Details
                 </p>
                 <div className="space-y-6">
+                  {/* Clarity used to be fixed at SI1 (not shown here at all) —
+                      now selectable, same as Color below, so "Diamond
+                      Quality" is a real Clarity+Color choice instead of only
+                      a color swatch (client asked to match how CaratLane's
+                      own Customise panel lets shoppers pick a diamond
+                      quality tier, not just a color — Sep 2026). */}
                   <CardGrid
-                    label="Diamond Quality"
+                    label="Clarity"
+                    cards={CLARITY_GRADES.map((grade) => ({
+                      key: grade.value,
+                      title: grade.value,
+                      sublabel: grade.sublabel,
+                      stock: '',
+                      selected: grade.value === clarityKey,
+                    }))}
+                    selected={clarityKey}
+                    onSelect={setClarityKey}
+                  />
+                  <CardGrid
+                    label="Color"
                     cards={allowedColors.map((colorValue) => ({
                       key: colorValue,
                       title: colorValue,
-                      stock: stockFor(FIXED_CLARITY, colorValue),
+                      stock: stockFor(clarityKey, colorValue),
                       selected: colorValue === colorKey,
                     }))}
                     selected={colorKey}
@@ -485,7 +536,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
       <div className="lg:col-start-1 lg:row-start-2">
         <ProductSpecifications
           product={product}
-          colorKey={hasDiamond ? colorKey : undefined}
+          colorKey={hasDiamond ? diamondQualityLabel ?? undefined : undefined}
           karat={karat}
           goldWeightGrams={effectiveGoldWeight}
           goldValue={goldValue}
