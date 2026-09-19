@@ -63,5 +63,26 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // /admin — the product management panel. Separate from the customer
+  // /account area: not just "logged in", but the signed-in email must be on
+  // the ADMIN_EMAILS allow-list (comma-separated in .env, e.g.
+  // "itsupport@norvikgold.com,owner@norvikgold.com"). No admin role table
+  // yet — for a handful of internal users this env-var allow-list is enough,
+  // and is simpler to audit than a database flag. Revisit if the number of
+  // admin users grows.
+  if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
+    const adminEmails = (process.env.ADMIN_EMAILS ?? '')
+      .split(',')
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    const isAdmin = Boolean(user?.email && adminEmails.includes(user.email.toLowerCase()));
+    if (!isAdmin) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/admin/login';
+      url.searchParams.set('redirect', request.nextUrl.pathname + request.nextUrl.search);
+      return NextResponse.redirect(url);
+    }
+  }
+
   return supabaseResponse;
 }
