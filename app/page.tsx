@@ -4,9 +4,17 @@ import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
 import CampaignHero from "@/components/campaign-hero";
 import NewArrivalsRow from "@/components/new-arrivals-row";
-import { products } from "@/lib/mock-products";
+import { getAllProductsServer } from "@/lib/products-server";
 
-export default function HomePage() {
+// Phase 5: now includes the real, admin-managed catalogue (published rows
+// from Supabase) alongside the original static showcase products — see
+// lib/products-server.ts. Needs the page to actually fetch data, so this
+// can no longer be a plain static component.
+export const dynamic = 'force-dynamic';
+
+export default async function HomePage() {
+  const products = await getAllProductsServer();
+
   return (
     <>
       <SiteHeader transparentOnHero />

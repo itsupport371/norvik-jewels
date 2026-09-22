@@ -4,9 +4,15 @@ import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { products } from '@/lib/mock-products';
+import type { Product } from '@/lib/mock-products';
 
-export default function SearchTrigger({ light = false }: { light?: boolean }) {
+export default function SearchTrigger({
+  light = false,
+  products,
+}: {
+  light?: boolean;
+  products: Product[];
+}) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const router = useRouter();

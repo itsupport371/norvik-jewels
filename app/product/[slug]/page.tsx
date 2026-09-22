@@ -4,23 +4,24 @@ import Link from 'next/link';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ProductConfigurator from '@/components/product-configurator';
-import PriceTag from '@/components/price-tag';
-import { getProductBySlug, products, getDisplayPrice } from '@/lib/mock-products';
+import { getProductBySlugServer, getRelatedServer } from '@/lib/products-server';
 
-export function generateStaticParams() {
-  return products.map((p) => ({ slug: p.slug }));
-}
+// Phase 5: the real catalogue is a Draft/Publish workflow in Supabase, not a
+// fixed list known at build time, so this can no longer be statically
+// generated the way the all-static catalogue was (no more
+// generateStaticParams) — always render fresh so a newly Published (or
+// unpublished) product shows/disappears immediately instead of waiting for
+// a rebuild.
+export const dynamic = 'force-dynamic';
 
-export default function ProductPage({ params }: { params: { slug: string } }) {
-  const product = getProductBySlug(params.slug);
+export default async function ProductPage({ params }: { params: { slug: string } }) {
+  const product = await getProductBySlugServer(params.slug);
 
   if (!product) {
     notFound();
   }
 
-  const related = products
-    .filter((p) => p.category === product.category && p.slug !== product.slug)
-    .slice(0, 4);
+  const related = await getRelatedServer(product.category, product.slug);
 
   return (
     <>
@@ -52,7 +53,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                   <div className="flex h-16 flex-col items-center justify-center overflow-hidden px-1 text-center sm:h-[76px]">
                     <p className="line-clamp-2 w-full text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">{p.name}</p>
                     <p className="mt-1 text-[13px] leading-[1.35] text-muted">
-                      <PriceTag amountInInr={getDisplayPrice(p)} />
+                      {p.currency}{p.basePrice.toLocaleString('en-IN')}
                     </p>
                   </div>
                 </Link>

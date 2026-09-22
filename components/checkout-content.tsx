@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { getProductBySlug } from '@/lib/mock-products';
+import type { Product } from '@/lib/mock-products';
 import { useCart, getCartBreakdown, getItemBreakdown } from '@/lib/cart-context';
 import { createClient } from '@/lib/supabase/client';
 import { useLocale } from '@/lib/locale-context';
@@ -20,7 +20,7 @@ type SavedAddress = {
   pincode: string;
 };
 
-export default function CheckoutContent() {
+export default function CheckoutContent({ products }: { products: Product[] }) {
   const searchParams = useSearchParams();
   const isCartMode = searchParams.get('cart') === '1';
 
@@ -38,7 +38,7 @@ export default function CheckoutContent() {
   const singleMakingCharge = Number(searchParams.get('makingCharge') ?? 0);
   const singleGstAmount = Number(searchParams.get('gstAmount') ?? 0);
 
-  const singleProduct = !isCartMode ? getProductBySlug(slug) : undefined;
+  const singleProduct = !isCartMode ? products.find((p) => p.slug === slug) : undefined;
   const { cart, totalPrice: cartTotal } = useCart();
   const { currency, formatPrice } = useLocale();
 

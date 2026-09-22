@@ -3,10 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { products, getDisplayPrice } from "@/lib/mock-products";
+import { getDisplayPrice, type Product } from "@/lib/mock-products";
 import { useLocale } from "@/lib/locale-context";
 
-export default function SearchContent() {
+export default function SearchContent({ products }: { products: Product[] }) {
   const searchParams = useSearchParams();
   const { formatPrice } = useLocale();
   const q = searchParams.get("q") ?? "";

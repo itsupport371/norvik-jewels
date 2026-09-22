@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { products, getDisplayPrice, type Product } from "@/lib/mock-products";
+import { getDisplayPrice, type Product } from "@/lib/mock-products";
 import { useLocale } from "@/lib/locale-context";
 
 type SortOption = "featured" | "price-low" | "price-high";
@@ -111,10 +111,11 @@ function productMatches(p: Product, f: Filters, ignoreGroup?: keyof Filters) {
   return categoryOk && metalOk && priceOk && weightOk && sizeOk && diamondOk && signatureOk;
 }
 
-// Derives every filter option straight from the live catalogue — a new
-// product with a new metal, a new category, or a new ring size shows up as
-// a new filter automatically, nothing here names today's SKUs.
-function deriveFilterOptions() {
+// Derives every filter option straight from the live catalogue (passed in as
+// `products` — static + real published SKUs, see lib/products-server.ts) — a
+// new product with a new metal, a new category, or a new ring size shows up
+// as a new filter automatically, nothing here names today's SKUs.
+function deriveFilterOptions(products: Product[]) {
   const categories: string[] = [];
   const metals: string[] = [];
   const sizesSet = new Set<number>();
@@ -137,7 +138,7 @@ function deriveFilterOptions() {
   };
 }
 
-export default function ShopContent() {
+export default function ShopContent({ products }: { products: Product[] }) {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category");
   const collectionParam = searchParams.get("collection");
@@ -148,7 +149,7 @@ export default function ShopContent() {
 
   const { formatPrice } = useLocale();
 
-  const options = useMemo(deriveFilterOptions, []);
+  const options = useMemo(() => deriveFilterOptions(products), [products]);
 
   const normalizedInitialCategory =
     options.categories.find((c) => c.toLowerCase() === initialCategory?.toLowerCase()) ?? null;
@@ -182,7 +183,7 @@ export default function ShopContent() {
       list = [...list].sort((a, b) => getDisplayPrice(b) - getDisplayPrice(a));
     }
     return list;
-  }, [filters, sort]);
+  }, [products, filters, sort]);
 
   const heading = isSignatureCollection
     ? "The Signature Collection"

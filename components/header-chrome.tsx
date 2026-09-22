@@ -1,18 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import WishlistBadge from '@/components/wishlist-badge';
 import CartBadge from '@/components/cart-badge';
 import SearchTrigger from '@/components/search-trigger';
 import LocaleSwitcher from '@/components/locale-switcher';
-import { products } from '@/lib/mock-products';
-
-// Same source the Shop page filters use — a category shows up here the
-// moment a product exists with it, so this list never needs manual upkeep
-// as categories are added/renamed in lib/mock-products.ts.
-const SHOP_CATEGORIES = Array.from(new Set(products.map((p) => p.category)));
+import type { Product } from '@/lib/mock-products';
 
 const CHEVRON = (
   <svg
@@ -32,11 +27,23 @@ export default function HeaderChrome({
   accountHref,
   isLoggedIn,
   transparentOnHero = false,
+  products,
 }: {
   accountHref: string;
   isLoggedIn: boolean;
   transparentOnHero?: boolean;
+  products: Product[];
 }) {
+  // Phase 5: SHOP_CATEGORIES used to be computed once at module load from
+  // the static `products` import. It's now derived from the `products` prop
+  // (static + real admin-managed catalogue, fetched server-side in
+  // site-header.tsx) — a category shows up here the moment a *published*
+  // product exists with it, no manual upkeep needed either way.
+  const SHOP_CATEGORIES = useMemo(
+    () => Array.from(new Set(products.map((p) => p.category))),
+    [products]
+  );
+
   // On pages with a full-bleed hero (currently just the homepage), the header
   // starts transparent so it blends into the hero photo's own dark
   // background instead of sitting on top of it as a solid white bar — then
@@ -206,7 +213,7 @@ export default function HeaderChrome({
               solid ? 'text-inknavy/80' : 'text-ivory'
             }`}
           >
-            <SearchTrigger light={!solid} />
+            <SearchTrigger light={!solid} products={products} />
             <Link href={accountHref} aria-label="Account" className="relative transition-colors hover:text-antiquegold">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
                 <circle cx="12" cy="8" r="4" />

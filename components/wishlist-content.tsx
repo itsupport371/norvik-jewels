@@ -3,10 +3,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useWishlist } from '@/lib/wishlist-context';
-import { products, getDisplayPrice } from '@/lib/mock-products';
+import { getDisplayPrice, type Product } from '@/lib/mock-products';
 import { useLocale } from '@/lib/locale-context';
 
-export default function WishlistContent() {
+export default function WishlistContent({ products }: { products: Product[] }) {
   const { wishlist, toggleWishlist } = useWishlist();
   const { formatPrice } = useLocale();
   const items = products.filter((p) => wishlist.includes(p.slug));

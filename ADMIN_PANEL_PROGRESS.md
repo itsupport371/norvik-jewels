@@ -1,6 +1,6 @@
 # Admin Panel + Real Product Catalog — Progress Notes
 
-_Last updated: 19 Sep 2026. Keep this file updated as work continues — it's
+_Last updated: 22 Sep 2026. Keep this file updated as work continues — it's
 the source of truth for "what's done, what's next" across sessions._
 
 ## Decision: build a real admin panel (not the fast-manual-import shortcut)
@@ -8,113 +8,362 @@ the source of truth for "what's done, what's next" across sessions._
 Client said "jo best ho wo karo" for the real-product-catalog rollout. Agreed
 plan, phased:
 
-1. **Database schema** — DONE (see below)
-2. **Admin login gate** — DONE (see below)
-3. Admin UI: product list + add/edit form — NOT STARTED
-4. Excel import tool (bulk-create Draft products from an Excel like the
-   Rings Vol.1 sheet) — NOT STARTED
-5. Photo upload / bulk SKU-matched import — NOT STARTED
-6. Switch storefront pages off `lib/mock-products.ts` onto the database,
-   Draft/Publish workflow — NOT STARTED
+1. **Database schema** — DONE
+2. **Admin login gate** — DONE (confirmed working on localhost AND production)
+3. **Admin UI: product list + add/edit form + Excel import** — DONE (this
+   session) — see Phase 3 below. Not yet used for a real import.
+4. Photo upload / bulk SKU-matched import into products — DONE
+5. Switch storefront pages off `lib/mock-products.ts` onto the database,
+   Draft/Publish workflow — DONE (built + pushed, not yet client-tested)
 
 ## Phase 1 — Database (Supabase) — DONE
 
-- New `products` table created in Supabase (SQL Editor), matching
-  `supabase/migrations/0001_products_schema.sql` in the repo.
-- **Important**: an unrelated leftover `products` table already existed in
-  this Supabase project (different, camelCase/Prisma-style schema —
-  `categoryId`, `collectionId`, `isActive`, etc. — apparently from an old,
-  never-wired-up starter template). Confirmed it was empty
-  (`select count(*) from products` = 0) and dropped it before creating the
-  real one. The migration file already includes `drop table if exists
-  products cascade;` at the top, documented with a comment — safe to
-  re-run.
-- Table stores `metalOptions` / `sizeOptions` / `diamond` / `images` as
-  JSONB (not fully normalized) to mirror the existing `Product` type in
-  `lib/mock-products.ts` almost 1:1. `status` column is `'draft' |
-  'published'` — nothing in this table is customer-visible yet since no
-  page reads from it (RLS policy only allows `select` where `status =
-  'published'`, and nothing is published).
-- **Nothing on the live site changed yet** — `lib/mock-products.ts` is
-  still what every page (`app/page.tsx`, `/shop`, `/search`, `/product/[slug]`,
-  cart, wishlist, new-arrivals) actually reads from. The new `products`
-  table is inert until Phase 6.
+- `products` table created via `supabase/migrations/0001_products_schema.sql`,
+  run manually in the Supabase SQL Editor (no Supabase CLI/migration runner
+  set up in this project — every migration file here has to be pasted into
+  the SQL Editor by hand and run).
+- An unrelated leftover `products` table (different, camelCase/Prisma-style
+  schema from an old, never-wired-up starter template) already existed in
+  this Supabase project — confirmed empty and dropped first. The migration
+  file documents this and is safe to re-run on a fresh project.
+- `metal_options` / `size_options` / `diamond` / `images` are stored as
+  JSONB, mirroring the `Product` type in `lib/mock-products.ts` almost 1:1.
+  `status` is `'draft' | 'published'`.
+- **Nothing on the live site reads from this table yet** — `lib/mock-products.ts`
+  is still what every customer-facing page uses. The table is inert until
+  Phase 5.
 
-## Phase 2 — Admin login gate — DONE
+## Phase 2 — Admin login gate — DONE, verified in both environments
 
-- `lib/supabase/middleware.ts` — added a block that protects any
-  `/admin/*` route (except `/admin/login` itself): redirects to
-  `/admin/login` unless the signed-in user's email is in the
-  `ADMIN_EMAILS` env var (comma-separated allow-list, e.g.
-  `itsupport@norvikgold.com`). This is deliberately simple (no DB role
-  table) since there are only a couple of internal users.
-- `.env` — client added `ADMIN_EMAILS=itsupport@norvikgold.com` locally.
-  **Still pending**: same var needs to be added in Vercel (Settings →
-  Environment Variables) + a redeploy, for the gate to work in production.
-- `app/admin/login/page.tsx` — reuses the existing `AuthForm` component
-  (same Supabase email/password sign-in as the customer `/login` page).
-  Now also uses the same diamond-halo-ring background photo as
-  `/login` and `/signup` (client asked for this Sep 19, so admin login
-  doesn't look like a bare/generic internal tool).
-- `app/admin/page.tsx` — placeholder dashboard, just confirms the gate
-  works end-to-end. **This is the next thing to build out into the real
-  product list.**
-- Verified working: visiting `localhost:3000/admin` correctly redirects to
-  `/admin/login?redirect=%2Fadmin` when not authenticated as an admin.
+- `lib/supabase/middleware.ts` protects `/admin/*` (except `/admin/login`):
+  redirects to login unless the signed-in user's email is in the
+  `ADMIN_EMAILS` env var (comma-separated allow-list).
+- `.env` (local) has `ADMIN_EMAILS=itsupport@norvikgold.com`. Vercel
+  Environment Variables also has it set for Production — **confirmed
+  working**, admin login + gate tested successfully on the live site.
+- `app/admin/login/page.tsx` reuses `AuthForm`, with the same diamond-halo-
+  ring background as `/login` and `/signup` (client asked for this).
+- **Deployment gotcha hit and fixed**: after adding `ADMIN_EMAILS`, a
+  "Redeploy" was accidentally run against the repo's very first commit
+  instead of the latest one, which promoted that ancient/generic build to
+  Production (client saw a totally different, unstyled-looking site and
+  was confused). Fixed by finding the correct latest `staging`-branch
+  deployment in the Vercel Deployments list and using "Promote to
+  Production" on that one instead. Lesson: when redeploying, double-check
+  which commit/row you're acting on, not just "the top one" — the list can
+  reorder.
+
+## Phase 3 — Admin product list, add/edit form, Excel import — DONE (this session)
+
+New files:
+- `supabase/migrations/0002_admin_write_policy.sql` — **run this in the
+  Supabase SQL Editor before testing Phase 3** (not run yet as of this
+  writing). Adds an RLS policy so a signed-in admin (matched by email,
+  same list as `ADMIN_EMAILS` — kept in the SQL itself, not read from the
+  env var, so keep both lists in sync by hand) can insert/update/delete
+  `products` directly from the browser Supabase client. Deliberately
+  avoids needing a Supabase **service role key** anywhere (there wasn't
+  one in `.env` — only the public anon key — and adding one would've been
+  another manual secret to fetch/store/rotate for no real benefit at this
+  scale).
+- `app/admin/products/page.tsx` — list of all products (Server Component,
+  reads via the user's own session), Draft/Published badge, links to
+  Excel import and to add/edit.
+- `app/admin/products/product-form.tsx` — shared Client Component form
+  (used by both New and Edit). Fields: name → auto slug, category,
+  manufacturer SKU + Norvik SKU, description, image URLs (plain text, one
+  per line — **no file upload UI yet**, see Phase 4), gold weight, diamond
+  piece count + carat total, a karat(9/14/18) × color(Yellow/White/Rose)
+  checkbox grid that builds `metal_options`, a size mode toggle ("One
+  Size" vs the standard ring run 5–25, duplicated here as a local
+  constant since `lib/mock-products.ts` doesn't export it), Signature
+  Collection checkbox, Draft/Published status, and a live estimated-price
+  preview computed with the same `lib/pricing.ts` engine and the same
+  shared placeholder rates as the rest of the site (making 12%, diamond
+  ₹100000/ct) — deliberately not a separate number.
+  - **Important, deliberate design decision**: the form always saves
+    `diamond: null` — it does NOT expose the "Diamond Shape/Cut/Carat/
+    Certification" customization that `product-configurator.tsx` shows for
+    products like "Halo Diamond Ring". That configurator pattern is for a
+    *swappable center stone* (solitaire-style); these ready-made pavé/
+    cluster ring designs have dozens of small *fixed* stones — there's no
+    "customer picks their own diamond" concept for them. To make this
+    correct, **`components/product-specifications.tsx`'s `hasDiamond` check
+    was changed** from `Boolean(product.diamond) && diamondCaratTotal > 0`
+    to just `diamondCaratTotal > 0`, so the spec sheet still correctly
+    shows real diamond weight/piece-count facts even with no `diamond`
+    config. (Pricing was already fine either way — `diamondCaratTotal`
+    feeds `calculatePrice()` directly in both `product-configurator.tsx`
+    and `getDisplayPrice()`, never gated on `hasDiamond`.)
+- `app/admin/products/new/page.tsx`, `app/admin/products/[id]/edit/page.tsx`
+  — thin wrappers around the form (empty vs. fetched-and-reshaped initial
+  values).
+- `app/admin/products/import/page.tsx` — Excel upload using the `xlsx`
+  npm package (added to `package.json` — **`npm install` needs to be run**
+  to actually fetch it, nothing here can run npm on the client's machine).
+  Parses the same block-structured sheet format as the Rings Vol.1 file
+  (one row per SKU with the SKU/Norvik SKU/gold weight/diamond total/name,
+  followed by sub-rows of diamond size+count that get summed into
+  `diamond_piece_count`), shows a preview table, and bulk-inserts as
+  Drafts. Skips rows whose Norvik SKU already exists in the table (safe to
+  re-run after fixing missing names). Missing names fall back to
+  `"<NORVIK_SKU> Diamond Ring"`.
+- `app/admin/page.tsx` — dashboard now links to Products and Import
+  instead of just being a placeholder.
+
+**Status as of 27 Aug/19 Sep 2026 session — Phase 3 is now fully done and tested**:
+- Migration `0002_admin_write_policy.sql` (admin RLS write policy) — **RUN**,
+  confirmed "Success. No rows returned" in Supabase SQL Editor.
+- `npm install` — **RUN**, `xlsx` package installed, `npm run dev` restarted
+  fine.
+- Real import test — **DONE AND SUCCESSFUL**. Client sent an updated Excel
+  (`Indian_rings_Name.xlsx`) with all 50 SKUs and, importantly, **all 50
+  names now filled in** (the previously-missing M-234/M-235/M-291/M-296
+  names were provided by the client in this file). Verified the file
+  structure/columns and data completeness before import (no missing names,
+  no duplicate/blank Norvik SKUs, no missing gold/diamond data). Uploaded
+  via `/admin/products/import` → preview showed all 50 rows correctly →
+  clicked "Import 50 as Drafts" → **"Created 50 draft products."** Next: spot-
+  check one product via Edit to confirm pricing/metal options/etc. look right.
+  - Minor cosmetic note (not a blocker): the SKU column in this file has
+    inconsistent spacing, e.g. `M -165` / `M - 166` instead of `M-165`. Doesn't
+    affect import, pricing, or the stored `norvik_sku` (which is clean,
+    e.g. `ILR-0165`). Will matter for Phase 4 photo-folder matching (folders
+    are named exactly `M-165` etc.) — handle then, either by fixing the sheet
+    or normalizing whitespace in the matching logic.
+- Images: the import created all 50 products with **no images** (empty
+  array) — admin has to add image URLs by hand per product via Edit for
+  now. Bulk photo upload (matching the `M-165\`-style SKU-named folders to
+  Supabase Storage automatically) is Phase 4, not built yet.
 
 ## Real product data ready to import (Rings Vol. 1)
 
-- Client has an Excel (`Thako mat Thuko Mat Rings Vol.1.xlsx`) with 50 SKUs
-  (`M-165` … `M-324`), each mapped to a Norvik SKU (`ILR-0165` … `ILR-0324`).
-  Columns: gold weight (18KT, gm), total diamond weight (cts), diamond
-  size/count breakdown (round + marquise + pear sub-rows).
-- Matching photo folder (client granted access):
+- Excel: `Thako mat Thuko Mat Rings Vol.1.xlsx` — 50 SKUs (`M-165` …
+  `M-324`) → Norvik SKUs (`ILR-0165` … `ILR-0324`), with gold weight,
+  total diamond carat weight, and diamond size/count breakdown per SKU.
+- A follow-up version (`...With_NAME.xlsx`, and a second copy
+  `..._Name_2.xlsx` which is byte-identical in its name data — client
+  likely resent the same file by mistake) added a "Product display name"
+  column. **46 of 50 have real names** (e.g. "Whisper Cluster Ring",
+  "Orbit Halo Ring") — no duplicates. **4 are still missing a name and
+  need to be gotten from the client**:
+  - M-234 (ILR-0234)
+  - M-235 (ILR-0235)
+  - M-291 (ILR-0291)
+  - M-296 (ILR-0296)
+  Everything else about these 4 (gold weight, diamond data) is complete —
+  only the display name is missing. The import tool handles this
+  gracefully (placeholder name, easy to rename later), so this does NOT
+  block running the import.
+- Matching photo folder (access already granted):
   `C:\Users\91972\Downloads\08-09-2026_Pulkit ji_Aanvi Gold\Indian\Rings\Thako Mat Thuko Mat Vol.1\`
   — one sub-folder per SKU, folder name = SKU code exactly (e.g. `M-165\`).
-  Each folder has: 1 hero/"Model" shot + 4 photos each for Rose/White/Yellow
-  gold (13 JPGs total), plus `.3dm`/`.stl` (3D CAD/manufacturing files —
-  **not** used on the website) and one `.png` render.
-- Client has since also gotten **product names** for these rings from
-  somewhere (mentioned Sep 19) — not yet shared with me/collected into the
-  data pipeline. Follow up on this before building the Excel-import
-  mapping, since "name" is one of the fields the raw Excel doesn't have.
-- Full Excel diamond-breakdown data was already parsed once (round/marquise/
-  pear sizes+counts per SKU, all totals cross-checked against the sheet's
-  own "Diamond Wt (Cts)" column) — reusable when Phase 4 (Excel importer)
-  is actually built; not persisted as a file anywhere yet, so re-parse the
-  original Excel if needed rather than assuming it's cached.
+  Each has 1 hero "Model" shot + 4 photos each for Rose/White/Yellow gold,
+  plus `.3dm`/`.stl` (3D CAD — not used on the site) and one `.png` render.
+  **Not yet wired into the import** — see Phase 4 above.
 
 ## Agreed defaults for this batch (client said "best ho wo karo")
 
 - Making charge %, gold rate, diamond base rate/carat, Color/Clarity %:
-  reuse the SAME site-wide placeholder values already in
-  `lib/pricing.ts` / `lib/mock-products.ts` — deliberately did NOT invent a
-  different number just for these 50 rings (would desync from the rest of
-  the catalog). Flagged to client: diamond rate (₹1,00,000/ct) and gold
-  rate are shared, global, and affect ALL products already on the site —
-  changing them is a separate decision, not scoped to this import.
-- Ring sizes: reuse the existing 5–23 (US-style, mm sublabel) run already
-  used by "Halo Diamond Ring" in `lib/mock-products.ts`.
-- Karat options: offer 18KT (from Excel) + 14KT + 9KT, all 3 colors
-  (Yellow/White/Rose) — same `goldWeightGrams` reused across karats,
-  matching how the site already handles multi-karat metal options
-  elsewhere (it doesn't have per-karat weight data anywhere currently).
-- Naming: honest/data-driven default ("Diamond Ring – ILR-0165" style) was
-  the fallback plan — now superseded since client says they have real
-  names; use those once shared.
-- No fake discounts/compareAtPrice, "Made to Order" stock status for all,
-  feature the 3–4 highest-diamond-carat designs as Signature Collection.
-- Images per product: 1 hero ("Model") + 1 representative photo per metal
-  color (4 images total) feeding into `images[]` + `metalImages{}`.
+  reuse the SAME site-wide placeholder values in `lib/pricing.ts` /
+  `lib/mock-products.ts` — did not invent different numbers just for these
+  50 rings. Diamond rate (₹1,00,000/ct) and gold rate are shared/global —
+  changing them is a separate decision affecting the whole catalog, not
+  scoped to this import.
+- Ring sizes: the existing 5–25 (US-style, mm sublabel) run.
+- Karat options: 18KT (from Excel) + 14KT + 9KT, all 3 colors — same
+  `goldWeightGrams` reused across karats (matches how the site already
+  handles this elsewhere; there's no per-karat weight data anywhere).
+- No fake discounts/compareAtPrice, "Made to Order" stock status for all.
+  Signature Collection picks are not yet chosen — do this after import,
+  from the real 46 names, not before.
+- Diamond customization UI: intentionally NOT offered on these pieces (see
+  Phase 3 write-up above) — they're fixed designs, not build-your-own.
 
 ## Open items / next conversation should pick up here
 
-1. Add `ADMIN_EMAILS` to Vercel env vars + redeploy (client hasn't
-   confirmed this is done).
-2. Get the real product names client mentioned collecting, so Phase 4's
-   import mapping can use them instead of the SKU-based fallback.
-3. Build Phase 3 (admin product list + add/edit form) — next actual coding
-   task once client confirms ready to continue.
-4. Then Phase 4 (Excel import) using the Rings Vol.1 file as the real test
-   case, Phase 5 (photo matching by SKU folder name), Phase 6 (switch
-   storefront reads off the DB + Draft/Publish).
+1. ~~Run `0002_admin_write_policy.sql` in Supabase SQL Editor.~~ **DONE.**
+2. ~~Run `npm install` / restart `npm run dev`.~~ **DONE.**
+3. ~~Test Phase 3 end-to-end via Excel import.~~ **DONE — 50 drafts created
+   successfully from `Indian_rings_Name.xlsx` (all 50 names present).**
+4. **NEXT STEP:** open `/admin/products`, pick one imported product, click
+   Edit, and spot-check it — name/SKU/Norvik SKU correct, gold weight +
+   diamond ct + piece count correct, metal options grid (9/14/18KT ×
+   Yellow/White/Rose) all checked, size mode = ring run, status = Draft,
+   estimated price preview looks sane. Then browse a few more of the 50 in
+   the list view to eyeball names/SKUs at a glance.
+5. ~~Get the 4 missing names from the client (M-234/235/291/296).~~ **DONE —
+   client's updated file had all 50 names, no placeholders needed.**
+6. ~~Phase 4: bulk photo import.~~ **BUILT (20 Sep 2026), not yet run.** New
+   files, committed straight to the connected folder on the client's
+   computer (not just /home/claude/work — those are also kept in sync as
+   the local reference copies):
+   - `supabase/migrations/0003_product_images_storage.sql` — **run this in
+     the Supabase SQL Editor before using the tool** (not run yet as of
+     this writing). Creates a public `product-images` Storage bucket plus
+     the same admin-email RLS pattern as `0002_admin_write_policy.sql` (no
+     service role key needed — the browser's own client uploads directly).
+     `next.config.mjs` already allowlists `*.supabase.co` for `next/image`,
+     so no config change was needed there.
+   - `app/admin/products/photos/page.tsx` — new "Import Photos" admin page
+     (linked from `/admin/products`). Admin picks the manufacturer's whole
+     photo folder via a folder picker (`webkitdirectory`); the tool groups
+     files by immediate sub-folder name (the SKU, e.g. `M-165`), matches
+     each folder to a product by normalizing both sides' SKU (strips all
+     whitespace, so `M-165` / `M -165` / `M - 166` all match the same way —
+     see the spacing note below), uploads the real photos to
+     `product-images` storage under `products/<norvik_sku>/<file>`, and
+     writes the resulting URLs onto that product's `images` (full gallery,
+     hero shot first) and `metal_images` (one representative photo per
+     Yellow/White/Rose — the hero shot doubles as Yellow's since it's shot
+     in yellow gold) columns. Filename pattern matched:
+     `{SKU}-Model-Yellow.jpg` (hero) and `{SKU}-{Yellow|White|Rose} N.jpg`
+     (gallery, N=1-4); `.3dm`/`.stl`/the bare `{SKU}.png` render are
+     ignored automatically (no color word in the name). Has a per-folder
+     status table (Ready/Unmatched/Uploading/Done/Error) and is safe to
+     re-run — storage uploads use `upsert: true` and re-running only
+     retries folders that errored or haven't been done yet.
+   - `app/admin/products/product-form.tsx` — **bugfix while building this**:
+     the Edit form used to always recompute `metal_images` as "every color
+     gets `images[0]`" on every save, which would have silently wiped out
+     the real per-color photos the very next time someone saved an edit
+     (e.g. just fixing a typo in the name) after running the photo import.
+     Now it preserves an existing per-color URL as long as that URL is
+     still present in the Images field, only falling back to the
+     `images[0]` default for a color that doesn't have its own photo yet.
+   - `app/admin/products/[id]/edit/page.tsx` — now also loads the row's
+     `metal_images` into the form (needed for the bugfix above).
+   - `app/admin/products/page.tsx` — added an "Import Photos" button next
+     to "Import from Excel".
+   - Verified against the real folder structure via the device link before
+     writing this (listed `Thako Mat Thuko Mat Vol.1/` — all 50 folders are
+     present and cleanly named `M-165` etc. with no spacing issues; the
+     spacing inconsistency is only in the Excel `sku` column already stored
+     in the DB, not in the folder names — confirmed exact file naming
+     inside `M-165/`, `M-234/`, `M-324/` folders matches the pattern coded
+     above, 13 real photos + 2-3 CAD/render files per folder).
+   - **DONE AND SUCCESSFUL (20 Sep 2026).** Migration run in Supabase SQL
+     Editor ("Success. No rows returned"). First run of the tool found one
+     naming inconsistency the code didn't yet handle: most SKU folders name
+     their numbered shots with a space (`M-165-Rose 1.jpg`) but some (e.g.
+     M-218, M-276, and others) use a hyphen instead (`M-218-Rose-1.jpg`) —
+     the regex only matched 1 of 13 photos (the hero) for those folders.
+     Fixed by widening the separator match from `\s*` to `[\s-]*` in
+     `IMAGE_NAME_RE`; verified against every file in all 50 folders
+     (fetched a full recursive listing of the photo folder and ran the
+     regex offline) before re-running — confirmed all 50 folders now parse
+     to exactly 13 photos each, and the only files still correctly excluded
+     are the CAD renders (`{SKU}.png`, `{SKU}-Rounds.png/.jpg` — a second,
+     unrelated CAD-only render some folders have alongside the main one).
+     Re-ran the tool against all 50 folders (883 total files scanned, 650
+     photos uploaded, 233 CAD/render files correctly ignored) —
+     **"Uploaded photos for 50 products."** Pushed the regex fix straight to
+     `app/admin/products/photos/page.tsx` on the client's computer via the
+     device link (same as the other Phase 4 files).
+   - **Next**: spot-check a product's Edit page (Image URLs pre-filled,
+     photo actually loads) and, once satisfied, the product detail page
+     itself (metal swatch switching to the right photo) — needs the
+     product briefly set to Published, or a signed-in admin preview, since
+     drafts aren't visible on the live site yet.
+7. ~~Phase 5: switch the storefront (home/shop/search/product page/cart/
+   wishlist/new-arrivals) from `lib/mock-products.ts` to reading published
+   rows from the `products` table.~~ **BUILT AND PUSHED (21 Sep 2026)** to
+   the client's computer via the device link. Triggered by a live 404 on
+   `/product/eternal-heart-ring` (a DB-only product) — confirmed by-design
+   (Phase 5 hadn't been done yet), then client asked to do it same day.
+
+   **Approach**: server-side fetch + prop-drilling, matching the codebase's
+   existing convention (`NewArrivalsRow` already took `products` as a
+   prop) — no client-side Context/hook needed. Verified first that RLS
+   from `0002_admin_write_policy.sql` already allows public `select` on
+   `status = 'published'` rows, so the new server helpers can use the same
+   anon-key client, no service role key.
+
+   New file:
+   - `lib/products-server.ts` — the single source of truth for server-side
+     product fetching from here on. Exports `getAllProductsServer()`,
+     `getProductBySlugServer(slug)`, and `getRelatedServer(category, slug)`.
+     Each **merges** the static showcase catalogue in `lib/mock-products.ts`
+     (kept completely untouched — still the fallback/reference for the
+     original 11 products and all shared pricing constants) with real
+     `published` rows from Supabase (static wins on a slug collision).
+     Only ever import this from a Server Component — Client Components get
+     the merged list passed down as a `products` prop instead.
+
+   Modified — pages (all made `async`, added
+   `export const dynamic = 'force-dynamic'`, fetch via the helpers above):
+   - `app/page.tsx` — home page, passes `products` into `NewArrivalsRow`.
+   - `app/product/[slug]/page.tsx` — removed `generateStaticParams` and the
+     old static-only `getProductBySlug` lookup; now uses
+     `getProductBySlugServer` (404s via `notFound()` only if not found in
+     static OR DB) and `getRelatedServer` for "You May Also Like".
+   - `app/shop/page.tsx`, `app/search/page.tsx`, `app/wishlist/page.tsx`,
+     `app/checkout/page.tsx` — each fetches once and passes `products` down
+     to its Client Component.
+   - `components/site-header.tsx` — already an async Server Component;
+     fetches `products` and passes to `HeaderChrome` (needed for the Shop
+     dropdown categories and search-suggestions to include real products).
+
+   Modified — Client Components (each now takes `products: Product[]` as a
+   prop instead of importing the static array directly):
+   - `components/header-chrome.tsx` — `SHOP_CATEGORIES` is now computed
+     from the live `products` prop via `useMemo` instead of being a
+     module-level constant; passes `products` down to `SearchTrigger`.
+   - `components/search-trigger.tsx`, `components/shop-content.tsx`,
+     `components/search-content.tsx`, `components/wishlist-content.tsx`,
+     `components/checkout-content.tsx` — same treatment; `checkout-content`
+     additionally swaps its old `getProductBySlug(slug)` static lookup for
+     `products.find((p) => p.slug === slug)`.
+
+   All 14 files pushed straight to the client's computer via the device
+   link (same `SendUserFile` → `device_commit_files` pattern as Phase 4).
+
+   **Not yet done — next conversation should pick up here**:
+   - Client needs to restart `npm run dev` to pick up the changes.
+   - End-to-end test on the live/local site: home page New Arrivals should
+     include real DB products; `/shop` should list and filter them;
+     `/product/eternal-heart-ring` (and other DB-only slugs) should load
+     with no 404; search should find them by name/category/description;
+     header's Shop dropdown should include "Rings" (or whatever categories
+     exist in the DB) alongside the static categories; wishlist and
+     checkout (`?slug=...` single-item flow) should resolve DB products
+     correctly.
+   - Specifically re-verify the metal color swatch on a DB product's page
+     switches to the correct Yellow/White/Rose photo — this was the
+     original unfulfilled Phase 4 verification goal that got deferred when
+     the 404 was discovered and Phase 5 took priority.
+8. **Pre-Vercel-push cleanup (22 Sep 2026), requested by client after seeing
+   the local demo**:
+   - **Remove the old static/placeholder products from the live storefront.**
+     `lib/products-server.ts` no longer merges in the static `products` array
+     from `lib/mock-products.ts` — `getAllProductsServer`,
+     `getProductBySlugServer`, and `getRelatedServer` now read ONLY
+     `status = 'published'` rows from the database. `lib/mock-products.ts`
+     itself is untouched (its `Product` type and shared pricing constants are
+     still used everywhere), it's just not shown to shoppers anymore. Header
+     categories (`SHOP_CATEGORIES` in `header-chrome.tsx`) will now also only
+     reflect real DB categories (i.e. just "Rings" until other categories are
+     imported) since they're derived from the same `products` prop.
+   - **Cover/thumbnail photo should never be the hand-worn "Model" shot** —
+     client wants only the bare ring as the cover image everywhere (shop
+     grid, New Arrivals, the metal-color swatch on the product page).
+     - `app/admin/products/photos/page.tsx` fixed for future imports: the
+       Model hero shot is still uploaded but now pushed to the END of the
+       `images` array instead of leading it, and `metal_images` per color is
+       now built only from that color's ring-only shots — never the Model
+       shot.
+     - `supabase/migrations/0004_fix_cover_image_no_hand.sql` — **run this
+       in the Supabase SQL Editor** (not run yet as of this writing) to fix
+       the 50 rings already imported, without needing to redo the 650-photo
+       browser upload. It's a pure data reorder: moves any `-model-` URL in
+       each row's existing `images` array to the end, and recomputes
+       `metal_images` from the first non-Model URL per color. Safe/idempotent
+       to re-run.
+   - **Not yet done**: run migration `0004` in Supabase SQL Editor, restart
+     `npm run dev`, spot-check a few product pages (cover image = ring only,
+     shop grid thumbnails = ring only) before pushing to Vercel.
+9. Also still pending from earlier in the project (not urgent): the
+   `.scroll-arrow-glow` CSS class on the New Arrivals arrows has no
+   matching rule (no glow effect) — client said leave as-is for now;
+   Norvik's gold-karat catalog (9/14/18K only, no 22K/Platinum) — also
+   leave as-is unless asked.

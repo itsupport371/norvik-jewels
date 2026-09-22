@@ -28,7 +28,13 @@ export default function ProductSpecifications({
   grandTotal: number;
 }) {
   const [open, setOpen] = useState(true);
-  const hasDiamond = Boolean(product.diamond) && (product.diamondCaratTotal ?? 0) > 0;
+  // Deliberately NOT gated on `product.diamond` (the customizable Diamond
+  // Details config) — a fixed pavé/cluster design (many small stones, no
+  // swappable center stone) correctly has no `diamond` config at all, but
+  // still has real diamondCaratTotal/diamondPieceCount data that belongs on
+  // the spec sheet. Whether a product offers Diamond Quality customization
+  // and whether it *has* diamonds worth listing here are separate facts.
+  const hasDiamond = (product.diamondCaratTotal ?? 0) > 0;
   const { formatPrice } = useLocale();
 
   return (
