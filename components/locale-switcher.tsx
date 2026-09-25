@@ -24,9 +24,18 @@ const CHEVRON = (
  * of its own. Currency switching only changes how prices are *displayed*
  * (see lib/currency.ts) — the underlying INR price never changes.
  *
- * Two layouts: `bar` is the compact "EN · ₹ INR" trigger used in the desktop
- * utility bar, `mobile` is an always-expanded chip list used inside the
- * mobile nav drawer (no room for a floating panel there).
+ * Two layouts: `bar` is the compact "EN · ₹ INR" trigger — used in the
+ * desktop utility bar (≥1024px) AND, since 25 Sep 2026, in the main header's
+ * icon row below that (see header-chrome.tsx) so phone/tablet visitors see
+ * it directly in the header instead of only inside the hamburger drawer.
+ * Below the `sm` breakpoint the "EN · ₹ INR" text is hidden and only the
+ * globe icon shows (still opens the same panel on tap) — there isn't room
+ * next to the search/account/wishlist/cart icons for the full label on a
+ * phone-width screen. `mobile` is an always-expanded chip list — it's no
+ * longer used in the hamburger drawer (the `bar` trigger in the header
+ * covers every screen size now, so keeping it in the drawer too was just a
+ * second, redundant place to find the same setting), but the variant is
+ * left in place in case a future layout wants an inline expanded list again.
  */
 export default function LocaleSwitcher({ variant = 'bar' }: { variant?: 'bar' | 'mobile' }) {
   const { currency, setCurrency, language, setLanguage, currencies, languages } = useLocale();
@@ -94,15 +103,18 @@ export default function LocaleSwitcher({ variant = 'bar' }: { variant?: 'bar' | 
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
+        aria-label="Language and currency"
         className="flex items-center gap-1.5 transition-colors hover:text-antiquegold"
       >
         {GLOBE}
-        {currentLanguage.code.toUpperCase()} · {currentCurrency.symbol} {currentCurrency.code}
+        <span className="hidden sm:inline">
+          {currentLanguage.code.toUpperCase()} · {currentCurrency.symbol} {currentCurrency.code}
+        </span>
         {CHEVRON}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-3 w-64 border border-warmstone bg-white p-4 normal-case tracking-normal text-inknavy shadow-lg">
+        <div className="absolute right-0 top-full z-50 mt-3 w-64 max-w-[calc(100vw-2rem)] border border-warmstone bg-white p-4 normal-case tracking-normal text-inknavy shadow-lg">
           <div>
             <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted">Language</p>
             <div className="flex flex-wrap gap-1.5">

@@ -213,6 +213,16 @@ export default function HeaderChrome({
               solid ? 'text-inknavy/80' : 'text-ivory'
             }`}
           >
+            {/* Below 1024px the utility bar above (which carries this on
+                desktop) is hidden entirely, and until now the only other
+                place to reach language/currency was inside the hamburger
+                drawer — easy to miss, and an extra tap to open. Showing the
+                same trigger here means phone/tablet visitors see it right in
+                the header, no drawer needed (25 Sep 2026). `lg:hidden` so it
+                isn't shown twice once the utility bar takes over at 1024px. */}
+            <div className="lg:hidden">
+              <LocaleSwitcher />
+            </div>
             <SearchTrigger light={!solid} products={products} />
             <Link href={accountHref} aria-label="Account" className="relative transition-colors hover:text-antiquegold">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -334,7 +344,6 @@ export default function HeaderChrome({
               <Link href="/about" onClick={closeMobileMenu} className="border-b border-warmstone/60 py-3.5">
                 About Norvik
               </Link>
-              <LocaleSwitcher variant="mobile" />
             </nav>
           </div>
         </div>

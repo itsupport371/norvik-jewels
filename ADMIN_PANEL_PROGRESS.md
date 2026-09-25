@@ -592,3 +592,60 @@ New files:
     (`update products set status = 'published' where status = 'draft'` for
     these 50, or individually) whenever the client's ready to show them
     live.
+  - **DONE (25 Sep 2026)**: photos uploaded successfully for all 50 (one
+    retry needed for ST-56-Rounds — a transient HTTP 520 on its last photo,
+    fixed by re-clicking "Upload photos", which only retries
+    not-yet-`done` folders). All 125 products (Rings + both Earrings
+    batches) then published in one go — client asked to publish everything
+    at once since the earlier 25-Earrings batch had also been left as Draft
+    this whole time. Ran migration `0004_fix_cover_image_no_hand.sql`
+    first (was still outstanding — fixes the ORIGINAL 50 Rings' cover image
+    only; both Earrings batches already had correct ring/earring-only
+    covers from photo-import time), then
+    `update products set status = 'published' where status = 'draft';`.
+
+## Client-reported issues, 25 Sep 2026
+
+- **"Images load with a slight delay"** — checked `next/image` usage across
+  shop grid / home / product page (`components/shop-content.tsx`,
+  `new-arrivals-row.tsx`, `product-configurator.tsx`) and
+  `next.config.mjs`: all correctly configured (proper `sizes`, `priority`
+  on the main product-page image, avif/webp + Supabase remote pattern
+  allowed) — not a code bug. Likely causes explained to the client: (1)
+  `next/image` optimizes/converts external images on first request per
+  unique size, so the very first view of an image is slower than repeat
+  views (cached after); this resets on every new Vercel *Preview* URL,
+  which is why testing on ever-changing previews feels slow every time —
+  once settled on a stable Production domain this stops happening for
+  repeat visitors; (2) the manufacturer photos are uploaded as-is (200—
+  500KB, uncompressed/un-resized), so the *original* fetch before
+  optimization is heavier than it needs to be. Offered to add an
+  automatic resize/compress step to the Import Photos tool — **not yet
+  requested**, client is discussing with their client first. Told them
+  plainly that **buying a custom domain does NOT by itself fix load
+  speed** — it's a DNS/branding change, unrelated to image optimization or
+  CDN behavior; a stable Production URL (any URL, not specifically a
+  custom one) is what stops the cache-reset behavior in point (1).
+
+- **Mobile header: language/currency switcher hard to find** — it only
+  existed in two places: the desktop utility bar (`hidden lg:flex`, so
+  completely absent below 1024px) and a chip-list version buried at the
+  bottom of the hamburger drawer's link list — needing an extra tap to
+  even find it. Fixed in `components/header-chrome.tsx` /
+  `components/locale-switcher.tsx`: the same compact "globe · EN · ₹ INR"
+  trigger now also renders directly in the main header's icon row
+  (alongside search/account/wishlist/cart), shown only below `lg` (`lg:hidden`
+  wrapper) so it isn't duplicated once the utility bar takes over at
+  1024px+. Below the `sm` breakpoint the text label hides and only the
+  globe icon shows (not enough room next to 4 other icons on a phone
+  screen) — same dropdown panel opens either way. Removed the now-redundant
+  chip-list copy from the drawer. Also widened the dropdown panel's
+  `max-w` to never overflow a narrow phone's viewport.
+
+- **Homepage "Shop by Category" wrapped unevenly (6 then 2)** — was
+  `flex flex-wrap justify-center`, which breaks purely by however many fit
+  per line at the current width, not a fixed count. Changed to a real grid
+  in `app/page.tsx`: `grid-cols-2` on phones (4 across was too cramped for
+  8 small circle-icons + labels), `sm:grid-cols-4` from tablet width up —
+  so the 8 categories now always read as a clean 2×4, matching what the
+  client asked for ("4-4 ki rows").

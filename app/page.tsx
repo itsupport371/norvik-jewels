@@ -35,7 +35,12 @@ export default async function HomePage() {
               Shop by Category
             </h2>
           </div>
-          <div className="flex flex-wrap justify-center gap-x-8 gap-y-10 sm:gap-x-10 lg:gap-x-14">
+          {/* Was `flex flex-wrap justify-center` — wrapped strictly by
+              available width (6 fit on one line, then 2 dropped to a second,
+              awkward-looking row). A fixed grid always breaks evenly: 2 per
+              row on phones (4 tiny circles side by side was too cramped),
+              4 per row from `sm:` up, so 8 categories read as a clean 2x4. */}
+          <div className="grid grid-cols-2 justify-items-center gap-x-8 gap-y-10 sm:grid-cols-4 sm:gap-x-10 lg:gap-x-14">
             {[
               {
                 href: '/shop?category=rings',
