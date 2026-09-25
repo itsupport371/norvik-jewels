@@ -1,7 +1,8 @@
 # Admin Panel + Real Product Catalog — Progress Notes
 
-_Last updated: 22 Sep 2026. Keep this file updated as work continues — it's
-the source of truth for "what's done, what's next" across sessions._
+_Last updated: 22 Sep 2026 (Earrings batch imported). Keep this file updated
+as work continues — it's the source of truth for "what's done, what's next"
+across sessions._
 
 ## Decision: build a real admin panel (not the fast-manual-import shortcut)
 
@@ -332,7 +333,100 @@ New files:
      switches to the correct Yellow/White/Rose photo — this was the
      original unfulfilled Phase 4 verification goal that got deferred when
      the 404 was discovered and Phase 5 took priority.
-8. **Pre-Vercel-push cleanup (22 Sep 2026), requested by client after seeing
+8. **Excel import tool now handles a second sheet shape (22 Sep 2026)** —
+   client sent `Sensual Appeal Vol.1_excel.xlsx` (25 Earrings, SKUs
+   ST-251–ST-275), which is NOT laid out like the Rings Vol.1 file:
+   - Only one diamond shape (Round: mm size + count), not three
+     (Round/Marquise/Pear).
+   - Extra columns not used here (Length, Width, Volume, Casting Wt., %
+     Reduction).
+   - **No "Norvik SKU" column at all** — just Manufacturer SKU
+     ("SKU Code") and a display-name column ("Display Earings").
+   - `app/admin/products/import/page.tsx` now auto-detects which shape a
+     workbook is (checks the header row for the word "Norvik" — present ⇒
+     the original "rings-v1" parser; absent ⇒ the new "single-diamond-v1"
+     parser) and exposes a **Category** dropdown and **Sizes** (One
+     Size / Ring run) choice above the preview table, both defaulted
+     sensibly per detected shape (Rings → category Rings, ring-run sizes;
+     the new shape → category Earrings, One Size) but editable before
+     importing — so future categories with either sheet shape don't need a
+     code change, just picking the right category in the UI.
+   - Since this shape has no Norvik SKU, the importer **reuses the
+     Manufacturer SKU as the Norvik SKU** (e.g. `ST-251` stays `ST-251`
+     instead of becoming something like `ILR-0165`). This only affects the
+     Supabase Storage folder name used later for photos (Norvik SKU isn't
+     used for matching — the photo importer matches by Manufacturer SKU) so
+     it's safe, but flagged in the preview table (italic) in case the
+     client has their own numbering convention for this category and wants
+     it corrected per-product after import.
+   - `app/admin/products/product-form.tsx` now exports `CATEGORIES` (was
+     module-private) so the import page can reuse the same list instead of
+     duplicating it.
+   - **DONE AND SUCCESSFUL (22 Sep 2026).** Two bugs found and fixed while
+     testing this real file, both in `app/admin/products/import/page.tsx`:
+     1. The client's actual file (a slightly newer version than the first
+        one sent) turned out to HAVE a "NORVIK SKUS" column after all
+        (`IER-0251`…`IER-0275`, one column left of the name column) — the
+        first version they'd sent was missing it. Format detection used to
+        key off "does the header contain the word Norvik", which routed
+        this file to the OLD Rings-shaped positional parser (wrong columns
+        entirely for this shape) purely because a Norvik column existed.
+        Fixed by detecting format from "Marquise"/"Pear" columns instead
+        (a real Rings-only signal), and making `parseSingleDiamondV1` find
+        its columns by header TEXT (`findCol()`) rather than a fixed
+        position, so it picks up a Norvik SKU column if present and falls
+        back to the Manufacturer SKU cleanly if not, regardless of which
+        column it's in.
+     2. After that fix, `parseWorkbookRows` was still passing
+        header-stripped rows into `parseSingleDiamondV1`, which ALSO
+        expects (and strips) its own header row — so it was reading the
+        blank spacer row as the header, every `findCol()` lookup failed,
+        and Name/Gold/Diamond ct silently fell back to blank/0 (SKU and
+        Pieces still looked right because those two specifically have a
+        positional fallback). Fixed by passing the full `allRows`
+        (including the real header) into `parseSingleDiamondV1`, keeping
+        `parseRingsV1` on header-stripped rows since it never reads a
+        header at all.
+     Verified against the real file with a standalone parser simulation
+     (Python, mirroring the exact TS logic) before and after each fix,
+     confirming all 25 rows resolve correctly, then confirmed again in the
+     actual admin UI preview table. Imported — **75 products total now**
+     (50 Rings + 25 Earrings), all 25 new ones Draft, category Earrings,
+     Norvik SKUs `IER-0251`–`IER-0275`.
+   - **Photo import — another filename-convention difference found and
+     fixed (22 Sep 2026).** Photo folder:
+     `C:\Users\91972\Downloads\08-09-2026_Pulkit ji_Aanvi Gold\Indian\Earrings\Sensual Appeal Vol.1\`
+     (granted access this session), one sub-folder per SKU (`ST-251`…
+     `ST-275`), same shape as the Rings photo folders. But the Earrings
+     files put a **space** before the color word (`ST-251 Rose 1.jpg`)
+     instead of Rings' **hyphen** (`M-165-Rose 1.jpg`) — the photo import
+     tool's `IMAGE_NAME_RE` in `app/admin/products/photos/page.tsx`
+     required a literal hyphen there, so only files matching
+     `-Model-Yellow.jpg` (the hero shot, hyphen-prefixed either way) were
+     found — every folder showed "1 photo found", and folders with no hero
+     shot at all didn't show up as matched. Fixed by widening the
+     character class right before the color word from a literal `-` to
+     `[\s-]` (space or hyphen), same fix already applied to the *trailing*
+     separator (before the photo number) back in Phase 4. Verified against
+     the real folder listing (25 folders, 883-ish files) with a regex
+     simulation before pushing: folders with a `-Model-Yellow.jpg` hero shot
+     resolve to 13 photos, folders without one resolve to 12 (Rose/White/
+     Yellow × 4 each) — matches expectation; `-Detail.jpg`,
+     `-Rounds-Detail.jpg`, and the CAD files (`.3dm`/`.stl`) stay correctly
+     excluded either way.
+   - **DONE AND SUCCESSFUL (22 Sep 2026).** Re-ran the tool after the regex
+     fix — all 25 folders matched, 12 or 13 photos each as predicted, 152
+     CAD/render files correctly ignored. "Uploaded photos for 25 products."
+     All 25 Earrings now have real Image URLs and `metal_images` set, cover
+     image = ring-only per the 22 Sep cover-image fix (no hand-model shot
+     leading the gallery).
+   - **Still pending**: the 25 Earrings are still **Draft** — publish them
+     (individually via Edit, or the same `update products set status =
+     'published' where status = 'draft'` SQL pattern used for the Rings
+     batch, once the client is ready to show them live) whenever the client
+     wants them on the storefront. No further code changes needed for that
+     step.
+9. **Pre-Vercel-push cleanup (22 Sep 2026), requested by client after seeing
    the local demo**:
    - **Remove the old static/placeholder products from the live storefront.**
      `lib/products-server.ts` no longer merges in the static `products` array
@@ -362,8 +456,139 @@ New files:
    - **Not yet done**: run migration `0004` in Supabase SQL Editor, restart
      `npm run dev`, spot-check a few product pages (cover image = ring only,
      shop grid thumbnails = ring only) before pushing to Vercel.
-9. Also still pending from earlier in the project (not urgent): the
+10. Also still pending from earlier in the project (not urgent): the
    `.scroll-arrow-glow` CSS class on the New Arrivals arrows has no
    matching rule (no glow effect) — client said leave as-is for now;
    Norvik's gold-karat catalog (9/14/18K only, no 22K/Platinum) — also
    leave as-is unless asked.
+
+## Excel import — 3rd manufacturer shape + multi-sheet support (25 Sep 2026)
+
+- New file: `Taka Tak Studs Vol-3Norvik.xlsx` — 100 SKUs total, across
+  **two sheets in the same workbook**:
+  - `IND-EAR-TUKTUK-FANCY` — 50 stud designs (`ST-51`…`ST-101`, skipping
+    ST-94) → Norvik SKUs `IFER-0xx`/`IEFR-0xx`, mixed diamond shapes
+    (Round + Marquise and/or Pear per piece), has its own Display name
+    column.
+  - `Round` — the SAME 50 designs' **all-round-diamond variant**
+    (`ST-51-Rounds`…`ST-101-Rounds`) → Norvik SKUs `IERR-0xx`. Round-only,
+    no Display name column at all.
+  - This is a THIRD manufacturer shape, and the first workbook we've seen
+    with more than one product sheet that both need importing.
+- `app/admin/products/import/page.tsx` extended:
+  - **Multi-sheet**: now reads every sheet in the workbook (used to only
+    read `SheetNames[0]`), so a file like this one imports all 100 rows
+    from both sheets in one go. Preview table now shows which sheet each
+    row came from.
+  - **New format `header-driven-v1`** replaces the old `single-diamond-v1`
+    — same header-text column lookup approach (not fixed position), but
+    now generalized to sum however many "Diamond Count" columns the sheet
+    has (1 for a single-shape sheet, 3 for a Round/Marquise/Pear sheet like
+    this file's Fancy sheet) instead of assuming exactly one. Format
+    detection changed to prefer header text: if the sheet labels its gold
+    weight or diamond weight column at all (`findCol` on `'18kt'`/`'gold
+    wt'`/`'diamond wt'` etc.), it's `header-driven-v1` regardless of how
+    many diamond-shape columns it has — only a sheet with NO such labels
+    falls back to the original fixed-position `rings-v1` parser. This
+    matters because this file's Fancy sheet has Marquise/Pear columns
+    (the old signal for routing to `rings-v1`) but ALSO has extra
+    Length/Width/Volume/Casting/Reduction columns before Norvik
+    SKU/Display name, which would have made the old fixed-position parser
+    (offsets 9/10/11/12) read completely wrong columns — same class of bug
+    as the Sensual Appeal Vol.1 import, caught before pushing this time by
+    simulating the exact parsing logic in Python against the real file
+    first (all 100 rows: correct gold weight, diamond ct, piece count, no
+    zeroes, no duplicate/missing Norvik SKUs).
+  - **Missing-name fallback for the Round sheet**: since it has no Display
+    name column at all, a new `fillMissingNames` pass runs after all sheets
+    are parsed — for any row with no name, it strips a trailing
+    `-Rounds`/`Rounds` from the SKU, looks for another row elsewhere in the
+    workbook with that base SKU, and borrows its name with "(All Diamond)"
+    appended (e.g. Fancy's "Petal Trinity Diamond Studs" → Round's "Petal
+    Trinity Diamond Studs (All Diamond)"), instead of a generic "<SKU>
+    piece" placeholder for all 50 Round rows. Still shown italic/flagged as
+    a guess in the preview (not a name the client actually typed) so it's
+    easy to spot-check or rename before importing.
+  - Verified the new parsing logic compiles clean under `tsc --strict`
+    (extracted in isolation) on top of the Python simulation above, before
+    pushing — the double round-trip cost of the last two import bugs made
+    this worth doing every time now.
+- **Client decision (25 Sep 2026): only import the "Round" sheet for now**
+  — photos exist only for the all-round-diamond variant, not the Fancy
+  (Marquise/Pear) shapes, so importing the Fancy sheet's 50 rows too would
+  just create 50 more Drafts nobody can photograph yet.
+  - `app/admin/products/import/page.tsx` extended again: when a workbook
+    has more than one sheet, a **"Sheets to import" checkbox row** appears
+    (one checkbox per sheet, row count shown, all checked by default) —
+    uncheck a sheet to exclude just its rows from the preview/Import
+    button, without losing it as a name source. This is why the Round
+    sheet's "(All Diamond)" borrowed names still work correctly even with
+    Fancy unchecked: `fillMissingNames` runs across ALL parsed rows before
+    the checkboxes filter anything, so an unchecked sheet can still supply
+    a name to a checked one.
+  - To do THIS import: upload the file, uncheck
+    **`IND-EAR-TUKTUK-FANCY`**, leave **`Round`** checked, Category
+    Earrings / Sizes One Size, then Import — should create 50 drafts (not
+    100).
+  - Caught and fixed a real TypeScript inference bug while building this
+    (not just the usual manufacturer-Excel-shape kind): the sheet-checkbox
+    list's `sheetNames` array needed an explicit `: string[]` annotation —
+    without it, `tsc --strict` failed on the checkbox's `onChange` handler
+    with `Argument of type 'unknown' is not assignable to parameter of
+    type 'string'` even though the value plainly comes from a
+    `.map((r) => r.sheetName)` on a fully-typed array. Found this by
+    running the new code through `tsc --noEmit --strict` in isolation
+    before pushing (same verification habit as the parsing-logic checks
+    above) rather than waiting for `npm run build` to catch it.
+- **Client resent a "-Round" version of the file (25 Sep 2026) — do NOT use
+  it.** Compared cell-by-cell against the original: the client tried to
+  move the Display names from the Fancy sheet into the Round sheet by hand,
+  but the paste landed shifted by one row and on the block's SUB-rows
+  instead of each SKU's main row — e.g. Round's `ST-51-Rounds` row got the
+  right name ("Petal Trinity Diamond Studs") by luck, but the very next
+  (sub-)row got "Blossom Whirl Diamond Studs" (that's actually **ST-52's**
+  name), `ST-52-Rounds`'s own row got "Triple Drop" (actually **ST-53's**),
+  `ST-53-Rounds` came out blank, etc. — every name is off by one design,
+  landing on the wrong SKU. The Fancy sheet's names are now blank too (cut
+  from there, presumably). Not something to silently auto-correct (risk of
+  publishing the wrong name on the wrong product) — told the client in
+  plain terms with 3 concrete examples and to just re-upload the
+  **original** file instead (it had clean names) and use the new sheet
+  checkboxes to keep only Round. No code change needed for this — it's a
+  data problem in the client's spreadsheet, not the tool.
+- **DONE AND SUCCESSFUL (25 Sep 2026).** Client uploaded the original file,
+  unchecked `IND-EAR-TUKTUK-FANCY`, kept `Round` checked, imported 50 as
+  Drafts. Products list now shows **125 products** (75 before + these 50).
+  All 50 came in as Earrings/Draft with the borrowed "... (All Diamond)"
+  names, correct Norvik SKUs (`IERR-051`…`IERR-0101`), and computed prices
+  — confirmed via screenshot of the products list.
+- **Photo folder located (25 Sep 2026)**:
+  `C:\Users\91972\Downloads\08-09-2026_Pulkit ji_Aanvi Gold\Indian\Earrings\Taka Tak Studs Vol.3\`
+  — one sub-folder per Round SKU (`ST-51-Rounds` … `ST-101-Rounds`, 50
+  folders, access granted). Each folder has the Round variant's 12 real
+  photos (4 each Rose/White/Yellow, **no "Model" hero shot in this
+  batch**), a Rounds detail shot, Rounds CAD (`.3dm`/`.stl`), PLUS the
+  Fancy variant's own bare render/CAD/detail shot alongside it (e.g.
+  `ST-51.jpg`, `ST-51.3dm`, `ST-51-Details.jpg`) — harmless, since none of
+  those have a color word so `IMAGE_NAME_RE` already skips them, and no
+  product exists with the bare `ST-51`-style SKU anyway (Fancy wasn't
+  imported).
+  - Verified via a full recursive listing fetched offline (Python, before
+    touching the live tool): all 50 folders present, 12/12 real photos
+    match in 49 of them. **Found and fixed one manufacturer typo**:
+    `ST-91-Rounds-Rose 4..jpg` has a double period, which the existing
+    `IMAGE_NAME_RE`'s single `\.` didn't match — would have silently
+    imported only 3 Rose photos for ST-91 with no error shown anywhere.
+    Widened the regex's extension-dot from `\.` to `\.+` in
+    `app/admin/products/photos/page.tsx` (verified in Python against every
+    filename in the folder first — still correctly excludes Details/CAD/
+    bare-render files, still matches every other batch's normal filenames).
+  - Folder name matches these 50 products' `sku` column exactly (it *is*
+    the Excel SKU, e.g. `ST-51-Rounds`) — no spacing workaround needed this
+    time, unlike the Rings batch.
+  - **Not yet run** — next step is selecting this folder on
+    `/admin/products/photos`; should show all 50 matched, 12 photos each
+    (11→12 for ST-91 once the regex fix is picked up). Then publish
+    (`update products set status = 'published' where status = 'draft'` for
+    these 50, or individually) whenever the client's ready to show them
+    live.

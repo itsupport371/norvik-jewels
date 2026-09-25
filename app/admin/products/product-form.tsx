@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { calculatePrice, TEST_GOLD_RATE_24K_PER_10G } from '@/lib/pricing';
 
-const CATEGORIES = [
+export const CATEGORIES = [
   'Rings',
   'Earrings',
   'Pendants',

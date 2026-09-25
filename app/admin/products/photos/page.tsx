@@ -5,13 +5,22 @@ import { createClient } from '@/lib/supabase/client';
 
 // Matches the manufacturer's photo naming convention seen in every SKU
 // folder (e.g. "M-165-Model-Yellow.jpg", "M-165-Yellow 1.jpg",
-// "M-165-White 4.jpg"). Deliberately does NOT match the bare SKU render
-// ("M-165.png") or the CAD files (.3dm/.stl) — those have no
-// Yellow/White/Rose color word in the name, so they're silently skipped.
-// Some folders separate the number with a space ("Rose 1.jpg"), others
-// with a hyphen ("Rose-1.jpg") — [\s-]* accepts either, or neither (the
-// hero shot has no number at all).
-const IMAGE_NAME_RE = /-(Model-)?(Yellow|White|Rose)[\s-]*(\d+)?\.(jpe?g|png)$/i;
+// "M-165-White 4.jpg", or — the Earrings batch, 22 Sep 2026 — "ST-251 Rose
+// 1.jpg" with a SPACE before the color word instead of a hyphen).
+// Deliberately does NOT match the bare SKU render ("M-165.png"), the CAD
+// files (.3dm/.stl), or plain detail shots like "ST-251-Detail.jpg" /
+// "ST-251-Rounds-Detail.jpg" — those have no Yellow/White/Rose color word
+// in the name, so they're silently skipped. The character right before the
+// color word (or "Model-") is a space OR a hyphen ([\s-]) since both
+// conventions have shown up across manufacturer batches; the separator
+// before the trailing number is the same, or absent entirely for the hero
+// shot, which has no number at all. The dot before the extension is `\.+`
+// (one or more), not `\.` — Taka Tak Studs Vol.3's Round folders (25 Sep
+// 2026) had one manufacturer typo, "ST-91-Rounds-Rose 4..jpg" (double
+// period), which a single `\.` silently failed to match, dropping a real
+// photo with no error shown anywhere. `\.+` still requires the extension
+// text itself to match exactly, so this doesn't loosen anything else.
+const IMAGE_NAME_RE = /[\s-](Model-)?(Yellow|White|Rose)[\s-]*(\d+)?\.+(jpe?g|png)$/i;
 
 // The Excel-derived `sku` column has inconsistent spacing across rows
 // ("M-165" vs "M -165" vs "M - 166") — see ADMIN_PANEL_PROGRESS.md — while
