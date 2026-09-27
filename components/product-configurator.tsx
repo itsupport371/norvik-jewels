@@ -267,6 +267,81 @@ export default function ProductConfigurator({ product }: { product: Product }) {
             className="object-contain"
             sizes="(min-width: 1024px) 45vw, 100vw"
           />
+          {/* Prev/Next arrows directly on the main photo — client asked so
+              shoppers can switch photos right there with one tap, instead of
+              having to reach the thumbnail row below (which on a phone can
+              mean scrolling first) (25 Sep 2026). Wraps at both ends; only
+              shown when there's more than one photo to switch between. */}
+          {product.images.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={() =>
+                  setActiveImage((i) => (i - 1 + product.images.length) % product.images.length)
+                }
+                aria-label="Previous photo"
+                className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-ink shadow-md transition-colors hover:bg-white sm:h-10 sm:w-10"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveImage((i) => (i + 1) % product.images.length)}
+                aria-label="Next photo"
+                className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-ink shadow-md transition-colors hover:bg-white sm:h-10 sm:w-10"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 6l6 6-6 6" />
+                </svg>
+              </button>
+              <span className="absolute bottom-2 right-2 rounded-full bg-ink/60 px-2 py-0.5 text-[11px] font-medium leading-[1.2] text-white">
+                {activeImage + 1} / {product.images.length}
+              </span>
+            </>
+          )}
+
+          {/* Wishlist + Share, moved onto the photo itself on mobile/tablet —
+              client asked for these near the photos on mobile instead of down
+              in the price row, where they were easy to miss (25 Sep 2026).
+              `lg:hidden` here since the price-row pair below (`hidden lg:flex`)
+              takes over on desktop, where they're already right next to the
+              image column. Same handlers/state as that pair — just a second
+              place to trigger them. */}
+          <div className="absolute right-2 top-2 flex flex-col gap-2 lg:hidden">
+            <button
+              onClick={() => toggleWishlist(product.slug)}
+              aria-label="Add to wishlist"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/85 text-ink shadow-md transition-colors hover:bg-white"
+            >
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill={wishlisted ? '#B8935A' : 'none'}
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+            </button>
+            <button
+              onClick={handleShare}
+              aria-label="Share this product"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/85 text-ink shadow-md transition-colors hover:bg-white"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <line x1="8.6" y1="10.5" x2="15.4" y2="6.5" />
+                <line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
+              </svg>
+            </button>
+          </div>
         </div>
         {product.images.length > 1 && (
           <div className="mt-3 flex gap-3">
@@ -297,7 +372,7 @@ export default function ProductConfigurator({ product }: { product: Product }) {
           <span className="text-[15px] font-medium leading-[1.35] text-ink">
             {formatPrice(grandTotal)}
           </span>
-          <div className="flex gap-2">
+          <div className="hidden gap-2 lg:flex">
             <button
               onClick={() => toggleWishlist(product.slug)}
               aria-label="Add to wishlist"
