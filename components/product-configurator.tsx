@@ -301,47 +301,6 @@ export default function ProductConfigurator({ product }: { product: Product }) {
               </span>
             </>
           )}
-
-          {/* Wishlist + Share, moved onto the photo itself on mobile/tablet —
-              client asked for these near the photos on mobile instead of down
-              in the price row, where they were easy to miss (25 Sep 2026).
-              `lg:hidden` here since the price-row pair below (`hidden lg:flex`)
-              takes over on desktop, where they're already right next to the
-              image column. Same handlers/state as that pair — just a second
-              place to trigger them. */}
-          <div className="absolute right-2 top-2 flex flex-col gap-2 lg:hidden">
-            <button
-              onClick={() => toggleWishlist(product.slug)}
-              aria-label="Add to wishlist"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/85 text-ink shadow-md transition-colors hover:bg-white"
-            >
-              <svg
-                width="17"
-                height="17"
-                viewBox="0 0 24 24"
-                fill={wishlisted ? '#B8935A' : 'none'}
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-              </svg>
-            </button>
-            <button
-              onClick={handleShare}
-              aria-label="Share this product"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/85 text-ink shadow-md transition-colors hover:bg-white"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-                <circle cx="18" cy="5" r="3" />
-                <circle cx="6" cy="12" r="3" />
-                <circle cx="18" cy="19" r="3" />
-                <line x1="8.6" y1="10.5" x2="15.4" y2="6.5" />
-                <line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
-              </svg>
-            </button>
-          </div>
         </div>
         {product.images.length > 1 && (
           <div className="mt-3 flex gap-3">
@@ -366,6 +325,46 @@ export default function ProductConfigurator({ product }: { product: Product }) {
           <h1 className="font-sans text-[14px] font-medium leading-[1.35] text-ink sm:text-[15px]">
             {product.name}
           </h1>
+          {/* Wishlist + Share, next to the product name on mobile/tablet —
+              was overlaid on the photo itself, but client asked it moved
+              down here instead (27 Sep 2026). `lg:hidden` since the
+              existing pair further down next to the price (`hidden lg:flex`)
+              already covers desktop, where it sits right next to the image
+              column. Same handlers/state as that pair — just shown here
+              instead, not in addition. */}
+          <div className="flex shrink-0 gap-2 lg:hidden">
+            <button
+              onClick={() => toggleWishlist(product.slug)}
+              aria-label="Add to wishlist"
+              className="flex h-9 w-9 items-center justify-center border border-line text-ink transition-colors hover:border-ink"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill={wishlisted ? '#B8935A' : 'none'}
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+            </button>
+            <button
+              onClick={handleShare}
+              aria-label="Share this product"
+              className="flex h-9 w-9 items-center justify-center border border-line text-ink transition-colors hover:border-ink"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <line x1="8.6" y1="10.5" x2="15.4" y2="6.5" />
+                <line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div className="mt-3 flex items-center justify-between gap-3">
