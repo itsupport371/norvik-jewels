@@ -45,6 +45,65 @@ function storageFileName(originalName: string): string {
   return originalName.toLowerCase().replace(/\s+/g, '-');
 }
 
+// Client asked why the shop feels a little slow loading photos (25 Sep
+// 2026) — one real cause: manufacturer photos land here straight off their
+// camera, often 3000px+ on the long side and 1-3MB each, when the site never
+// displays a product photo larger than roughly half a desktop screen. This
+// resizes + re-compresses every photo to something that still looks sharp at
+// every size the site actually uses, right here at import time — so it's a
+// one-time cost paid once per photo (by the admin, during import) instead of
+// a recurring cost paid by every visitor's browser on every first view.
+// next/image's own optimizer (next.config.mjs) still runs on top of this for
+// avif/webp conversion — this step only fixes the *source* file being far
+// bigger than it needs to be in the first place.
+const MAX_DIMENSION_PX = 1600;
+const JPEG_QUALITY = 0.82;
+const SKIP_BELOW_BYTES = 150 * 1024; // already-small files aren't worth touching
+
+async function compressImage(file: File): Promise<File> {
+  if (file.size < SKIP_BELOW_BYTES) return file;
+
+  try {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, MAX_DIMENSION_PX / Math.max(bitmap.width, bitmap.height));
+    const targetWidth = Math.max(1, Math.round(bitmap.width * scale));
+    const targetHeight = Math.max(1, Math.round(bitmap.height * scale));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return file;
+
+    // Fill white first — every product photo is shot on a white background,
+    // and this guarantees a source PNG with any transparent edge pixels
+    // doesn't turn black once flattened onto the JPEG below.
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, targetWidth, targetHeight);
+    ctx.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
+    bitmap.close();
+
+    const blob: Blob | null = await new Promise((resolve) =>
+      canvas.toBlob(resolve, 'image/jpeg', JPEG_QUALITY)
+    );
+    // If compression somehow didn't shrink the file (rare — e.g. an already
+    // tightly-compressed small photo), just keep the original rather than
+    // uploading a needlessly re-encoded copy.
+    if (!blob || blob.size >= file.size) return file;
+
+    // Same filename as the original (still ends .jpg/.jpeg/.png) so nothing
+    // downstream — storageFileName(), the color/index regex match already
+    // done on the ORIGINAL name, gallery ordering — needs to change; only
+    // the bytes and the declared content type are different now.
+    return new File([blob], file.name, { type: 'image/jpeg' });
+  } catch {
+    // Any failure here (unsupported format, browser quirk, etc.) — fall
+    // back to uploading the original file untouched rather than blocking
+    // the import over an optimization step.
+    return file;
+  }
+}
+
 type FileRole = { isHero: boolean; color: 'yellow' | 'white' | 'rose'; index: number };
 type GroupStatus = 'matched' | 'unmatched' | 'uploading' | 'done' | 'error';
 
@@ -67,6 +126,9 @@ export default function ImportPhotosPage() {
   const [skippedFiles, setSkippedFiles] = useState(0);
   const [doneCount, setDoneCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  // Running totals for the "Compressed X MB -> Y MB" summary shown once
+  // the batch finishes — purely informational, doesn't affect the upload.
+  const [compressionStats, setCompressionStats] = useState({ originalBytes: 0, uploadedBytes: 0 });
 
   async function handleFolderSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const fileList = e.target.files;
@@ -75,6 +137,7 @@ export default function ImportPhotosPage() {
     setError(null);
     setGroups([]);
     setDoneCount(0);
+    setCompressionStats({ originalBytes: 0, uploadedBytes: 0 });
 
     try {
       const supabase = createClient();
@@ -136,7 +199,11 @@ export default function ImportPhotosPage() {
     }
   }
 
-  async function uploadGroup(group: PhotoGroup, supabase: ReturnType<typeof createClient>) {
+  async function uploadGroup(
+    group: PhotoGroup,
+    supabase: ReturnType<typeof createClient>,
+    onCompressed: (originalBytes: number, uploadedBytes: number) => void
+  ) {
     if (!group.productId || !group.norvikSku) return;
 
     const heroFiles = group.files.filter((f) => f.role.isHero);
@@ -153,7 +220,9 @@ export default function ImportPhotosPage() {
       byColor[color].sort((a, b) => a.index - b.index);
     }
 
-    async function uploadOne(file: File, filename: string): Promise<string> {
+    async function uploadOne(originalFile: File, filename: string): Promise<string> {
+      const file = await compressImage(originalFile);
+      onCompressed(originalFile.size, file.size);
       const path = `products/${group.norvikSku}/${storageFileName(filename)}`;
       const { error: upErr } = await supabase.storage
         .from('product-images')
@@ -210,7 +279,12 @@ export default function ImportPhotosPage() {
         )
       );
       try {
-        await uploadGroup(group, supabase);
+        await uploadGroup(group, supabase, (originalBytes, uploadedBytes) => {
+          setCompressionStats((prev) => ({
+            originalBytes: prev.originalBytes + originalBytes,
+            uploadedBytes: prev.uploadedBytes + uploadedBytes,
+          }));
+        });
         setGroups((prev) =>
           prev.map((g) => (g.folderName === group.folderName ? { ...g, status: 'done' } : g))
         );
@@ -241,7 +315,9 @@ export default function ImportPhotosPage() {
         product by its <strong>Manufacturer SKU</strong>, its Yellow/White/Rose photos are uploaded
         to storage, and that product&apos;s Image URLs and per-metal photo are set automatically.
         CAD files (.3dm/.stl) and the render (.png) are ignored — only import this after those SKUs
-        already exist as products (Excel import).
+        already exist as products (Excel import). Each photo is also automatically resized and
+        compressed before upload (down to {MAX_DIMENSION_PX}px on its longer side) — no change
+        needed on your end, it just makes the shop load faster for visitors.
       </p>
 
       <div className="mt-6 border border-dashed border-line px-6 py-8 text-center">
@@ -325,6 +401,22 @@ export default function ImportPhotosPage() {
             <p className="mt-4 border border-green-300 bg-green-50 px-4 py-3 text-[13px] text-green-800">
               Uploaded photos for {doneCount} product{doneCount === 1 ? '' : 's'}. Open any of them in
               Edit to confirm — the Image URLs field will now be pre-filled.
+              {compressionStats.originalBytes > 0 && (
+                <>
+                  {' '}
+                  Photos were auto-resized/compressed before upload: {(
+                    compressionStats.originalBytes /
+                    1024 /
+                    1024
+                  ).toFixed(1)}{' '}
+                  MB →{' '}
+                  {(compressionStats.uploadedBytes / 1024 / 1024).toFixed(1)} MB (
+                  {Math.round(
+                    (1 - compressionStats.uploadedBytes / compressionStats.originalBytes) * 100
+                  )}
+                  % smaller) — this is what should make the shop feel faster to load.
+                </>
+              )}
             </p>
           )}
         </div>
