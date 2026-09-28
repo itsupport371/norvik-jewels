@@ -103,7 +103,7 @@ export default function SearchTrigger({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search for rings, earrings, necklaces…"
-              className="flex-1 text-[13.5px] leading-[1.6] text-ink outline-none placeholder:text-muted"
+              className="flex-1 border-0 bg-transparent text-[13.5px] leading-[1.6] text-ink outline-none appearance-none placeholder:text-muted"
             />
             {query && (
               <button
