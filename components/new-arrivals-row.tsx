@@ -6,14 +6,25 @@ import Link from 'next/link';
 import { getDisplayPrice, type Product } from '@/lib/mock-products';
 import { useLocale } from '@/lib/locale-context';
 
-// Triangle "play button" style arrow — client asked for something more
-// luxurious than the bare browser scrollbar: golden triangle arrows on a
-// dark-navy glowing button, sitting half on/half off the row's edge.
+// Was a filled gold triangle "play button" on a glowing dark-navy circle —
+// client pointed out it read as an odd video-player icon rather than a
+// scroll arrow, and asked this be restyled to match the thin-bordered
+// antiquegold arrows now used for photo navigation on the product page
+// (28 Sep 2026). Same chevron glyph, same square-with-thin-border treatment.
 function Arrow({ direction }: { direction: 'left' | 'right' }) {
-  const points = direction === 'left' ? '17,3 17,21 4,12' : '7,3 7,21 20,12';
   return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <polygon points={points} />
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d={direction === 'left' ? 'M15 18l-6-6 6-6' : 'M9 6l6 6-6 6'} />
     </svg>
   );
 }
@@ -53,14 +64,15 @@ export default function NewArrivalsRow({ products }: { products: Product[] }) {
 
   return (
     <div className="relative">
-      {/* Left/right nav — glowing gold-on-navy triangle buttons instead of the
-          plain browser scrollbar. Fade out (and stop taking clicks) once
-          there's nothing further to scroll to on that side. */}
+      {/* Left/right nav — thin-bordered antiquegold squares, same look as the
+          product page's photo-nav arrows, instead of the old glowing
+          gold-on-navy "play button" circles. Fade out (and stop taking
+          clicks) once there's nothing further to scroll to on that side. */}
       <button
         type="button"
         onClick={() => scroll('left')}
         aria-label="Scroll to previous products"
-        className={`scroll-arrow-glow absolute left-0 top-1/2 z-10 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-antiquegold bg-inknavy text-antiquegold transition-all duration-300 hover:scale-110 hover:bg-black sm:h-12 sm:w-12 ${
+        className={`absolute left-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center border border-warmstone bg-softwhite text-antiquegold transition-all duration-300 hover:border-antiquegold hover:bg-antiquegold hover:text-white sm:h-10 sm:w-10 ${
           canScrollLeft ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
       >
@@ -70,7 +82,7 @@ export default function NewArrivalsRow({ products }: { products: Product[] }) {
         type="button"
         onClick={() => scroll('right')}
         aria-label="Scroll to more products"
-        className={`scroll-arrow-glow absolute right-0 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full border border-antiquegold bg-inknavy text-antiquegold transition-all duration-300 hover:scale-110 hover:bg-black sm:h-12 sm:w-12 ${
+        className={`absolute right-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center border border-warmstone bg-softwhite text-antiquegold transition-all duration-300 hover:border-antiquegold hover:bg-antiquegold hover:text-white sm:h-10 sm:w-10 ${
           canScrollRight ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
       >
