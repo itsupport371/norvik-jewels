@@ -271,7 +271,16 @@ export default function ProductConfigurator({ product }: { product: Product }) {
               shoppers can switch photos right there with one tap, instead of
               having to reach the thumbnail row below (which on a phone can
               mean scrolling first) (25 Sep 2026). Wraps at both ends; only
-              shown when there's more than one photo to switch between. */}
+              shown when there's more than one photo to switch between.
+              Restyled (28 Sep 2026) — the plain white circle + drop-shadow
+              looked like a generic stock UI widget dropped onto the page.
+              Squared off with a thin warmstone border and an antiquegold
+              icon at rest (the theme's own palette calls antiquegold out by
+              name for exactly this — "labels, thin lines, arrows, small
+              CTAs" — see tailwind.config.ts), filling solid antiquegold on
+              hover the same way an active CardGrid choice fills solid ink,
+              so it reads as one of this site's own controls, not a
+              library default. */}
           {product.images.length > 1 && (
             <>
               <button
@@ -280,9 +289,9 @@ export default function ProductConfigurator({ product }: { product: Product }) {
                   setActiveImage((i) => (i - 1 + product.images.length) % product.images.length)
                 }
                 aria-label="Previous photo"
-                className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-ink shadow-md transition-colors hover:bg-white sm:h-10 sm:w-10"
+                className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center border border-warmstone bg-softwhite text-antiquegold transition-colors hover:border-antiquegold hover:bg-antiquegold hover:text-white sm:h-10 sm:w-10"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M15 18l-6-6 6-6" />
                 </svg>
               </button>
@@ -290,13 +299,13 @@ export default function ProductConfigurator({ product }: { product: Product }) {
                 type="button"
                 onClick={() => setActiveImage((i) => (i + 1) % product.images.length)}
                 aria-label="Next photo"
-                className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-ink shadow-md transition-colors hover:bg-white sm:h-10 sm:w-10"
+                className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center border border-warmstone bg-softwhite text-antiquegold transition-colors hover:border-antiquegold hover:bg-antiquegold hover:text-white sm:h-10 sm:w-10"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 6l6 6-6 6" />
                 </svg>
               </button>
-              <span className="absolute bottom-2 right-2 rounded-full bg-ink/60 px-2 py-0.5 text-[11px] font-medium leading-[1.2] text-white">
+              <span className="absolute bottom-2 right-2 border border-warmstone bg-softwhite px-2 py-0.5 text-[11px] font-medium leading-[1.2] tracking-[0.02em] text-inknavy/80">
                 {activeImage + 1} / {product.images.length}
               </span>
             </>
