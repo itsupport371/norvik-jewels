@@ -649,3 +649,119 @@ New files:
   8 small circle-icons + labels), `sm:grid-cols-4` from tablet width up —
   so the 8 categories now always read as a clean 2×4, matching what the
   client asked for ("4-4 ki rows").
+
+## Session notes — 28–29 Sep 2026
+
+**Product page (mobile) — wishlist/share icons moved.** Were overlaid on
+the main photo (`absolute right-2 top-2`, `lg:hidden`). Client wanted them
+next to the product name instead — moved into a `flex` row beside the
+`<h1>` in `components/product-configurator.tsx`, photo overlay removed.
+
+**Photo nav arrows & counter — restyled to match site theme.** Product
+page's prev/next arrows and the "X / Y" counter badge
+(`components/product-configurator.tsx`) were a plain white circle/shadow
+look; New Arrivals row's scroll arrows (`components/new-arrivals-row.tsx`)
+were a glowing gold-triangle-on-navy "play button" look the client said
+read as a video icon. Both restyled to the same thin-bordered `antiquegold`
+square-with-chevron treatment (`border-warmstone bg-softwhite
+text-antiquegold`, hover fills solid `antiquegold`) — the two now read as
+one consistent nav-arrow style across the site.
+
+**Search — full redesign.** `components/search-trigger.tsx` was a
+full-page `fixed inset-0 bg-ink/50` dark overlay modal ("bakwas" per
+client, and overlaid unrelated page content). Rewritten as an anchored
+dropdown panel (same click-outside-close pattern as
+`locale-switcher.tsx`) — no page overlay, a properly bordered input box.
+Also fixed a black border the browser was drawing on the raw `<input>`
+itself (UA-stylesheet default border, `border-color: currentColor`
+resolving dark) — added `border-0 bg-transparent appearance-none` directly
+on the input, not just the wrapping `<form>`.
+
+**"You May Also Like" — gated behind Show More, moved into the empty
+column.** New `components/related-products.tsx` (used from
+`ProductConfigurator` via a `related` prop, sourced from
+`getRelatedServer`) — starts collapsed with a "Show More" button, and
+lives at `lg:col-start-2 lg:row-start-2` in the product page's own grid
+(same cell that was empty white space below "Add to Bag" on desktop),
+collapsing to normal stacked order on mobile so it's still visible there.
+
+**Wishlist quick-add button — added to every product image, site-wide.**
+New shared `components/wishlist-quick-button.tsx` (extracted from a
+pattern that already existed correctly on the Wishlist page itself) — a
+heart button overlaid top-right on every product tile. Wired into
+`shop-content.tsx`, `search-content.tsx`, `new-arrivals-row.tsx`, and the
+new `related-products.tsx` (in addition to its original home in
+`wishlist-content.tsx`). Each tile's `<Link>` and the button are siblings
+inside a shared `<div className="group relative">` — never a `<button>`
+nested inside an `<a>`, which is invalid HTML.
+
+**Import Photos — automatic compression before upload.**
+`app/admin/products/photos/page.tsx` now resizes (max 1600px long edge)
+and re-encodes to JPEG (quality 0.82) client-side via `<canvas>` before
+every upload, skipping files already under 150KB. Addresses the client's
+"images load with a slight delay" report — the manufacturer photos were
+being uploaded as-is, 200–500KB uncompressed. Shows a summary line after
+upload ("X MB → Y MB, Z% smaller").
+
+**Import tool — Batch-13 format support (new manufacturer file shape).**
+`app/admin/products/import/page.tsx`'s `parseHeaderDrivenV1`:
+- `findAllCols` for diamond piece counts now matches bare `"count"`, not
+  just `"diamond count"` — Batch-13 labels each of its five diamond-shape
+  columns (Round/Oval/Marquise/Pear/Baguette) with a plain "Count" header
+  repeated after each shape's own "(mm)" column, not "Diamond Count".
+- Added `"product name"` to the display-name header match (alongside
+  `"display"`).
+- Norvik SKU: Batch-13 has no header saying "Norvik" anywhere — its own
+  code (e.g. "EPS-01201") sits in a column with **no header text at all**,
+  directly to the left of the "Product name" column. `norvikCol` now falls
+  back to that unlabeled column when no "norvik" header is found and the
+  column left of the name column has no header text.
+- Name/Norvik-SKU/gold-weight/diamond-weight are now read by scanning
+  **every row in the SKU's block**, keeping the first value found for
+  each — Batch-13 sometimes splits a block so the code/name lands on the
+  row *after* the one carrying the SKU (its diamond-breakdown sub-row),
+  not on the SKU row itself. Previously these were only ever read off the
+  first (SKU) row.
+- Verified with a standalone Python/openpyxl simulation of the exact same
+  logic against the real `Batch-13_ExcelSKU.xlsx` (100 SKUs, `EXPORT --->
+  13` sheet) before touching the live file: all 100 rows parse with a
+  correct Norvik SKU, correct gold/diamond weights, correct diamond piece
+  counts; 3 rows with `diamondCaratTotal = 0` confirmed as genuinely
+  plain-gold pieces (no diamond columns filled at all), not a bug.
+- Cross-checked against the client's actual photo folder
+  (`Export/Batch-13/`, 30 numbered subfolders with renders/videos/3D
+  files): the 27 SKUs that have a "Product name" filled in the sheet are
+  exactly the SKUs with photos already shot — except **1232, 1233, 1237**,
+  which have photos ready but no name in the sheet. These 3 will import
+  with the usual auto-placeholder name ("EPS-0123X piece"), same as any
+  other unnamed row — rename after import if/when the client gives real
+  names. The other 73 SKUs (no photo folder yet) are expected to have no
+  name.
+
+**Import Photos — Batch-13 needed two more fixes (found once the client
+actually tried uploading, 29 Sep 2026).** `app/admin/products/photos/page.tsx`:
+- **Folder matching**: every batch before this one had photo folders named
+  by the full manufacturer SKU string (e.g. "M-165"), matched against
+  `products.sku`. Batch-13's 30 folders are named with just the trailing
+  digits ("1213", not "DOC - P 1213"). Added a fallback: when the exact
+  normalized-SKU match fails, compare the trailing run of digits on both
+  sides as a *number* (so a zero-padded folder name still matches a
+  non-padded SKU suffix) — only used when it identifies exactly one
+  product, so it can't silently mis-assign a folder if some future batch's
+  SKUs happen to collide on their last few digits. Verified unambiguous for
+  all 30 of this batch's folders against all 100 imported SKUs (no
+  collisions).
+- **Filename parsing**: Batch-13's real per-color, per-angle photography
+  (4 angles × Rose/White/Yellow = 12 images per product) is named
+  `"1213-Render-R2.jpg"` — a single-letter color code, not the full word
+  every prior batch used ("M-165-Rose 2.jpg"), so the existing regex
+  matched none of them — only the two "PD-1213-Model-White/Yellow.jpg" hero
+  shots (and this batch has no Rose one of those at all). Added a second
+  regex (`RENDER_LETTER_RE`) for the `-Render-(R|W|Y)<n>.jpg` shape,
+  mapped to the same color/index roles as the existing parser, so the full
+  12-image set imports as the gallery per color and the two Model shots
+  still come in as the trailing hero shots, same as before.
+- Verified against the actual folder listing (all 30 subfolders) with a
+  Python simulation of the exact same regex/matching logic before pushing:
+  every folder yields 4 images per color + 2 hero shots, matches exactly
+  one product, no ambiguity.

@@ -47,6 +47,22 @@ import {
 //        fillMissingNames, which borrows the matching Fancy-sheet row's
 //        name (by stripping the "-Rounds" suffix) rather than leaving a
 //        generic "<SKU> piece" placeholder for 50 rows at once.
+//      - "Batch-13" (Pendants, 29 Sep 2026): FIVE diamond-shape columns
+//        (Round/Oval/Marquise/Pear/Baguette), each labelled with its own
+//        "(mm)" header followed by a plain "Count" header (not "Diamond
+//        Count" like earlier sheets) — findAllCols now matches on bare
+//        "count" so it still catches all five. Its own SKU-style code
+//        (e.g. "EPS-01201") sits in a column with NO header text at all,
+//        directly to the left of the "Product name" column — norvikCol
+//        falls back to that unlabeled column when no header literally
+//        says "norvik". Only 27 of its 100 rows have an actual Product
+//        name filled in — the rest fall through to fillMissingNames as
+//        usual. Also: on some of its rows the SKU and its diamond
+//        breakdown are split so the unlabeled code / name only appears on
+//        a row AFTER the row carrying the SKU itself, not on the SKU row
+//        — so name/Norvik-SKU/gold/diamond-weight are now read by
+//        scanning every row in the block and keeping the first value
+//        found for each, instead of only the SKU row.
 type ParsedRow = {
   sku: string;
   norvikSku: string;
@@ -153,65 +169,109 @@ function parseRingsV1(rows: unknown[][]): ParsedRow[] {
 }
 
 // "header-driven-v1" — one or more diamond-shape columns (Round always;
-// Marquise/Pear if the sheet has them), a handful of dimension/casting
-// columns we don't use, a gold-weight column, and (usually) a display-name
-// column. Columns are located by HEADER TEXT, not fixed position, because
-// a Norvik SKU column may or may not be present, and can sit at a
-// different offset between sheets — this is what actually broke on the
-// first Sensual Appeal Vol.1 import (22 Sep 2026): the Rings-v1 parser's
-// fixed offsets 9/10/11/12 didn't line up with that sheet's columns, so
-// gold weight came out NaN and the name ended up with "Diamond Ring"
-// appended (the Rings parser's own fallback). All "Diamond Count" columns
-// found are summed together per SKU block, so this also correctly handles
-// a 3-diamond-shape sheet like Taka Tak Studs Vol.3's "Fancy" sheet.
-// Falls back to the manufacturer SKU when no Norvik SKU column is found,
-// and to an empty name (filled in afterward by fillMissingNames) when no
-// Display name column is found at all — see the "Round" sheet note above.
+// Marquise/Pear/Oval/Baguette if the sheet has them), a handful of
+// dimension/casting columns we don't use, a gold-weight column, and
+// (usually) a display-name column. Columns are located by HEADER TEXT, not
+// fixed position, because a Norvik SKU column may or may not be present,
+// and can sit at a different offset between sheets — this is what actually
+// broke on the first Sensual Appeal Vol.1 import (22 Sep 2026): the
+// Rings-v1 parser's fixed offsets 9/10/11/12 didn't line up with that
+// sheet's columns, so gold weight came out NaN and the name ended up with
+// "Diamond Ring" appended (the Rings parser's own fallback). Every count
+// column found (matched on bare "count", so both "Diamond Count" and a
+// per-shape "Count" header like Batch-13's work) is summed together per SKU
+// block, so this also correctly handles a sheet with several diamond-shape
+// columns like Taka Tak Studs Vol.3's "Fancy" sheet or Batch-13.
+// Falls back to the manufacturer SKU when no Norvik SKU column is found
+// (including via the unlabeled-column fallback below), and to an empty
+// name (filled in afterward by fillMissingNames) when no Display/Product
+// name column is found at all — see the "Round" sheet note above.
 function parseHeaderDrivenV1(allRows: unknown[][], sheetName: string): ParsedRow[] {
   const header = allRows[0] ?? [];
   const rows = allRows.slice(1);
 
-  const skuCol = findCol(header, ['sku code', 'sku']);
-  const nameCol = findCol(header, ['display']);
+  const skuCol = findCol(header, ['sku code', 'sku', 'style no']);
+  const nameCol = findCol(header, ['display', 'product name']);
   const goldCol = findCol(header, ['gold wt', 'gold weight', '18kt', 'karat wt']);
   const diamondWeightCol = findCol(header, ['diamond wt', 'diamond weight']);
-  const diamondCountCols = findAllCols(header, ['diamond count']);
-  const norvikCol = findCol(header, ['norvik']);
+  const diamondCountCols = findAllCols(header, ['count']);
+  let norvikCol = findCol(header, ['norvik']);
+  // Batch-13 (29 Sep 2026): no header says "norvik" anywhere, but the
+  // piece's own code (e.g. "EPS-01201") sits in a column with NO header
+  // text at all, directly to the left of the Product name column — only
+  // fall back to it when that's the shape we see, so an ordinary blank
+  // column next to an unrelated header elsewhere doesn't get mistaken for
+  // this.
+  if (norvikCol < 0 && nameCol > 0 && !isNonEmptyString(header[nameCol - 1])) {
+    norvikCol = nameCol - 1;
+  }
 
   const results: ParsedRow[] = [];
   let current: ParsedRow | null = null;
   let pieceCount = 0;
+  // Batch-13 also splits some blocks so the code/name only lands on a row
+  // AFTER the one carrying the SKU itself (its diamond-breakdown sub-row),
+  // not on the SKU row — so these are no longer read once off the SKU row
+  // alone. Every row in the block is checked, keeping the first non-empty
+  // value found for each; a value that (as usual) sits right on the SKU
+  // row is still found immediately, so this changes nothing for sheets
+  // where it always has been on that row.
+  let norvikSkuFound: string | undefined;
+  let nameFound: string | undefined;
+  let goldWeightFound: number | undefined;
+  let diamondWeightFound: number | undefined;
+
+  function finalizeCurrent() {
+    if (!current) return;
+    current.diamondPieceCount = pieceCount;
+    current.norvikSku = norvikSkuFound || current.sku;
+    current.hasNorvikSku = Boolean(norvikSkuFound);
+    current.name = nameFound ?? '';
+    current.hasName = Boolean(nameFound);
+    current.goldWeightGrams = goldWeightFound ?? 0;
+    current.diamondCaratTotal = diamondWeightFound ?? 0;
+    results.push(current);
+  }
 
   for (const row of rows) {
     const skuRaw = row[skuCol >= 0 ? skuCol : 0];
     if (isNonEmptyString(skuRaw)) {
-      if (current) {
-        current.diamondPieceCount = pieceCount;
-        results.push(current);
-      }
+      finalizeCurrent();
       const skuTrimmed = skuRaw.trim();
-      const norvikRaw = norvikCol >= 0 ? row[norvikCol] : undefined;
-      const norvikSku = typeof norvikRaw === 'string' ? norvikRaw.trim() : '';
-      const rawName = nameCol >= 0 ? row[nameCol] : undefined;
-      const name = typeof rawName === 'string' ? rawName.trim() : '';
       current = {
         sku: skuTrimmed,
-        norvikSku: norvikSku || skuTrimmed,
-        hasNorvikSku: Boolean(norvikSku),
-        // Left blank (not defaulted here) when the sheet has no name
-        // column at all — fillMissingNames tries to borrow a sibling
-        // sheet's name first, and only falls back to a generic
-        // placeholder if that fails too.
-        name,
-        hasName: Boolean(name),
-        goldWeightGrams: Number((goldCol >= 0 ? row[goldCol] : undefined) ?? 0),
-        diamondCaratTotal: Number((diamondWeightCol >= 0 ? row[diamondWeightCol] : undefined) ?? 0),
+        norvikSku: skuTrimmed,
+        hasNorvikSku: false,
+        name: '',
+        hasName: false,
+        goldWeightGrams: 0,
+        diamondCaratTotal: 0,
         diamondPieceCount: 0,
         sheetName,
       };
       pieceCount = 0;
+      norvikSkuFound = undefined;
+      nameFound = undefined;
+      goldWeightFound = undefined;
+      diamondWeightFound = undefined;
     }
     if (!current) continue;
+    if (norvikSkuFound === undefined && norvikCol >= 0) {
+      const v = row[norvikCol];
+      if (isNonEmptyString(v)) norvikSkuFound = v.trim();
+    }
+    if (nameFound === undefined && nameCol >= 0) {
+      const v = row[nameCol];
+      if (isNonEmptyString(v)) nameFound = v.trim();
+    }
+    if (goldWeightFound === undefined && goldCol >= 0) {
+      const v = row[goldCol];
+      if (typeof v === 'number') goldWeightFound = v;
+    }
+    if (diamondWeightFound === undefined && diamondWeightCol >= 0) {
+      const v = row[diamondWeightCol];
+      if (typeof v === 'number') diamondWeightFound = v;
+    }
     const countCols = diamondCountCols.length > 0 ? diamondCountCols : [2];
     for (const col of countCols) {
       const count = row[col];
@@ -219,8 +279,7 @@ function parseHeaderDrivenV1(allRows: unknown[][], sheetName: string): ParsedRow
     }
   }
   if (current) {
-    current.diamondPieceCount = pieceCount;
-    results.push(current);
+    finalizeCurrent();
   }
   return results;
 }

@@ -22,6 +22,21 @@ import { createClient } from '@/lib/supabase/client';
 // text itself to match exactly, so this doesn't loosen anything else.
 const IMAGE_NAME_RE = /[\s-](Model-)?(Yellow|White|Rose)[\s-]*(\d+)?\.+(jpe?g|png)$/i;
 
+// Batch-13 (29 Sep 2026): its main product-photography set uses a totally
+// different naming convention from every batch before it — a single-letter
+// color code instead of the full color word, e.g. "1213-Render-R2.jpg"
+// (R/W/Y = Rose/White/Yellow), not "M-165-Rose 2.jpg". These are the ONLY
+// per-color, per-angle shots this batch has (4 angles per color) — the
+// "PD-<num>-Model-*.jpg" files (still matched by IMAGE_NAME_RE above, since
+// those spell the color out in full) are just a single hero/worn shot per
+// color, and this batch has no Rose one of those at all.
+const RENDER_LETTER_RE = /-Render-([RWY])(\d+)?\.+(jpe?g|png)$/i;
+const RENDER_LETTER_COLOR: Record<string, 'yellow' | 'white' | 'rose'> = {
+  r: 'rose',
+  w: 'white',
+  y: 'yellow',
+};
+
 // The Excel-derived `sku` column has inconsistent spacing across rows
 // ("M-165" vs "M -165" vs "M - 166") — see ADMIN_PANEL_PROGRESS.md — while
 // the photo folders on disk are consistently "M-165" with no spaces.
@@ -31,14 +46,33 @@ function normalizeSku(s: string): string {
   return s.replace(/\s+/g, '').toUpperCase();
 }
 
+// Batch-13's photo folders are named with just the trailing digits of the
+// SKU ("1213"), not the full manufacturer SKU string ("DOC - P 1213") like
+// every batch before it — see the folder-matching fallback below, which
+// uses this.
+function trailingNumber(s: string): number | null {
+  const m = s.match(/(\d+)\s*$/);
+  return m ? parseInt(m[1], 10) : null;
+}
+
 function parseFileName(name: string) {
   const m = name.match(IMAGE_NAME_RE);
-  if (!m) return null;
-  return {
-    isHero: Boolean(m[1]),
-    color: m[2].toLowerCase() as 'yellow' | 'white' | 'rose',
-    index: m[3] ? parseInt(m[3], 10) : 0,
-  };
+  if (m) {
+    return {
+      isHero: Boolean(m[1]),
+      color: m[2].toLowerCase() as 'yellow' | 'white' | 'rose',
+      index: m[3] ? parseInt(m[3], 10) : 0,
+    };
+  }
+  const rm = name.match(RENDER_LETTER_RE);
+  if (rm) {
+    return {
+      isHero: false,
+      color: RENDER_LETTER_COLOR[rm[1].toLowerCase()],
+      index: rm[2] ? parseInt(rm[2], 10) : 0,
+    };
+  }
+  return null;
 }
 
 function storageFileName(originalName: string): string {
@@ -147,8 +181,18 @@ export default function ImportPhotosPage() {
       if (fetchError) throw new Error(fetchError.message);
 
       const bySku = new Map<string, ProductRow>();
+      // Trailing-digit fallback for Batch-13-style folders (named "1213",
+      // not the full "DOC - P 1213" SKU) — only kept when it identifies
+      // exactly ONE product for that number, so a folder can't be silently
+      // mis-assigned if some future batch's SKUs happen to collide on
+      // their last few digits (set to null once ambiguous).
+      const byTrailingNumber = new Map<number, ProductRow | null>();
       for (const p of (products ?? []) as ProductRow[]) {
         if (p.sku) bySku.set(normalizeSku(p.sku), p);
+        const n = p.sku ? trailingNumber(p.sku) : null;
+        if (n !== null) {
+          byTrailingNumber.set(n, byTrailingNumber.has(n) ? null : p);
+        }
       }
 
       const byFolder = new Map<string, { file: File; role: FileRole }[]>();
@@ -176,7 +220,9 @@ export default function ImportPhotosPage() {
 
       const nextGroups: PhotoGroup[] = [];
       for (const [folderName, files] of byFolder.entries()) {
-        const product = bySku.get(normalizeSku(folderName));
+        const folderNum = trailingNumber(folderName);
+        const product =
+          bySku.get(normalizeSku(folderName)) ?? (folderNum !== null ? byTrailingNumber.get(folderNum) ?? undefined : undefined);
         nextGroups.push({
           folderName,
           productId: product?.id,
