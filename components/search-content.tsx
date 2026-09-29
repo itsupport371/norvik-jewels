@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { getDisplayPrice, type Product } from "@/lib/mock-products";
 import { useLocale } from "@/lib/locale-context";
+import WishlistQuickButton from "@/components/wishlist-quick-button";
 
 export default function SearchContent({ products }: { products: Product[] }) {
   const searchParams = useSearchParams();
@@ -46,30 +47,29 @@ export default function SearchContent({ products }: { products: Product[] }) {
       ) : (
         <div className="mt-10 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
           {results.map((product) => (
-            <Link
-              href={`/product/${product.slug}`}
-              key={product.slug}
-              className="group block"
-            >
-              <div className="relative aspect-square overflow-hidden bg-white">
-                <Image
-                  src={product.images[0]}
-                  alt={product.name}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-                />
-              </div>
-              <p className="mt-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
-                {product.category}
-              </p>
-              <p className="mt-1 text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">
-                {product.name}
-              </p>
-              <p className="mt-1 text-[13px] leading-[1.35] text-muted">
-                {formatPrice(getDisplayPrice(product))}
-              </p>
-            </Link>
+            <div key={product.slug} className="group relative">
+              <Link href={`/product/${product.slug}`} className="block">
+                <div className="relative aspect-square overflow-hidden bg-white">
+                  <Image
+                    src={product.images[0]}
+                    alt={product.name}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                  />
+                </div>
+                <p className="mt-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
+                  {product.category}
+                </p>
+                <p className="mt-1 text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">
+                  {product.name}
+                </p>
+                <p className="mt-1 text-[13px] leading-[1.35] text-muted">
+                  {formatPrice(getDisplayPrice(product))}
+                </p>
+              </Link>
+              <WishlistQuickButton slug={product.slug} />
+            </div>
           ))}
         </div>
       )}

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Product } from '@/lib/mock-products';
+import WishlistQuickButton from '@/components/wishlist-quick-button';
 
 // Was an always-visible, full-width grid below the whole two-column product
 // layout — client asked for two changes together (28-29 Sep 2026): (1) a
@@ -46,27 +47,26 @@ export default function RelatedProducts({ related }: { related: Product[] }) {
       {open && (
         <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-6">
           {related.map((p) => (
-            <Link
-              href={`/product/${p.slug}`}
-              key={p.slug}
-              className="group relative block aspect-square overflow-hidden bg-white p-2"
-            >
-              <div className="relative h-[calc(100%-56px)] overflow-hidden">
-                <Image
-                  src={p.images[0]}
-                  alt={p.name}
-                  fill
-                  className="object-contain transition-transform duration-500 group-hover:scale-105"
-                  sizes="(min-width: 1024px) 22vw, 50vw"
-                />
-              </div>
-              <div className="flex h-14 flex-col items-center justify-center overflow-hidden px-1 text-center">
-                <p className="line-clamp-2 w-full text-[12px] font-medium leading-[1.3] text-ink">{p.name}</p>
-                <p className="mt-1 text-[12px] leading-[1.3] text-muted">
-                  {p.currency}{p.basePrice.toLocaleString('en-IN')}
-                </p>
-              </div>
-            </Link>
+            <div key={p.slug} className="group relative">
+              <Link href={`/product/${p.slug}`} className="relative block aspect-square overflow-hidden bg-white p-2">
+                <div className="relative h-[calc(100%-56px)] overflow-hidden">
+                  <Image
+                    src={p.images[0]}
+                    alt={p.name}
+                    fill
+                    className="object-contain transition-transform duration-500 group-hover:scale-105"
+                    sizes="(min-width: 1024px) 22vw, 50vw"
+                  />
+                </div>
+                <div className="flex h-14 flex-col items-center justify-center overflow-hidden px-1 text-center">
+                  <p className="line-clamp-2 w-full text-[12px] font-medium leading-[1.3] text-ink">{p.name}</p>
+                  <p className="mt-1 text-[12px] leading-[1.3] text-muted">
+                    {p.currency}{p.basePrice.toLocaleString('en-IN')}
+                  </p>
+                </div>
+              </Link>
+              <WishlistQuickButton slug={p.slug} />
+            </div>
           ))}
         </div>
       )}

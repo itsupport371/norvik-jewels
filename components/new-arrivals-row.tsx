@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getDisplayPrice, type Product } from '@/lib/mock-products';
 import { useLocale } from '@/lib/locale-context';
+import WishlistQuickButton from '@/components/wishlist-quick-button';
 
 // Was a filled gold triangle "play button" on a glowing dark-navy circle —
 // client pointed out it read as an odd video-player icon rather than a
@@ -95,32 +96,37 @@ export default function NewArrivalsRow({ products }: { products: Product[] }) {
           buttons above are the intended way to navigate. */}
       <div ref={scrollerRef} className="no-scrollbar flex gap-4 overflow-x-auto scroll-smooth pb-2 sm:gap-5">
         {products.map((product) => (
-          <Link
-            href={`/product/${product.slug}`}
+          <div
             key={product.slug}
-            className="group relative block aspect-square w-[42%] shrink-0 overflow-hidden bg-white p-3 sm:w-[30%] lg:w-[23%]"
+            className="group relative w-[42%] shrink-0 sm:w-[30%] lg:w-[23%]"
           >
-            <div className="relative h-[calc(100%-88px)] overflow-hidden sm:h-[calc(100%-104px)]">
-              <Image
-                src={product.images[0]}
-                alt={product.name}
-                fill
-                className="object-contain transition-transform duration-500 group-hover:scale-105"
-                sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-              />
-            </div>
-            <div className="flex h-[88px] flex-col items-center justify-center overflow-hidden px-1 text-center sm:h-[104px]">
-              <p className="text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
-                {product.category}
-              </p>
-              <p className="mt-1 line-clamp-2 w-full text-[13px] font-medium leading-[1.35] text-inknavy sm:text-[14px]">
-                {product.name}
-              </p>
-              <p className="mt-1 text-[13px] leading-[1.35] text-inknavy/60">
-                {formatPrice(getDisplayPrice(product))}
-              </p>
-            </div>
-          </Link>
+            <Link
+              href={`/product/${product.slug}`}
+              className="relative block aspect-square overflow-hidden bg-white p-3"
+            >
+              <div className="relative h-[calc(100%-88px)] overflow-hidden sm:h-[calc(100%-104px)]">
+                <Image
+                  src={product.images[0]}
+                  alt={product.name}
+                  fill
+                  className="object-contain transition-transform duration-500 group-hover:scale-105"
+                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                />
+              </div>
+              <div className="flex h-[88px] flex-col items-center justify-center overflow-hidden px-1 text-center sm:h-[104px]">
+                <p className="text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
+                  {product.category}
+                </p>
+                <p className="mt-1 line-clamp-2 w-full text-[13px] font-medium leading-[1.35] text-inknavy sm:text-[14px]">
+                  {product.name}
+                </p>
+                <p className="mt-1 text-[13px] leading-[1.35] text-inknavy/60">
+                  {formatPrice(getDisplayPrice(product))}
+                </p>
+              </div>
+            </Link>
+            <WishlistQuickButton slug={product.slug} />
+          </div>
         ))}
       </div>
     </div>

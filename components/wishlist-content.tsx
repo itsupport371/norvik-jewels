@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { useWishlist } from '@/lib/wishlist-context';
 import { getDisplayPrice, type Product } from '@/lib/mock-products';
 import { useLocale } from '@/lib/locale-context';
+import WishlistQuickButton from '@/components/wishlist-quick-button';
 
 export default function WishlistContent({ products }: { products: Product[] }) {
-  const { wishlist, toggleWishlist } = useWishlist();
+  const { wishlist } = useWishlist();
   const { formatPrice } = useLocale();
   const items = products.filter((p) => wishlist.includes(p.slug));
 
@@ -57,15 +58,7 @@ export default function WishlistContent({ products }: { products: Product[] }) {
                   </p>
                 </div>
               </Link>
-              <button
-                onClick={() => toggleWishlist(product.slug)}
-                aria-label="Remove from wishlist"
-                className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center bg-ivory/90 text-ink shadow transition-opacity hover:opacity-75"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#B8935A" stroke="#B8935A" strokeWidth="1.5">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                </svg>
-              </button>
+              <WishlistQuickButton slug={product.slug} />
             </div>
           ))}
         </div>
