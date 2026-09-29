@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation';
 import SiteHeader from '@/components/site-header';
 import SiteFooter from '@/components/site-footer';
 import ProductConfigurator from '@/components/product-configurator';
-import RelatedProducts from '@/components/related-products';
 import { getProductBySlugServer, getRelatedServer } from '@/lib/products-server';
 
 // Phase 5: the real catalogue is a Draft/Publish workflow in Supabase, not a
@@ -26,14 +25,12 @@ export default async function ProductPage({ params }: { params: { slug: string }
     <>
       <SiteHeader />
       <main className="mx-auto max-w-7xl px-6 py-12 lg:px-10 lg:py-16">
-        <ProductConfigurator product={product} />
-
-        {/* Extracted into its own client component (28 Sep 2026) — the grid
-            is now gated behind a "Show More" button instead of always
-            showing, which needs useState, and this page itself stays a
-            server component (product/related data is fetched here, not in
-            the browser). See components/related-products.tsx. */}
-        <RelatedProducts related={related} />
+        {/* `related` is now passed down and rendered INSIDE the
+            configurator's own grid (28-29 Sep 2026) — it fills what used to
+            be empty white space next to Specifications on desktop, instead
+            of sitting as its own full-width section below everything. See
+            components/related-products.tsx for the reasoning. */}
+        <ProductConfigurator product={product} related={related} />
       </main>
       <SiteFooter />
     </>

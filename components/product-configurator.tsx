@@ -12,6 +12,7 @@ import {
   CLARITY_CHARGE_PERCENT,
 } from '@/lib/mock-products';
 import ProductSpecifications from '@/components/product-specifications';
+import RelatedProducts from '@/components/related-products';
 import { calculatePrice, TEST_GOLD_RATE_24K_PER_10G } from '@/lib/pricing';
 import { useWishlist } from '@/lib/wishlist-context';
 import { useCart } from '@/lib/cart-context';
@@ -85,7 +86,13 @@ function CardGrid({
   );
 }
 
-export default function ProductConfigurator({ product }: { product: Product }) {
+export default function ProductConfigurator({
+  product,
+  related,
+}: {
+  product: Product;
+  related: Product[];
+}) {
   const router = useRouter();
   const [activeImage, setActiveImage] = useState(0);
   const [metalKey, setMetalKey] = useState(product.metalOptions[0].label);
@@ -629,6 +636,14 @@ export default function ProductConfigurator({ product }: { product: Product }) {
           gstAmount={gstAmount}
           grandTotal={grandTotal}
         />
+      </div>
+
+      {/* Related products — sits in the column-2/row-2 grid cell, which was
+          empty white space on desktop (see RelatedProducts' own comment for
+          why). On mobile this still stacks right after Specifications, same
+          as before — not hidden there. */}
+      <div className="lg:col-start-2 lg:row-start-2">
+        <RelatedProducts related={related} />
       </div>
     </div>
   );
