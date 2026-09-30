@@ -22,16 +22,22 @@ import { createClient } from '@/lib/supabase/client';
 // text itself to match exactly, so this doesn't loosen anything else.
 const IMAGE_NAME_RE = /[\s-](Model-)?(Yellow|White|Rose)[\s-]*(\d+)?\.+(jpe?g|png)$/i;
 
-// Batch-13 (29 Sep 2026): its main product-photography set uses a totally
-// different naming convention from every batch before it — a single-letter
-// color code instead of the full color word, e.g. "1213-Render-R2.jpg"
-// (R/W/Y = Rose/White/Yellow), not "M-165-Rose 2.jpg". These are the ONLY
-// per-color, per-angle shots this batch has (4 angles per color) — the
-// "PD-<num>-Model-*.jpg" files (still matched by IMAGE_NAME_RE above, since
-// those spell the color out in full) are just a single hero/worn shot per
-// color, and this batch has no Rose one of those at all.
-const RENDER_LETTER_RE = /-Render-([RWY])(\d+)?\.+(jpe?g|png)$/i;
-const RENDER_LETTER_COLOR: Record<string, 'yellow' | 'white' | 'rose'> = {
+// Batch-13 (29 Sep 2026) and Batch-15 (30 Sep 2026) both use a totally
+// different naming convention from every batch before them for their main
+// product-photography set — a single-letter color code instead of the full
+// color word, e.g. "1213-Render-R2.jpg" or "DOC-PD-15045-R1.jpg" (R/W/Y =
+// Rose/White/Yellow), not "M-165-Rose 2.jpg". Deliberately NOT anchored on
+// "Render-" specifically (Batch-15 has no such word in its filenames at
+// all, just "...-R1.jpg" directly) — a bare hyphen right before the single
+// letter is enough, and is not a real collision risk: nothing else in
+// either batch's folder ends in "-R", "-W" or "-Y" plus an optional number
+// before a jpg/png extension (the CAD/detail/"SizeN" files all end
+// differently). These are the ONLY per-color, per-angle shots each batch
+// has (4 angles per color) — the "...-Model-*.jpg" files (still matched by
+// IMAGE_NAME_RE above, since those spell the color out in full) are just a
+// hero/worn shot per color/size, and neither batch has a Rose one of those.
+const LETTER_COLOR_RE = /-([RWY])(\d+)?\.+(jpe?g|png)$/i;
+const LETTER_COLOR: Record<string, 'yellow' | 'white' | 'rose'> = {
   r: 'rose',
   w: 'white',
   y: 'yellow',
@@ -64,11 +70,11 @@ function parseFileName(name: string) {
       index: m[3] ? parseInt(m[3], 10) : 0,
     };
   }
-  const rm = name.match(RENDER_LETTER_RE);
+  const rm = name.match(LETTER_COLOR_RE);
   if (rm) {
     return {
       isHero: false,
-      color: RENDER_LETTER_COLOR[rm[1].toLowerCase()],
+      color: LETTER_COLOR[rm[1].toLowerCase()],
       index: rm[2] ? parseInt(rm[2], 10) : 0,
     };
   }

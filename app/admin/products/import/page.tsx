@@ -63,6 +63,32 @@ import {
 //        — so name/Norvik-SKU/gold/diamond-weight are now read by
 //        scanning every row in the block and keeping the first value
 //        found for each, instead of only the SKU row.
+//      - "Batch-15" (Pendants/Necklaces, 30 Sep 2026): TEN diamond-shape
+//        columns, all correctly caught by the bare-"count" match above. Two
+//        new wrinkles:
+//        (1) It has BOTH a "Casting Gold Wt(18kt)" column (the raw cast
+//        blank, before polishing/finishing loses material) AND an
+//        "Est.Final Gold Wt(18kt)" column (the piece's actual finished
+//        weight) — and Casting comes FIRST in the sheet, so naive
+//        first-match header text would grab the wrong (heavier) one and
+//        overstate/mis-price every piece. goldCol now prefers a
+//        "final"-labelled column when one exists, and otherwise excludes
+//        any "casting"-labelled column from the general gold-wt match.
+//        (2) Some designs are listed as several separate rows — one per
+//        available SIZE ("DOC-PD-15045 Size 1" .. "Size 4" — e.g. a bigger
+//        pendant takes more gold) — all sharing the SAME Norvik SKU, since
+//        it's one design. norvik_sku is UNIQUE in the database, so
+//        importing every size as its own row fails outright on the
+//        second one — and the photo folders aren't split by size either
+//        (one folder per design, shared main photography across all
+//        sizes). See dedupeByNorvikSku: these collapse to one row per
+//        Norvik SKU (keeping the first-listed size — the smallest, which
+//        is also the one carrying the Display name when the sheet has
+//        one), and the sku itself has its "Size N" suffix stripped so the
+//        base SKU (matching the shared, non-size-split photo folder)
+//        survives. The other sizes' own gold/diamond figures are dropped
+//        — the site has no per-size pricing today, just a fixed
+//        gold_weight_grams/base_price per product.
 type ParsedRow = {
   sku: string;
   norvikSku: string;
@@ -103,6 +129,21 @@ function findAllCols(header: unknown[], patterns: string[]): number[] {
     if (patterns.some((p) => norm.includes(p))) result.push(i);
   }
   return result;
+}
+
+// Like findCol, but skips any header cell that matches one of
+// excludePatterns first — used to keep the general "gold wt" match from
+// picking up a "Casting Gold Wt" column when the sheet also has a
+// separately-labelled "Est.Final Gold Wt" one (Batch-15, 30 Sep 2026).
+function findColExcluding(header: unknown[], patterns: string[], excludePatterns: string[]): number {
+  for (let i = 0; i < header.length; i++) {
+    const cell = header[i];
+    if (typeof cell !== 'string') continue;
+    const norm = cell.toLowerCase();
+    if (excludePatterns.some((p) => norm.includes(p))) continue;
+    if (patterns.some((p) => norm.includes(p))) return i;
+  }
+  return -1;
 }
 
 function detectFormat(headerRow: unknown[] | undefined): 'rings-v1' | 'header-driven-v1' {
@@ -192,7 +233,17 @@ function parseHeaderDrivenV1(allRows: unknown[][], sheetName: string): ParsedRow
 
   const skuCol = findCol(header, ['sku code', 'sku', 'style no']);
   const nameCol = findCol(header, ['display', 'product name']);
-  const goldCol = findCol(header, ['gold wt', 'gold weight', '18kt', 'karat wt']);
+  // Batch-15 (30 Sep 2026): the sheet has BOTH a "Casting Gold Wt(18kt)"
+  // column (the raw cast blank, before polishing/finishing loses material)
+  // and an "Est.Final Gold Wt(18kt)" column (the piece's actual finished
+  // weight), with Casting listed first — so a plain first-match would grab
+  // the heavier, wrong figure. Try a "final"-labelled column first; only
+  // fall back to the general match (excluding anything "casting"-labelled)
+  // when the sheet doesn't distinguish the two at all.
+  let goldCol = findCol(header, ['final gold', 'est.final', 'final wt']);
+  if (goldCol < 0) {
+    goldCol = findColExcluding(header, ['gold wt', 'gold weight', '18kt', 'karat wt'], ['casting']);
+  }
   const diamondWeightCol = findCol(header, ['diamond wt', 'diamond weight']);
   const diamondCountCols = findAllCols(header, ['count']);
   let norvikCol = findCol(header, ['norvik']);
@@ -313,6 +364,36 @@ function fillMissingNames(rows: ParsedRow[]): void {
   }
 }
 
+// Batch-15 (30 Sep 2026): some designs are listed as several separate
+// rows — one per available SIZE ("DOC-PD-15045 Size 1" through "... Size
+// 4", a bigger pendant taking more gold) — but all sharing the SAME
+// Norvik SKU, since it's one design. norvik_sku is UNIQUE in the
+// database, so importing every size as its own row fails outright on the
+// second one, and the photo folders aren't split by size either (one
+// folder per design, the main photography shared across all sizes — only
+// a couple of reference "Model" shots differ per size). Collapses every
+// group sharing a Norvik SKU down to ONE row — keeping whichever one was
+// listed FIRST (every sheet seen lists sizes smallest-first, and that's
+// also the one carrying the Display name when the sheet has one at all)
+// and dropping the rest. The kept row's `sku` has any trailing "Size N"
+// stripped, so the base manufacturer SKU — matching the shared,
+// non-size-split photo folder — is what survives, not "...Size 1"
+// specifically. Run BEFORE fillMissingNames so name-borrowing only ever
+// sees the one row per design that's actually going to be imported.
+const SIZE_SUFFIX_RE = /\s+size\s*\d+\s*$/i;
+function dedupeByNorvikSku(rows: ParsedRow[]): ParsedRow[] {
+  const seen = new Set<string>();
+  const result: ParsedRow[] = [];
+  for (const r of rows) {
+    r.sku = r.sku.replace(SIZE_SUFFIX_RE, '').trim();
+    const key = r.norvikSku;
+    if (key && seen.has(key)) continue;
+    if (key) seen.add(key);
+    result.push(r);
+  }
+  return result;
+}
+
 // Reads every sheet in the workbook (not just the first) — Taka Tak Studs
 // Vol.3 (25 Sep 2026) is the first file we've seen with more than one
 // product sheet ("Fancy" shapes + an all-Round variant), and both need to
@@ -348,11 +429,12 @@ function parseWorkbook(
     allRows.push(...parsed);
   }
 
-  fillMissingNames(allRows);
+  const deduped = dedupeByNorvikSku(allRows);
+  fillMissingNames(deduped);
   // The badge/defaults only need one format to show — if ANY sheet came in
   // as rings-v1 that's the more useful thing to flag (it's the format that
   // still needs the caveats in the on-page copy below).
-  return { format: sawRingsV1 ? 'rings-v1' : lastFormat, rows: allRows };
+  return { format: sawRingsV1 ? 'rings-v1' : lastFormat, rows: deduped };
 }
 
 export default function ImportProductsPage() {

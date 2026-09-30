@@ -765,3 +765,55 @@ actually tried uploading, 29 Sep 2026).** `app/admin/products/photos/page.tsx`:
   Python simulation of the exact same regex/matching logic before pushing:
   every folder yields 4 images per color + 2 hero shots, matches exactly
   one product, no ambiguity.
+
+## Batch-15 import (30 Sep 2026) — two more new wrinkles
+
+Batch-15 (`EXPORT-->15` sheet, Pendants/Necklaces, 114 raw rows) needed two
+real fixes in `app/admin/products/import/page.tsx`'s `parseHeaderDrivenV1`,
+found by inspecting the file with openpyxl before touching any code (same
+approach as Batch-13):
+
+- **Wrong gold-weight column.** The sheet has BOTH a "Casting Gold Wt(18kt)"
+  column (the raw cast blank, before polishing/finishing loses material)
+  and an "Est.Final Gold Wt(18kt)" column (the piece's actual finished
+  weight) — with Casting listed first. The existing header-text match
+  (`'gold wt'`/`'18kt'`/etc.) would have silently grabbed the heavier
+  Casting figure for every one of the 114 rows, overstating gold content
+  and mis-pricing every piece. `goldCol` now tries a "final"-labelled
+  column first (`'final gold'`/`'est.final'`/`'final wt'`), and only falls
+  back to the general match — now excluding anything "casting"-labelled —
+  when a sheet doesn't distinguish the two at all. New helper:
+  `findColExcluding`.
+- **Size variants sharing one Norvik SKU.** 20 of the 114 rows are actually
+  4 separate rows per design — one per SIZE ("DOC-PD-15045 Size 1" through
+  "... Size 4", a bigger pendant taking more gold per size) — but ALL 4
+  share the SAME Norvik SKU (`norvik_sku` has a UNIQUE database
+  constraint), so importing every size as its own row would fail outright
+  on the second one. Confirmed via the client's actual photo folder
+  (`Export/Batch-15/`, one folder per design — e.g. `15045/` — NOT split by
+  size: the main Rose/White/Yellow studio photography is shared across all
+  4 sizes, only a couple of "Model" reference shots differ per size) that
+  this really is meant as ONE product per design, not 4 separate listings.
+  New `dedupeByNorvikSku` (run once per workbook, before `fillMissingNames`)
+  collapses each group of rows sharing a Norvik SKU down to the
+  first-listed one (every sheet lists sizes smallest-first, and that's also
+  the one carrying the Display name when the sheet has one at all) and
+  strips a trailing "Size N" off the kept row's `sku` so it matches the
+  shared (non-size-split) photo folder. 114 rows → 54 real products. The
+  other 3 sizes' own gold/diamond figures are dropped for now — the site
+  has no per-size pricing today (one `gold_weight_grams`/`base_price` per
+  product, sizes are just a picklist); flagged to the client as a possible
+  future feature, not built here.
+
+**Import Photos** also needed a matching filename-parsing fix: Batch-15's
+per-color, per-angle shots are named `"DOC-PD-15045-R1.jpg"` — no
+"-Render-" in the name at all, unlike Batch-13's
+`"1213-Render-R1.jpg"`. Generalized the regex (renamed `RENDER_LETTER_RE`
+→ `LETTER_COLOR_RE`) to drop the "Render-" requirement — a bare hyphen
+right before the single color letter is enough and matches both batches'
+conventions (and every file already checked in both batches' folders for
+false-positive risk — none found). Both fixes verified against the real
+uploaded Excel file and the real folder listing (Python simulation of the
+exact same parsing/matching/dedup logic) before pushing: 30/30 photo
+folders parse to 4 images per color each, and all 54 deduped products get
+the correct (Final, not Casting) gold weight.
