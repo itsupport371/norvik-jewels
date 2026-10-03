@@ -136,7 +136,14 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* New Arrivals */}
+        {/* New Arrivals — commented out for now (3 Oct 2026), client asked
+            to hide this whole homepage section along with the header's
+            "New Arrivals"/"Best Sellers" links, kept here (not deleted) so
+            it can go back exactly as it was by uncommenting. `products`
+            (fetched above) and the `NewArrivalsRow` import are now unused
+            while this is hidden — harmless (no unused-var build errors in
+            this project's tsconfig), left in place so re-enabling needs no
+            other changes.
         <section className="bg-scandi px-6 py-20 lg:px-10">
           <div className="mx-auto max-w-7xl">
             <div className="mb-10 flex items-end justify-between border-b border-warmstone pb-6">
@@ -155,14 +162,10 @@ export default async function HomePage() {
                 View All
               </Link>
             </div>
-            {/* Single scrollable row (not a wrapping grid) — client wanted the
-                products to stay side-by-side, not stack into more rows. The
-                row + its glowing gold/navy triangle nav arrows live in
-                NewArrivalsRow (a client component, needed for the scroll
-                ref/handlers) since this page itself is a server component. */}
             <NewArrivalsRow products={products} />
           </div>
         </section>
+        */}
 
         {/* Craftsmanship / Brand story */}
         <section className="grid grid-cols-1 lg:grid-cols-2">
@@ -198,7 +201,12 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Newsletter */}
+        {/* Newsletter — commented out for now (3 Oct 2026), client asked to
+            remove this section too. Kept here (not deleted) so it can go
+            back exactly as it was by uncommenting. Note: this form never
+            had a submit handler wired up (no onSubmit/API call) even when
+            it was showing — "Subscribe" didn't actually collect emails
+            anywhere; worth flagging if/when this comes back.
         <section className="bg-ink px-6 py-20 text-center">
           <p className="mx-auto mb-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
             Stay in the Know
@@ -220,6 +228,7 @@ export default async function HomePage() {
             </button>
           </form>
         </section>
+        */}
       </main>
       <SiteFooter />
     </>

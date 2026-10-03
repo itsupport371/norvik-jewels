@@ -817,3 +817,95 @@ uploaded Excel file and the real folder listing (Python simulation of the
 exact same parsing/matching/dedup logic) before pushing: 30/30 photo
 folders parse to 4 images per color each, and all 54 deduped products get
 the correct (Final, not Casting) gold weight.
+
+## Header search — grow-in-place redesign (3 Oct 2026)
+
+Client flagged the search icon's dropdown (the 28 Sep rebuild — a bordered
+panel that appeared below the icon) as still reading like a "box popping
+up". Replaced it with the icon itself growing sideways into an inline bar.
+
+`components/search-trigger.tsx`:
+- The input bar is now a fixed-width element (`w-[min(80vw,21rem)]`)
+  sitting inside a sibling wrapper whose *width* animates `0 -> full` with
+  `overflow-hidden` and a CSS `transition`. Because the bar's own width
+  never changes — only the wrapper clipping it does — it reads as the bar
+  sliding out from behind the icon, not a box appearing. The icon stays in
+  normal document flow the whole time (only the bar is absolutely
+  positioned, to its left via `right-full`), so none of the other header
+  icons (account/wishlist/cart) shift when it opens.
+- Suggestion results are a plain sibling of the width-animated wrapper
+  (not nested inside its `overflow-hidden`), so the list isn't clipped by
+  the same box that's clipping the bar mid-slide — only rendered once
+  fully open.
+- Desktop: opens on `onMouseEnter`/`onMouseLeave` of the wrapping element
+  (same hover pattern the Shop nav dropdown already uses) — no click
+  needed, matches what was asked ("hover kare to side mein grow karke
+  dikha"). Does NOT auto-focus the input on hover — only an explicit click
+  focuses it, so just moving the mouse across the header doesn't steal
+  keyboard focus.
+- Touch devices (no such thing as hover): falls back to the existing
+  tap-to-toggle on the icon + tap-outside-to-close — same grow animation,
+  just triggered by tap instead of hover. Tapping the icon also focuses
+  the input (after a short delay so focus doesn't fire mid-animation).
+- No changes needed in `components/header-chrome.tsx` — `SearchTrigger`'s
+  outer wrapper is still a plain `relative` element sized to the icon, so
+  it drops into the existing icon row unchanged.
+- Verified via `tsc --noEmit` (clean) before pushing.
+
+## "New Arrivals" / "Best Sellers" nav links hidden (3 Oct 2026)
+
+Client asked to hide the "New Arrivals" and "Best Sellers" links from the
+header nav for now, but keep the code around for later rather than delete
+it.
+
+`components/header-chrome.tsx` — both occurrences wrapped in a JSX
+comment (`{/* ... */}`) instead of removed, each with a short note on why:
+- Desktop nav (`<nav className="hidden ... lg:flex">`), between
+  "Collections" and "Our World".
+- Mobile drawer nav, between "Collections" and "Our World" (same spot).
+
+Nothing else changed — the `/shop?sort=new` and `/shop?sort=bestsellers`
+routes themselves (in `shop-content.tsx`) still work exactly as before;
+only the header's links to them are hidden. Uncommenting those two blocks
+in `header-chrome.tsx` brings both back exactly as they were. Verified via
+`tsc --noEmit` (clean) before pushing.
+
+## Homepage "New Arrivals" section also hidden (3 Oct 2026)
+
+Same request extended to the homepage itself — client pointed at a
+screenshot of the "Just In / New Arrivals" scrollable product row and
+said not to keep that visible either, for now.
+
+`app/page.tsx`: the whole `<section>` (heading, "View All" link, and the
+`<NewArrivalsRow products={products} />` row) is wrapped in a JSX comment,
+same approach as the header links — commented out, not deleted, with a
+note so it's a one-step uncomment to bring back. `products` (fetched via
+`getAllProductsServer()`) and the `NewArrivalsRow` import are both unused
+while this is hidden; left as-is since this project's tsconfig has no
+`noUnusedLocals`/`noUnusedImports`, so it doesn't fail the build, and it
+means reactivating the section later needs no other edits. Verified via
+`tsc --noEmit` (clean) before pushing.
+
+Together with the earlier header-nav-links change today, the site now has
+no visible path to "New Arrivals" or "Best Sellers" anywhere — both
+`/shop?sort=new` and `/shop?sort=bestsellers` still work as direct URLs,
+just nothing on the site currently links to them.
+
+## Homepage Newsletter section removed (3 Oct 2026)
+
+Same ask, extended once more — client pointed at a screenshot of the
+dark "Stay in the Know" newsletter signup block (bottom of the homepage,
+above the footer) and asked to remove it too.
+
+`app/page.tsx`: the `<section>` (heading, "Stay in the Know" label, and
+the email input + Subscribe form) is commented out, same as the other two
+sections hidden earlier today — not deleted, so it's a one-step uncomment
+to restore. Flagged in the code comment for whenever this does come back:
+the form never had a submit handler wired up even while it was live (no
+`onSubmit`, no API call) — "Subscribe" didn't actually collect emails
+anywhere, so that would need building before this section is meaningful
+again, not just un-hiding it. Verified via `tsc --noEmit` (clean) before
+pushing.
+
+Homepage now flows: hero → Shop by Category → Signature Collection banner
+→ Craftsmanship/brand story → footer.

@@ -6,15 +6,25 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { Product } from '@/lib/mock-products';
 
-// Was a full-screen `fixed inset-0` dark overlay with a plain, border-less
-// input floating near the top of the page — client called it out as looking
-// cheap ("bakwas") and, separately, didn't want it dimming/blocking the rest
-// of the page underneath (28 Sep 2026). Rebuilt as an anchored dropdown
-// panel instead — same pattern as LocaleSwitcher's own panel (relative
-// wrapper, absolute panel, click-outside-to-close) — so it opens right under
-// the search icon like the site's other menus, never covers anything else,
-// and the input itself now looks like a real search box (bordered, focus
-// ring in the site's antiquegold accent) instead of a bare underline.
+// Was an anchored dropdown panel that popped open below the icon (28 Sep
+// 2026 rebuild) — client called it out again as still looking like a "box"
+// suddenly appearing (3 Oct 2026). Rebuilt once more: instead of a panel
+// dropping down, the icon itself grows sideways into a bordered input bar.
+// Mechanism: a fixed-width bar sits inside an `overflow-hidden` wrapper
+// whose width animates 0 -> full; the wrapper's width only grows (never the
+// bar inside it), so the bar looks like it's sliding out from behind the
+// icon rather than a box popping into existence. The icon stays anchored at
+// the same spot the whole time (it's in normal flow; only the bar is
+// absolutely positioned to its left), so none of the other header icons
+// shift when this opens.
+//
+// Trigger differs by input type since there's no such thing as "hover" on a
+// phone: desktop opens it on mouse-enter/leave of the wrapping element (feels
+// instant, no click needed — same pattern as the Shop nav dropdown already
+// uses). Touch devices fall back to the existing tap-to-toggle + tap-outside-
+// to-close behaves, same growth animation either way. Only an explicit click
+// focuses the input (not a hover) — auto-focusing on hover would steal focus
+// just from someone moving their mouse across the header.
 export default function SearchTrigger({
   light = false,
   products,
@@ -26,6 +36,7 @@ export default function SearchTrigger({
   const [query, setQuery] = useState('');
   const router = useRouter();
   const rootRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -62,29 +73,42 @@ export default function SearchTrigger({
     setQuery('');
   }
 
-  return (
-    <div className="relative" ref={rootRef}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-label="Search"
-        className={
-          light
-            ? 'text-ivory transition-colors hover:text-antiquegold'
-            : 'text-charcoal transition-colors hover:text-antiquegold'
-        }
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-          <circle cx="11" cy="11" r="7" />
-          <path d="M21 21l-4.3-4.3" />
-        </svg>
-      </button>
+  function toggleOpen() {
+    if (open) {
+      close();
+      return;
+    }
+    setOpen(true);
+    // Explicit click (mobile tap, or a desktop click instead of a hover) —
+    // focus once the bar has had a moment to grow, so the caret doesn't
+    // appear while the box is still mid-animation.
+    window.setTimeout(() => inputRef.current?.focus(), 160);
+  }
 
-      {open && (
-        <div className="absolute right-0 top-full z-50 mt-3 w-80 max-w-[calc(100vw-2rem)] border border-warmstone bg-white p-4 normal-case tracking-normal text-inknavy shadow-lg">
+  const barWidth = 'w-[min(80vw,21rem)]';
+
+  return (
+    <div
+      className="relative flex items-center"
+      ref={rootRef}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      {/* Anchor for the growing bar + its results — sits to the left of the
+          icon (right: 100% of this row) so it never pushes the icon or the
+          account/wishlist/cart icons after it. */}
+      <div className="absolute right-full top-1/2 z-50 mr-2 -translate-y-1/2">
+        {/* The width-animated wrapper. overflow-hidden is what makes the
+            fixed-width bar inside it look like it's sliding out instead of
+            just appearing. */}
+        <div
+          className={`overflow-hidden transition-[width] duration-300 ease-out ${
+            open ? barWidth : 'w-0'
+          }`}
+        >
           <form
             onSubmit={handleSubmit}
-            className="flex items-center gap-2 border border-line px-3 py-2 transition-colors focus-within:border-antiquegold"
+            className={`flex items-center gap-2 border border-line bg-white px-3 py-2 ${barWidth}`}
           >
             <svg
               width="16"
@@ -99,11 +123,11 @@ export default function SearchTrigger({
               <path d="M21 21l-4.3-4.3" />
             </svg>
             <input
-              autoFocus
+              ref={inputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search for rings, earrings, necklaces…"
-              className="flex-1 border-0 bg-transparent text-[13.5px] leading-[1.6] text-ink outline-none appearance-none placeholder:text-muted"
+              className="w-full min-w-0 flex-1 border-0 bg-transparent text-[13.5px] leading-[1.6] text-ink outline-none appearance-none placeholder:text-muted"
             />
             {query && (
               <button
@@ -119,33 +143,58 @@ export default function SearchTrigger({
               </button>
             )}
           </form>
-
-          {results.length > 0 && (
-            <div className="mt-3 max-h-80 space-y-1 overflow-y-auto">
-              {results.map((p) => (
-                <Link
-                  key={p.slug}
-                  href={`/product/${p.slug}`}
-                  onClick={close}
-                  className="flex items-center gap-3 p-2 transition-colors hover:bg-softwhite"
-                >
-                  <div className="relative h-12 w-12 shrink-0 overflow-hidden bg-white">
-                    <Image src={p.images[0]} alt={p.name} fill className="object-cover" sizes="48px" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">{p.name}</p>
-                    <p className="text-[13px] leading-[1.35] text-muted">{p.category}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-
-          {query.trim() && results.length === 0 && (
-            <p className="mt-3 text-[13px] leading-[1.6] text-muted">No results for &ldquo;{query}&rdquo;</p>
-          )}
         </div>
-      )}
+
+        {/* Results — a plain sibling of the overflow-hidden wrapper above
+            (not nested inside it), so the suggestion list isn't clipped by
+            the same box that clips the bar during its width animation. Only
+            rendered once fully open, so it never flashes mid-slide. */}
+        {open && query.trim() && (
+          <div className={`mt-2 ${barWidth} border border-line bg-white shadow-lg`}>
+            {results.length > 0 ? (
+              <div className="max-h-80 space-y-1 overflow-y-auto p-2">
+                {results.map((p) => (
+                  <Link
+                    key={p.slug}
+                    href={`/product/${p.slug}`}
+                    onClick={close}
+                    className="flex items-center gap-3 p-2 transition-colors hover:bg-softwhite"
+                  >
+                    <div className="relative h-12 w-12 shrink-0 overflow-hidden bg-white">
+                      <Image src={p.images[0]} alt={p.name} fill className="object-cover" sizes="48px" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">
+                        {p.name}
+                      </p>
+                      <p className="text-[13px] leading-[1.35] text-muted">{p.category}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <p className="p-3 text-[13px] leading-[1.6] text-muted">No results for &ldquo;{query}&rdquo;</p>
+            )}
+          </div>
+        )}
+      </div>
+
+      <button
+        type="button"
+        onClick={toggleOpen}
+        aria-label="Search"
+        aria-expanded={open}
+        className={
+          light
+            ? 'text-ivory transition-colors hover:text-antiquegold'
+            : 'text-charcoal transition-colors hover:text-antiquegold'
+        }
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+          <circle cx="11" cy="11" r="7" />
+          <path d="M21 21l-4.3-4.3" />
+        </svg>
+      </button>
     </div>
   );
 }

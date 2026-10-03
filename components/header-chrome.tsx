@@ -193,12 +193,16 @@ export default function HeaderChrome({
               Collections
               {CHEVRON}
             </Link>
+            {/* Commented out for now (3 Oct 2026) — client asked to hide
+                these two nav links until they're ready to be shown again,
+                keeping the code here for later rather than deleting it.
             <Link href="/shop?sort=new" className="transition-colors hover:text-antiquegold">
               New Arrivals
             </Link>
             <Link href="/shop?sort=bestsellers" className="transition-colors hover:text-antiquegold">
               Best Sellers
             </Link>
+            */}
             <Link href="/our-world" className="transition-colors hover:text-antiquegold">
               Our World
             </Link>
@@ -332,12 +336,15 @@ export default function HeaderChrome({
               <Link href="/collections" onClick={closeMobileMenu} className="border-b border-warmstone/60 py-3.5">
                 Collections
               </Link>
+              {/* Commented out for now (3 Oct 2026) — same as the desktop
+                  nav above, kept for later rather than deleted.
               <Link href="/shop?sort=new" onClick={closeMobileMenu} className="border-b border-warmstone/60 py-3.5">
                 New Arrivals
               </Link>
               <Link href="/shop?sort=bestsellers" onClick={closeMobileMenu} className="border-b border-warmstone/60 py-3.5">
                 Best Sellers
               </Link>
+              */}
               <Link href="/our-world" onClick={closeMobileMenu} className="border-b border-warmstone/60 py-3.5">
                 Our World
               </Link>
