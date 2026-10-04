@@ -909,3 +909,39 @@ pushing.
 
 Homepage now flows: hero → Shop by Category → Signature Collection banner
 → Craftsmanship/brand story → footer.
+
+## Test-mode Stripe checkout now generates a real invoice (4 Oct 2026)
+
+Client wants to run a demo: have someone do a test purchase through the
+site's existing Stripe test-mode checkout (card 4242 4242 4242 4242, no
+real money) and have an invoice land in that buyer's inbox. The checkout
+flow itself already existed and already worked (test-mode Stripe
+Checkout Session, email + address form, "Payment Successful" page) — what
+was missing was an actual invoice.
+
+`app/api/create-checkout-session/route.ts`: added `invoice_creation: {
+enabled: true, invoice_data: {...} }` to the Checkout Session — Stripe now
+generates a real Invoice object (downloadable PDF, Norvik Jewels branding
+from the Stripe account's own invoice settings) for every completed
+session, not just a bare payment confirmation.
+
+`app/checkout/success/page.tsx`: converted to an async server component
+that takes the `?session_id=` the success URL already carried, looks the
+session up via Stripe (`expand: ['invoice']`), and — when the invoice is
+ready — shows a "Download Invoice (PDF)" button right there on the success
+screen. This was done deliberately instead of relying on email alone,
+because whether Stripe actually SENDS that invoice by email depends on a
+Dashboard setting (Settings → Invoices → "Email finalized invoices to
+customers" — test mode has its own separate toggle from live mode) that
+only the account owner can turn on — not something reachable from the
+code or from this session. Told the client to flip that toggle in their
+own Stripe Dashboard (test mode) if they want the PDF to also show up by
+email automatically during the demo; the on-page download link works
+either way, so the demo isn't blocked on that setting being found/enabled
+in time.
+
+Verified via `tsc --noEmit` (clean) before pushing. Not verified against
+a live Stripe test call in this session (no way to run `npm run dev` or
+make an outbound Stripe API call from here) — client should run the
+actual test purchase themselves to confirm the invoice link appears on
+the success page as expected.

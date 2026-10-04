@@ -34,6 +34,22 @@ export async function POST(req: NextRequest) {
       payment_method_types: ['card'],
       line_items,
       customer_email: typeof email === 'string' && email.trim() ? email.trim() : undefined,
+      // Demo/testing request (4 Oct 2026): a test purchase should produce a
+      // real invoice the buyer gets. `invoice_creation` makes Stripe generate
+      // an actual Invoice object + downloadable PDF for this session once
+      // payment succeeds (not just a payment receipt) — the success page
+      // below fetches and links to it. Whether Stripe ALSO auto-emails it
+      // depends on a Dashboard setting (Settings → Invoices → "Email
+      // finalized invoices to customers", test mode has its own toggle,
+      // separate from live mode) — that's an account setting, not something
+      // this code can turn on from here.
+      invoice_creation: {
+        enabled: true,
+        invoice_data: {
+          description: 'Norvik Jewels — order invoice',
+          footer: 'Thank you for shopping with Norvik Jewels. (Test mode — no real payment was collected.)',
+        },
+      },
       success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/checkout`,
     });
