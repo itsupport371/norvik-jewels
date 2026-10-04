@@ -16,6 +16,21 @@ type SavedAddress = {
   pincode: string;
 };
 
+// Demo/testing request (4 Oct 2026): "My Orders" was a static placeholder
+// with no table behind it — a completed test purchase never showed up
+// here. app/checkout/success/page.tsx now writes a row to the new `orders`
+// table (see supabase/migrations/0005_orders_schema.sql) once a signed-in
+// shopper's Checkout Session completes; this tab reads it back the same
+// way the Saved Addresses tab already reads `addresses`.
+type Order = {
+  id: string;
+  items: { name: string; quantity: number; amount: number }[];
+  total: number;
+  status: string;
+  invoice_pdf_url: string | null;
+  created_at: string;
+};
+
 type Tab = 'orders' | 'addresses' | 'gift-cards' | 'faq' | 'privacy';
 
 const NAV_ITEMS: { key: Tab; label: string; icon: ReactNode }[] = [
@@ -122,6 +137,8 @@ export default function AccountDashboard({ email }: { email: string }) {
   const [tab, setTab] = useState<Tab>('orders');
   const [addresses, setAddresses] = useState<SavedAddress[] | null>(null);
   const [loadingAddresses, setLoadingAddresses] = useState(false);
+  const [orders, setOrders] = useState<Order[] | null>(null);
+  const [loadingOrders, setLoadingOrders] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
@@ -137,6 +154,20 @@ export default function AccountDashboard({ email }: { email: string }) {
         setLoadingAddresses(false);
       });
   }, [tab, addresses]);
+
+  useEffect(() => {
+    if (tab !== 'orders' || orders !== null) return;
+    setLoadingOrders(true);
+    const supabase = createClient();
+    supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .then(({ data }) => {
+        setOrders((data as Order[]) ?? []);
+        setLoadingOrders(false);
+      });
+  }, [tab, orders]);
 
   async function handleRemoveAddress(id: string) {
     setAddresses((prev) => prev?.filter((a) => a.id !== id) ?? prev);
@@ -210,23 +241,75 @@ export default function AccountDashboard({ email }: { email: string }) {
       {/* Content */}
       <div className="min-h-[360px] border border-line bg-paper p-6 sm:p-8">
         {tab === 'orders' && (
-          <div className="flex flex-col items-center justify-center py-14 text-center">
-            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" className="text-line" aria-hidden="true">
-              <path d="M6 8h12l-1 12H7L6 8z" />
-              <path d="M9 8V6a3 3 0 0 1 6 0v2" />
-            </svg>
-            <h2 className="font-display mt-5 text-[20px] font-medium leading-[1.1] text-ink sm:text-[24px]">
-              You haven&apos;t placed an order yet
-            </h2>
-            <p className="mt-2 max-w-xs text-[13px] leading-[1.6] text-muted">
-              Once you place an order, you&apos;ll be able to track it here.
-            </p>
-            <Link
-              href="/shop"
-              className="mt-6 inline-block bg-ink px-6 py-3 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-white transition-opacity hover:opacity-90 sm:text-[12px]"
-            >
-              Start Shopping
-            </Link>
+          <div>
+            {loadingOrders && <p className="py-14 text-center text-[13px] text-muted">Loading…</p>}
+
+            {!loadingOrders && orders && orders.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-14 text-center">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" className="text-line" aria-hidden="true">
+                  <path d="M6 8h12l-1 12H7L6 8z" />
+                  <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+                </svg>
+                <h2 className="font-display mt-5 text-[20px] font-medium leading-[1.1] text-ink sm:text-[24px]">
+                  You haven&apos;t placed an order yet
+                </h2>
+                <p className="mt-2 max-w-xs text-[13px] leading-[1.6] text-muted">
+                  Once you place an order, you&apos;ll be able to track it here.
+                </p>
+                <Link
+                  href="/shop"
+                  className="mt-6 inline-block bg-ink px-6 py-3 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-white transition-opacity hover:opacity-90 sm:text-[12px]"
+                >
+                  Start Shopping
+                </Link>
+              </div>
+            )}
+
+            {!loadingOrders && orders && orders.length > 0 && (
+              <div>
+                <h2 className="font-display text-[20px] font-medium leading-[1.1] text-ink sm:text-[24px]">My Orders</h2>
+                <div className="mt-5 space-y-4">
+                  {orders.map((order) => (
+                    <div key={order.id} className="border border-line p-4 sm:p-5">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">
+                          {new Date(order.created_at).toLocaleDateString('en-IN', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          })}
+                        </p>
+                        <span className="inline-block bg-[#EEF6F1] px-2.5 py-1 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-[#1F4D3D]">
+                          {order.status}
+                        </span>
+                      </div>
+                      <div className="mt-3 space-y-1">
+                        {order.items.map((item, i) => (
+                          <p key={i} className="text-[13px] leading-[1.5] text-charcoal">
+                            {item.name} <span className="text-muted">&times; {item.quantity}</span>
+                          </p>
+                        ))}
+                      </div>
+                      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
+                        <p className="text-[14px] font-semibold text-ink">
+                          ₹{order.total.toLocaleString('en-IN')}
+                        </p>
+                        {order.invoice_pdf_url && (
+                          <a
+                            href={order.invoice_pdf_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-ink underline underline-offset-4 hover:text-antiquegold"
+                          >
+                            Download Invoice
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

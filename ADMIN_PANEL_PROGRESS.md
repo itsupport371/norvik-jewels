@@ -945,3 +945,50 @@ a live Stripe test call in this session (no way to run `npm run dev` or
 make an outbound Stripe API call from here) — client should run the
 actual test purchase themselves to confirm the invoice link appears on
 the success page as expected.
+
+## "My Orders" was never actually recording orders — fixed (4 Oct 2026)
+
+Client's test purchase (with the new invoice feature above) didn't show up
+under Account → My Orders. Root cause: that tab was a static placeholder
+("You haven't placed an order yet") since it was first built — there was
+no `orders` table anywhere in the project, and nothing ever wrote to one.
+Stripe was the only system that knew a payment happened.
+
+New migration `supabase/migrations/0005_orders_schema.sql`: `orders`
+table (user_id, email, stripe_session_id, items jsonb, total, currency,
+status, invoice_pdf_url, created_at). RLS only, same as every other table
+in this project — "Users can view their own orders" / "Users can insert
+their own orders", both `auth.uid() = user_id`. A unique index on
+`stripe_session_id` makes writing to it an upsert, not an insert, so
+reloading the success page twice doesn't create two rows for the same
+payment.
+
+`app/checkout/success/page.tsx`: now also looks up the signed-in shopper
+(same cookie-based `lib/supabase/server` client already used elsewhere)
+and, if they're signed in and the session is paid, upserts one row into
+`orders` — items, total, the invoice PDF link from the feature above, all
+in one place. Deliberately NOT done via a Stripe webhook: this project
+has no service-role key by design, and a webhook has no signed-in user to
+satisfy the `auth.uid() = user_id` insert policy. Doing it from the
+success page, using the shopper's own session, is the only way to write
+this without that key. Known tradeoff, noted in the code: if the browser
+never reaches this page (closed tab mid-redirect), no order gets
+recorded. Fine for this demo; a real webhook + service role would be the
+correct fix if this becomes real order tracking rather than a demo.
+
+Guest checkouts (not signed in) are still not recorded anywhere — there's
+no account to attach them to, and My Orders only exists behind sign-in
+anyway. Expected, not a bug.
+
+`components/account-dashboard.tsx`: the "My Orders" tab now fetches from
+`orders` the same way the Saved Addresses tab already reads `addresses` —
+date, items, total, status, and a "Download Invoice" link per order. The
+original empty state ("You haven't placed an order yet") is kept, now
+shown only when the shopper genuinely has zero orders instead of always.
+
+Verified via `tsc --noEmit` (clean) on all three changed files before
+pushing. Not verified against a live purchase in this session (no way to
+run `npm run dev` or hit Supabase from here) — client needs to run the
+migration (`supabase/migrations/0005_orders_schema.sql`) against the
+database, then do one more signed-in test purchase to confirm it appears
+under My Orders.
