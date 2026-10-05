@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { getDisplayPrice, type Product } from "@/lib/mock-products";
 import { useLocale } from "@/lib/locale-context";
-import WishlistQuickButton from "@/components/wishlist-quick-button";
 
 type SortOption = "featured" | "price-low" | "price-high";
 
@@ -452,36 +451,34 @@ export default function ShopContent({ products }: { products: Product[] }) {
               No pieces found. Try clearing a few filters.
             </p>
           ) : (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4 lg:gap-x-5 lg:gap-y-10">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-12">
               {filtered.map((product) => (
-                <div key={product.slug} className="group relative">
-                  <Link
-                    href={`/product/${product.slug}`}
-                    className="relative block aspect-square overflow-hidden bg-white p-2 sm:p-3 lg:p-2.5"
-                  >
-                    <div className="relative h-[calc(100%-88px)] overflow-hidden sm:h-[calc(100%-104px)] lg:h-[calc(100%-80px)]">
-                      <Image
-                        src={product.images[0]}
-                        alt={product.name}
-                        fill
-                        className="object-contain transition-transform duration-500 group-hover:scale-105"
-                        sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-                      />
-                    </div>
-                    <div className="flex h-[88px] flex-col items-center justify-center overflow-hidden px-1 text-center sm:h-[104px] lg:h-[80px]">
-                      <p className="text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
-                        {product.category}
-                      </p>
-                      <p className="mt-1 line-clamp-2 w-full text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px] lg:text-[13px]">
-                        {product.name}
-                      </p>
-                      <p className="mt-1 text-[13px] leading-[1.35] text-muted">
-                        {formatPrice(getDisplayPrice(product))}
-                      </p>
-                    </div>
-                  </Link>
-                  <WishlistQuickButton slug={product.slug} />
-                </div>
+                <Link
+                  href={`/product/${product.slug}`}
+                  key={product.slug}
+                  className="group relative block aspect-square bg-white p-2 transition-all duration-300 ease-out hover:z-10 hover:scale-[1.04] hover:shadow-[0_18px_40px_-14px_rgba(0,0,0,0.3)] sm:p-3 lg:p-2.5"
+                >
+                  <div className="relative h-[calc(100%-88px)] overflow-hidden sm:h-[calc(100%-104px)] lg:h-[calc(100%-80px)]">
+                    <Image
+                      src={product.images[0]}
+                      alt={product.name}
+                      fill
+                      className="object-contain transition-transform duration-500 group-hover:scale-105"
+                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+                    />
+                  </div>
+                  <div className="flex h-[88px] flex-col items-center justify-center overflow-hidden px-1 text-center sm:h-[104px] lg:h-[80px]">
+                    <p className="text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
+                      {product.category}
+                    </p>
+                    <p className="mt-1 line-clamp-2 w-full text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px] lg:text-[13px]">
+                      {product.name}
+                    </p>
+                    <p className="mt-1 text-[13px] leading-[1.35] text-muted">
+                      {formatPrice(getDisplayPrice(product))}
+                    </p>
+                  </div>
+                </Link>
               ))}
             </div>
           )}

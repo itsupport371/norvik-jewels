@@ -49,7 +49,21 @@ create index orders_user_id_idx on orders (user_id);
 -- One order row per Checkout Session — the success page can be hit more
 -- than once (refresh, back button), so this is what makes that an upsert
 -- instead of a duplicate row each time.
-create unique index orders_stripe_session_id_idx on orders (stripe_session_id) where stripe_session_id is not null;
+--
+-- NOT a partial index (no "where stripe_session_id is not null") even
+-- though the column is nullable: Postgres only lets ON CONFLICT infer a
+-- partial unique index as the arbiter when the predicate is repeated in
+-- the ON CONFLICT clause itself, which `supabase-js`'s
+-- `.upsert(..., { onConflict: 'stripe_session_id' })` doesn't do. With the
+-- partial version, every upsert from app/checkout/success/page.tsx threw
+-- "there is no unique or exclusion constraint matching the ON CONFLICT
+-- specification" — caught and swallowed by that code's try/catch (so the
+-- payment flow itself never broke), silently failing to write ANY order,
+-- ever (4 Oct 2026 bug, found while the client was testing demo
+-- purchases). A plain (non-partial) unique index works fine as an arbiter,
+-- and still allows multiple NULLs same as any standard SQL unique
+-- constraint — there's no behavior lost by dropping the predicate.
+create unique index orders_stripe_session_id_idx on orders (stripe_session_id);
 
 alter table orders enable row level security;
 

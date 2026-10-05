@@ -12,7 +12,6 @@ import {
   CLARITY_CHARGE_PERCENT,
 } from '@/lib/mock-products';
 import ProductSpecifications from '@/components/product-specifications';
-import RelatedProducts from '@/components/related-products';
 import { calculatePrice, TEST_GOLD_RATE_24K_PER_10G } from '@/lib/pricing';
 import { useWishlist } from '@/lib/wishlist-context';
 import { useCart } from '@/lib/cart-context';
@@ -86,13 +85,7 @@ function CardGrid({
   );
 }
 
-export default function ProductConfigurator({
-  product,
-  related,
-}: {
-  product: Product;
-  related: Product[];
-}) {
+export default function ProductConfigurator({ product }: { product: Product }) {
   const router = useRouter();
   const [activeImage, setActiveImage] = useState(0);
   const [metalKey, setMetalKey] = useState(product.metalOptions[0].label);
@@ -278,16 +271,7 @@ export default function ProductConfigurator({
               shoppers can switch photos right there with one tap, instead of
               having to reach the thumbnail row below (which on a phone can
               mean scrolling first) (25 Sep 2026). Wraps at both ends; only
-              shown when there's more than one photo to switch between.
-              Restyled (28 Sep 2026) — the plain white circle + drop-shadow
-              looked like a generic stock UI widget dropped onto the page.
-              Squared off with a thin warmstone border and an antiquegold
-              icon at rest (the theme's own palette calls antiquegold out by
-              name for exactly this — "labels, thin lines, arrows, small
-              CTAs" — see tailwind.config.ts), filling solid antiquegold on
-              hover the same way an active CardGrid choice fills solid ink,
-              so it reads as one of this site's own controls, not a
-              library default. */}
+              shown when there's more than one photo to switch between. */}
           {product.images.length > 1 && (
             <>
               <button
@@ -296,9 +280,9 @@ export default function ProductConfigurator({
                   setActiveImage((i) => (i - 1 + product.images.length) % product.images.length)
                 }
                 aria-label="Previous photo"
-                className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center border border-warmstone bg-softwhite text-antiquegold transition-colors hover:border-antiquegold hover:bg-antiquegold hover:text-white sm:h-10 sm:w-10"
+                className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-ink shadow-md transition-colors hover:bg-white sm:h-10 sm:w-10"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M15 18l-6-6 6-6" />
                 </svg>
               </button>
@@ -306,25 +290,76 @@ export default function ProductConfigurator({
                 type="button"
                 onClick={() => setActiveImage((i) => (i + 1) % product.images.length)}
                 aria-label="Next photo"
-                className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center border border-warmstone bg-softwhite text-antiquegold transition-colors hover:border-antiquegold hover:bg-antiquegold hover:text-white sm:h-10 sm:w-10"
+                className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-ink shadow-md transition-colors hover:bg-white sm:h-10 sm:w-10"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 6l6 6-6 6" />
                 </svg>
               </button>
-              <span className="absolute bottom-2 right-2 border border-warmstone bg-softwhite px-2 py-0.5 text-[11px] font-medium leading-[1.2] tracking-[0.02em] text-inknavy/80">
+              <span className="absolute bottom-2 right-2 rounded-full bg-ink/60 px-2 py-0.5 text-[11px] font-medium leading-[1.2] text-white">
                 {activeImage + 1} / {product.images.length}
               </span>
             </>
           )}
+
         </div>
+
+        {/* Wishlist + Share on mobile/tablet — moved OFF the photo itself and
+            into their own row underneath it (5 Oct 2026). They used to float
+            absolutely at top-right of the image, directly above the "Next
+            photo" arrow (also right-2, vertically centered) — on narrow
+            phones the two stacked icon buttons there left very little
+            clearance above the arrow and visually overlapped it. Taking them
+            out of the absolute overlay entirely removes that risk for good,
+            instead of just nudging pixel offsets around. `lg:hidden` since
+            the price-row pair below (`hidden lg:flex`) takes over on
+            desktop. Same handlers/state as that pair — just a second place
+            to trigger them. */}
+        <div className="mt-2 flex items-center justify-end gap-2 lg:hidden">
+          <button
+            onClick={() => toggleWishlist(product.slug)}
+            aria-label="Add to wishlist"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-ink"
+          >
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill={wishlisted ? '#B8935A' : 'none'}
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+          </button>
+          <button
+            onClick={handleShare}
+            aria-label="Share this product"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-ink"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+              <circle cx="18" cy="5" r="3" />
+              <circle cx="6" cy="12" r="3" />
+              <circle cx="18" cy="19" r="3" />
+              <line x1="8.6" y1="10.5" x2="15.4" y2="6.5" />
+              <line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Thumbnail strip — on mobile this now scrolls horizontally
+            (`overflow-x-auto`) with `shrink-0` thumbnails instead of
+            overflowing/clipping past the image's width when there are 4+
+            photos (5 Oct 2026, found while fixing the overlap above). */}
         {product.images.length > 1 && (
-          <div className="mt-3 flex gap-3">
+          <div className="mt-3 flex gap-3 overflow-x-auto pb-1">
             {product.images.map((img, i) => (
               <button
                 key={img}
                 onClick={() => setActiveImage(i)}
-                className={`relative h-20 w-20 overflow-hidden bg-white transition-opacity ${
+                className={`relative h-20 w-20 shrink-0 overflow-hidden bg-white transition-opacity ${
                   activeImage === i ? 'opacity-100 ring-1 ring-black' : 'opacity-60 hover:opacity-90'
                 }`}
               >
@@ -341,46 +376,6 @@ export default function ProductConfigurator({
           <h1 className="font-sans text-[14px] font-medium leading-[1.35] text-ink sm:text-[15px]">
             {product.name}
           </h1>
-          {/* Wishlist + Share, next to the product name on mobile/tablet —
-              was overlaid on the photo itself, but client asked it moved
-              down here instead (27 Sep 2026). `lg:hidden` since the
-              existing pair further down next to the price (`hidden lg:flex`)
-              already covers desktop, where it sits right next to the image
-              column. Same handlers/state as that pair — just shown here
-              instead, not in addition. */}
-          <div className="flex shrink-0 gap-2 lg:hidden">
-            <button
-              onClick={() => toggleWishlist(product.slug)}
-              aria-label="Add to wishlist"
-              className="flex h-9 w-9 items-center justify-center border border-line text-ink transition-colors hover:border-ink"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill={wishlisted ? '#B8935A' : 'none'}
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-              </svg>
-            </button>
-            <button
-              onClick={handleShare}
-              aria-label="Share this product"
-              className="flex h-9 w-9 items-center justify-center border border-line text-ink transition-colors hover:border-ink"
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-                <circle cx="18" cy="5" r="3" />
-                <circle cx="6" cy="12" r="3" />
-                <circle cx="18" cy="19" r="3" />
-                <line x1="8.6" y1="10.5" x2="15.4" y2="6.5" />
-                <line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
-              </svg>
-            </button>
-          </div>
         </div>
 
         <div className="mt-3 flex items-center justify-between gap-3">
@@ -636,14 +631,6 @@ export default function ProductConfigurator({
           gstAmount={gstAmount}
           grandTotal={grandTotal}
         />
-      </div>
-
-      {/* Related products — sits in the column-2/row-2 grid cell, which was
-          empty white space on desktop (see RelatedProducts' own comment for
-          why). On mobile this still stacks right after Specifications, same
-          as before — not hidden there. */}
-      <div className="lg:col-start-2 lg:row-start-2">
-        <RelatedProducts related={related} />
       </div>
     </div>
   );

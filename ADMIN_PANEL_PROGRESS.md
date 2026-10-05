@@ -992,3 +992,61 @@ run `npm run dev` or hit Supabase from here) — client needs to run the
 migration (`supabase/migrations/0005_orders_schema.sql`) against the
 database, then do one more signed-in test purchase to confirm it appears
 under My Orders.
+
+## Orders bug found: partial unique index broke the upsert silently (4 Oct 2026)
+
+After the client ran the `orders` migration and redeployed, a fresh test
+purchase still didn't show up under My Orders — and nothing showed in the
+`orders` table in Supabase either. Root cause: `orders_stripe_session_id_idx`
+was a PARTIAL unique index (`where stripe_session_id is not null`), but
+`app/checkout/success/page.tsx` writes with `supabase.from('orders').upsert(
+..., { onConflict: 'stripe_session_id' })`, which Postgres translates to
+`ON CONFLICT (stripe_session_id)` with no `WHERE` clause. Postgres will not
+infer a partial index as the arbiter for an `ON CONFLICT` target unless the
+same predicate is repeated in the `ON CONFLICT ... WHERE ...` clause — since
+it isn't here, every single upsert threw "there is no unique or exclusion
+constraint matching the ON CONFLICT specification", which the success
+page's own try/catch silently swallowed (so the payment flow itself never
+broke or showed an error) — meaning no order was EVER actually written,
+from the very first test.
+
+Fix: dropped the partial predicate — `orders_stripe_session_id_idx` is now
+a plain (non-partial) unique index on `stripe_session_id`. A plain unique
+index still allows multiple NULLs same as any standard SQL unique
+constraint, so nothing is lost, and it's a valid `ON CONFLICT` arbiter.
+Updated directly in `supabase/migrations/0005_orders_schema.sql` with a
+comment explaining why, so this doesn't get "fixed" back to a partial
+index by accident later. Client needs to run in Supabase SQL Editor:
+
+    drop index if exists orders_stripe_session_id_idx;
+    create unique index orders_stripe_session_id_idx on orders (stripe_session_id);
+
+then do one more signed-in test purchase to confirm an order row finally
+appears both in the Supabase table editor and under My Orders.
+
+## Product photo arrows overlapping on mobile — fixed (5 Oct 2026)
+
+**Report:** on the product page, the main-photo Prev/Next arrows were
+overlapping other controls on mobile ("images sliding mein products ke wo
+mobile mein overlap ho rahe hein").
+
+**Root cause:** `components/product-configurator.tsx` had THREE separate
+floating controls stacked on the right edge of the main product photo —
+the "Next photo" arrow (vertically centered), the image-count badge
+(bottom-right), and a Wishlist+Share icon pair (top-right, stacked). On a
+narrow phone the square photo container shrinks a lot, and the Wishlist+
+Share stack and the Next arrow ended up only ~30px apart (or less,
+depending on device/zoom) — tight enough to visually overlap.
+
+**Fix:** moved the Wishlist + Share buttons OFF the photo entirely. They
+now sit in their own row just below the image (still mobile/tablet only,
+`lg:hidden` — desktop already has this pair in the price row). This
+removes the crowding for good instead of just nudging pixel offsets, since
+there's now nothing else floating on top of the arrows.
+
+**Bonus fix (found while in there):** the thumbnail strip below the main
+photo had no horizontal scroll — with 4+ product photos the thumbnails
+would overflow past the image's width on mobile. Added `overflow-x-auto`
+to the strip and `shrink-0` to each thumbnail so it scrolls instead.
+
+File touched: `components/product-configurator.tsx`.
