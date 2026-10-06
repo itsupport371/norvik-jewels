@@ -443,21 +443,6 @@ export default function ProductConfigurator({
                 <line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
               </svg>
             </button>
-            <button
-              onClick={() => setShowRelated((v) => !v)}
-              aria-label={showRelated ? 'Hide similar products' : 'Show similar products'}
-              aria-pressed={showRelated}
-              className={`flex h-10 w-10 items-center justify-center border transition-colors ${
-                showRelated ? 'border-ink bg-ink text-white' : 'border-line text-ink hover:border-ink'
-              }`}
-            >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="7" height="7" rx="1" />
-                <rect x="14" y="3" width="7" height="7" rx="1" />
-                <rect x="3" y="14" width="7" height="7" rx="1" />
-                <rect x="14" y="14" width="7" height="7" rx="1" />
-              </svg>
-            </button>
           </div>
         </div>
 
@@ -677,11 +662,25 @@ export default function ProductConfigurator({
         />
       </div>
 
-      {/* Related products — sits in the second row of the right column, next
-          to Specifications, instead of as its own full-width section below
-          everything. See components/related-products.tsx for the reasoning. */}
-      <div className="lg:col-start-2 lg:row-start-2">
+      {/* Related products — mobile only, icon-gated (6 Oct 2026): client
+          wants it hidden-by-default and tap-to-reveal ONLY on phones; this
+          copy sits inside the grid so on mobile (where the grid collapses
+          to one column) it still falls in normal order right after
+          Specifications. `lg:hidden` so desktop never renders this copy. */}
+      <div className="lg:hidden">
         <RelatedProducts related={related} open={showRelated} />
+      </div>
+
+      {/* Related products — desktop, compulsory (6 Oct 2026): always visible
+          on web, full-width (`lg:col-span-2` — this grid is only 2 columns
+          at lg — so it naturally falls into its own row below everything
+          else, directly under the Specifications table, instead of beside
+          it in column 2 like before. `open` is hardcoded true since desktop
+          no longer has a toggle for it at all — only the mobile icon above
+          does. `hidden lg:block` so phones never render this copy; they get
+          the icon-gated one right above instead. */}
+      <div className="hidden lg:col-span-2 lg:block">
+        <RelatedProducts related={related} open />
       </div>
     </div>
   );
