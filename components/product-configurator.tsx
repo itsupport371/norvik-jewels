@@ -95,6 +95,13 @@ export default function ProductConfigurator({
 }) {
   const router = useRouter();
   const [activeImage, setActiveImage] = useState(0);
+  // "You May Also Like" is now hidden-by-default on both web and mobile —
+  // client asked to drop the "Show More" text button and instead trigger it
+  // from a small icon alongside Wishlist/Share, matching their look, with
+  // the related grid only appearing once that icon is tapped (6 Oct 2026).
+  // Lifted up here (was local state inside related-products.tsx) since the
+  // trigger icon now lives in this component, not inside that one.
+  const [showRelated, setShowRelated] = useState(false);
   const [metalKey, setMetalKey] = useState(product.metalOptions[0].label);
   const [sizeKey, setSizeKey] = useState<string | null>(
     () => product.sizeOptions.find((o) => o.label === '9')?.label ?? null
@@ -354,6 +361,21 @@ export default function ProductConfigurator({
               <line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
             </svg>
           </button>
+          <button
+            onClick={() => setShowRelated((v) => !v)}
+            aria-label={showRelated ? 'Hide similar products' : 'Show similar products'}
+            aria-pressed={showRelated}
+            className={`flex h-9 w-9 items-center justify-center rounded-full border transition-colors ${
+              showRelated ? 'border-ink bg-ink text-white' : 'border-line text-ink hover:border-ink'
+            }`}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+          </button>
         </div>
 
         {/* Thumbnail strip — on mobile this now scrolls horizontally
@@ -419,6 +441,21 @@ export default function ProductConfigurator({
                 <circle cx="18" cy="19" r="3" />
                 <line x1="8.6" y1="10.5" x2="15.4" y2="6.5" />
                 <line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setShowRelated((v) => !v)}
+              aria-label={showRelated ? 'Hide similar products' : 'Show similar products'}
+              aria-pressed={showRelated}
+              className={`flex h-10 w-10 items-center justify-center border transition-colors ${
+                showRelated ? 'border-ink bg-ink text-white' : 'border-line text-ink hover:border-ink'
+              }`}
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+                <rect x="14" y="14" width="7" height="7" rx="1" />
               </svg>
             </button>
           </div>
@@ -644,7 +681,7 @@ export default function ProductConfigurator({
           to Specifications, instead of as its own full-width section below
           everything. See components/related-products.tsx for the reasoning. */}
       <div className="lg:col-start-2 lg:row-start-2">
-        <RelatedProducts related={related} />
+        <RelatedProducts related={related} open={showRelated} />
       </div>
     </div>
   );
