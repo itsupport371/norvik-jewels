@@ -440,7 +440,29 @@ function normalizeDedupedSku(rawSku: string): string {
   return m ? `ER-16${m[1].padStart(3, '0')}` : stripped;
 }
 
+// A design's Display Name isn't always typed against the FIRST-listed
+// variant row — e.g. Batch-16's SEER-045 (7 Oct 2026): after correcting a
+// mistyped Norvik SKU on an earlier variant row, that corrected row became
+// the kept (smallest/first) one below, but the sheet's own "Sunburst
+// Solitaire" name was still typed against a LATER variant row of the same
+// design — which dedupe would otherwise drop along with its gold/diamond
+// figures, silently losing the name the client actually typed and falling
+// back to a placeholder instead. This first pass finds each Norvik SKU's
+// name from ANY of its variant rows (first one found, not just the kept
+// row), so the dedupe pass below can backfill it onto the kept row when
+// that row has none of its own.
+function collectNamesByNorvikSku(rows: ParsedRow[]): Map<string, string> {
+  const nameByNorvikSku = new Map<string, string>();
+  for (const r of rows) {
+    if (r.hasName && r.norvikSku && !nameByNorvikSku.has(r.norvikSku)) {
+      nameByNorvikSku.set(r.norvikSku, r.name);
+    }
+  }
+  return nameByNorvikSku;
+}
+
 function dedupeByNorvikSku(rows: ParsedRow[]): ParsedRow[] {
+  const nameByNorvikSku = collectNamesByNorvikSku(rows);
   const seen = new Set<string>();
   const result: ParsedRow[] = [];
   for (const r of rows) {
@@ -448,6 +470,10 @@ function dedupeByNorvikSku(rows: ParsedRow[]): ParsedRow[] {
     const key = r.norvikSku;
     if (key && seen.has(key)) continue;
     if (key) seen.add(key);
+    if (!r.hasName && key && nameByNorvikSku.has(key)) {
+      r.name = nameByNorvikSku.get(key)!;
+      r.hasName = true;
+    }
     result.push(r);
   }
   return result;

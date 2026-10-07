@@ -1152,3 +1152,20 @@ Order to run this: (1) fix/confirm the Excel row 117 typo, (2) import the
 Excel at `/admin/products/import` (54 drafts), (3) import photos at
 `/admin/products/photos`, selecting this same `Batch-16` folder (30 of the
 54 will match — the other 24 have no photos yet).
+
+## SEER-045 typo fixed in client's sheet — found a name-loss side effect (7 Oct 2026)
+
+Client corrected the Excel row 117 typo (SEER-044 → SEER-045). That fix
+alone would have caused a NEW problem: the "Sunburst Solitaire" Display
+Name was typed against the 1.00 ct variant row of SEER-045, not the 0.50
+ct one — and once the SKU typo is fixed, the 0.50 ct row becomes the one
+dedupe keeps (first-listed = smallest), dropping the 1.00 ct row (and its
+name) entirely. Without a further fix, SEER-045 would have imported
+correctly priced but with a placeholder name instead of "Sunburst
+Solitaire".
+
+`dedupeByNorvikSku` in `app/admin/products/import/page.tsx` now collects a
+name from ANY variant row sharing a Norvik SKU (not just the kept one)
+before deduping, and backfills it onto the kept row if that row has no
+name of its own. General fix, not Batch-16-specific — protects every
+future batch with the same "name typed on a non-kept variant row" shape.
