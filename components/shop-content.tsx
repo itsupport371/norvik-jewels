@@ -399,8 +399,18 @@ export default function ShopContent({ products }: { products: Product[] }) {
       </div>
 
       <div className="lg:grid lg:grid-cols-[240px_1fr] lg:gap-10">
-        {/* Sidebar — desktop */}
-        <aside className="hidden lg:block">{sidebar}</aside>
+        {/* Sidebar — desktop. Client reported (7 Oct 2026) that scrolling
+            down the product grid made the filters disappear — the aside
+            was a plain block in the grid, only as tall as its own filter
+            list, so once you scrolled past that it was gone while the
+            (much taller) product grid kept going. `sticky` pins it to the
+            viewport as you scroll; `top-24` clears the site header (~76px)
+            with a little breathing room; `max-h-[calc(100vh-6rem)]` +
+            `overflow-y-auto` keeps it fully reachable and independently
+            scrollable on short viewports instead of ever being clipped. */}
+        <aside className="hidden lg:sticky lg:top-24 lg:block lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto">
+          {sidebar}
+        </aside>
 
         {/* Sidebar — mobile drawer */}
         {mobileFiltersOpen && (

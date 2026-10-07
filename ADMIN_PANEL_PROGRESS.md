@@ -1227,3 +1227,20 @@ This protects every future import, not just Batch-16 — any batch where
 the manufacturer reuses a design name, or where a new batch's name happens
 to match an already-imported product's name, no longer kills the whole
 bulk insert.
+
+## Shop page: filters disappear on scroll (7 Oct 2026)
+
+Client: scrolling down the product grid on the shop/category page made the
+left filters panel disappear — it only showed up at the very top.
+
+Cause: in `components/shop-content.tsx`, the desktop `<aside>{sidebar}</aside>`
+was a plain block inside the `lg:grid lg:grid-cols-[240px_1fr]` layout, so it
+was only as tall as its own filter list — once scrolled past that height
+(much shorter than the product grid), it was simply gone.
+
+Fixed: made the aside `sticky` so it pins to the viewport while scrolling —
+`lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-6rem)]
+lg:overflow-y-auto` (top-24 clears the site header; max-height +
+overflow-y-auto means on a short viewport the filter list scrolls on its
+own instead of ever getting clipped off-screen). Mobile is unaffected — it
+already uses the separate slide-in drawer, not this aside.
