@@ -1196,3 +1196,34 @@ will import as Draft (per the bulk importer, unchanged) and now literally
 cannot be flipped to Published from the admin UI until at least one Image
 URL is present — closes the gap between "photo import ran" and "this
 product is safe to make live."
+
+## Batch-16 import failed: duplicate slug (7 Oct 2026)
+
+Client clicked "Import 54 as Drafts" and got: `duplicate key value violates
+unique constraint "products_slug_key"`.
+
+Root cause (confirmed via Python simulation of the full 54-row parse):
+`slug` was always `slugify(name)` with no collision check, and two
+different designs in this batch both have Display Name "Crossover
+Solitaire" (EER-016006 and EER-016015) — so both produced slug
+`crossover-solitaire`, and the single bulk `insert()` of all rows failed
+on the second one. `norvik_sku` was already deduped/checked, `slug` never
+was.
+
+Fixed generally (not just patched for this one pair) in
+`app/admin/products/import/page.tsx`'s `handleImport`:
+- Before building payloads, queries the DB for any existing `slug` that
+  matches this batch's candidate slugs (`slugify(name)` for every row).
+- Walks the rows in order; if a row's slug is already taken — by an
+  existing product OR by an earlier row in the same batch — it appends
+  ` ${norvikSku || sku}` to the name before slugifying, guaranteeing a
+  unique slug (every Norvik SKU is unique).
+- So "Crossover Solitaire" (EER-016006) keeps slug `crossover-solitaire`,
+  and the second one (EER-016015) gets `crossover-solitaire-eer-016015`
+  instead of colliding. Client can rename either one later from the
+  product edit page if desired.
+
+This protects every future import, not just Batch-16 — any batch where
+the manufacturer reuses a design name, or where a new batch's name happens
+to match an already-imported product's name, no longer kills the whole
+bulk insert.

@@ -606,10 +606,41 @@ export default function ImportProductsPage() {
 
     const toInsert = selectedRows.filter((r) => !existingSet.has(r.norvikSku));
 
+    // Batch-16 (7 Oct 2026): import failed with "duplicate key value
+    // violates unique constraint products_slug_key" — two rows in this
+    // batch both have Display Name "Crossover Solitaire" (EER-016006 and
+    // EER-016015, genuinely different designs that the manufacturer happened
+    // to name the same), so both got slug "crossover-solitaire" and the
+    // single bulk insert failed outright. `slug` is unique in the table but
+    // `name` isn't, and nothing previously checked for this — it can also
+    // happen across batches (this batch's name matching an older product's).
+    // Fixed generally: look up which slugs already exist in the DB for this
+    // batch's candidate slugs, then walk the rows in order and append a
+    // `-<norvik sku>` suffix to any slug that's already taken (by an
+    // existing product OR by an earlier row in this same batch), so every
+    // row always gets a slug the database will actually accept.
+    const candidateSlugs = toInsert.map((r) => slugify(r.name));
+    const { data: existingSlugRows } = await supabase
+      .from('products')
+      .select('slug')
+      .in('slug', candidateSlugs);
+    const takenSlugs = new Set((existingSlugRows ?? []).map((e) => e.slug));
+
+    function uniqueSlug(r: ParsedRow): string {
+      const base = slugify(r.name);
+      if (!takenSlugs.has(base)) {
+        takenSlugs.add(base);
+        return base;
+      }
+      const disambiguated = slugify(`${r.name} ${r.norvikSku || r.sku}`);
+      takenSlugs.add(disambiguated);
+      return disambiguated;
+    }
+
     const payloads = toInsert.map((r) => {
       const formValue: ProductFormValue = {
         name: r.name,
-        slug: slugify(r.name),
+        slug: uniqueSlug(r),
         category,
         sku: r.sku,
         norvik_sku: r.norvikSku,
