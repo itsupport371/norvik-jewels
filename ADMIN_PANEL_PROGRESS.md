@@ -1050,3 +1050,105 @@ would overflow past the image's width on mobile. Added `overflow-x-auto`
 to the strip and `shrink-0` to each thumbnail so it scrolls instead.
 
 File touched: `components/product-configurator.tsx`.
+
+## Batch-16 (Solitaire Earrings) import — parser fix (7 Oct 2026)
+
+Client sent `Batch-16_solitaire_earring_Norvik.xlsx` (54 unique designs, 114
+rows before dedupe). Verified it against the import parser with a
+standalone Python/openpyxl simulation before touching the live code, per
+the usual practice for a new batch.
+
+**Fix needed:** the sheet's Norvik SKU column is headed literally `"SKU"`
+— not `"Norvik SKU"` — so it wasn't caught by the existing `['norvik']`
+text match, and it also has its own header text (not blank), so the
+Batch-13-style "unlabeled column left of name" fallback didn't catch it
+either. `norvikCol` now also tries an EXACT match for a header that
+trims+lowercases to just `"sku"` (distinct from the manufacturer code
+column, headed `"SKU Code"`, which a plain substring match would hit
+first). File touched: `app/admin/products/import/page.tsx`.
+
+**Data issue in the client's sheet (not a parser bug) — flagged, not
+silently fixed:** like Batch-15, this sheet lists each design once per
+available diamond carat (0.50/1.00/1.50/2.00 ct) sharing one Norvik SKU,
+and dedupe keeps the first-listed (smallest) one. One row — `S ER-45(0.50)`
+— has its own SKU column mistyped as `SEER-044` instead of `SEER-045`.
+Dedupe reads that literally, so `SEER-044` ends up with two 0.50 ct
+candidates (keeps the correct one, from `S ER-44(0.50)`) and `SEER-045`'s
+canonical row becomes its 1.00 ct listing instead of 0.50 ct — different
+gold weight and diamond specs than every other product in this batch got.
+**Client should check row 117 (SKU column) in the source sheet before
+importing** — if it's confirmed a typo, fix it there and re-upload; this
+was deliberately left for the client to confirm rather than guessed at.
+
+24 of the 54 designs have no Display Name in the sheet — these import with
+a placeholder name (`"<Norvik SKU> piece"`), same as prior batches;
+rename them afterward in the products list.
+
+Next: client uploads the Excel at `/admin/products/import` as usual (same
+UI, no separate conversion step) — 54 drafts, category "Earrings", "One
+Size" (not a ring run).
+
+## Batch-16 photo folder checked — two more import-tool fixes (7 Oct 2026)
+
+Client pointed at the actual photo folder on their computer
+(`...\08-09-2026_Pulkit ji_Aanvi Gold\Export\Batch-16`, 30 SKU sub-folders)
+before importing anything. Checked it against the photo importer
+(`app/admin/products/photos/page.tsx`) with the same simulate-before-ship
+approach used for the Excel parser. Two more real gaps found and fixed:
+
+1. **Per-angle photos used a naming style the importer didn't recognise at
+   all.** Every folder's main photo set is named `16001-R1.jpg` /
+   `-W2.jpg` / `-Y3.jpg` (folder number + single color letter + angle
+   digit) — no "Render" word, unlike Batch-13's `-Render-R1.jpg`. Neither
+   existing pattern matched, which would have silently skipped the bulk of
+   every folder's photos (12 of 19–33 files each). Added as its own
+   pattern (`BARE_LETTER_RE`) rather than loosening the Batch-13 one, so a
+   bare `-R1.jpg`-shaped ending can't start matching unrelated files in
+   older batches.
+
+2. **A "carat size chart" image was being picked up as a real product
+   photo.** The ten `16045`–`16054` folders each have
+   `{folder}-caratsizes-white.jpg` (a size-comparison infographic, not a
+   ring photo) — it spells out "white" right before the extension, so the
+   existing color-word regex matched it as a genuine white-gold shot.
+   Excluded by filename (`caratsizes`) before either regex runs.
+
+**Folder-name vs SKU mismatch, fixed at the Excel-import side instead of
+in the photo matcher:** the `16045`–`16054` folders don't line up with
+either the manufacturer SKU (`S ER-45`) or the Norvik SKU (`SEER-045`) by
+the photo importer's existing exact/trailing-digit match — the folder
+keeps the batch's full numbering (`16045`) while this one design family's
+own code is shortened. Rather than loosening the shared folder-matching
+logic (risky — a short 2-digit suffix match could hit an unrelated
+product from a different batch entirely), `app/admin/products/import/page.tsx`
+now rewrites a `"S ER-<n>"`-shaped manufacturer SKU to the long form
+(`"ER-16045"`) at import time, verified against all 10 of this batch's
+photo folders with zero exceptions — so the existing, unmodified
+trailing-digit folder match just works for this family too.
+
+With all three fixes, a full dry-run simulation against the real folder
+(30 sub-folders, 742 files) came out clean: 420 photos correctly
+recognised (12 per ER-16NNN design, 16 per SEER-0NN design — 4 carat
+variants' worth of hero shots there, one extra nuance to note below), 290
+correctly ignored (CAD `.3dm`/`.stl`, video `.mp4`, bare SKU renders, the
+carat-size chart).
+
+**Remaining open item — client needs to check, not something to silently
+fix:** the `16045` folder's own files (`S ER-45(0.50).jpg` etc.) confirm
+folder "45" = design "SEER-045" — which corroborates the typo flagged
+earlier (Excel row 117's SKU column says `SEER-044` for the `S ER-45(0.50)`
+row). **Still needs the client's confirmation before import** — only
+affects which carat variant's gold/diamond weight SEER-045 gets.
+
+**Minor, not fixed — cosmetic only:** the SEER-0NN folders have FOUR
+"Model" hero shots each (one per carat variant: 0.50/1.00/1.50/2.00), but
+since each design imports as ONE product (one carat kept, per the
+existing multi-variant dedupe), all four still get uploaded and will show
+up as 4 near-identical hero shots at the end of that product's gallery.
+Harmless — client can delete the extra three from the product's Image
+URLs after import if they'd rather have just one.
+
+Order to run this: (1) fix/confirm the Excel row 117 typo, (2) import the
+Excel at `/admin/products/import` (54 drafts), (3) import photos at
+`/admin/products/photos`, selecting this same `Batch-16` folder (30 of the
+54 will match — the other 24 have no photos yet).

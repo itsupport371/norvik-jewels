@@ -89,6 +89,24 @@ import {
 //        survives. The other sizes' own gold/diamond figures are dropped
 //        — the site has no per-size pricing today, just a fixed
 //        gold_weight_grams/base_price per product.
+//      - "Batch-16" (Solitaire Earrings, 7 Oct 2026): same shape as
+//        Batch-15 (TEN diamond-shape columns, all caught by bare "count"),
+//        but its Norvik SKU column is headed literally "SKU" — not "Norvik
+//        SKU", so the existing `['norvik']` text match missed it, and not
+//        blank either, so the Batch-13 unlabeled-column fallback missed it
+//        too (that fallback only fires when the column has NO header text
+//        at all). norvikCol now also tries an EXACT (not substring) match
+//        for a header that trims+lowercases to "sku" — distinct from the
+//        manufacturer code column, headed "SKU Code", which a substring
+//        match would hit first. Also has the SAME per-design multi-SIZE
+//        row shape as Batch-15 (here it's carat, not physical size — e.g.
+//        "SEER-035" listed four times for 0.50/1.00/1.50/2.00 ct), handled
+//        the same way by dedupeByNorvikSku — EXCEPT one row in this sheet
+//        ("S ER-45(0.50)") has its own SKU column mis-typed as "SEER-044"
+//        instead of "SEER-045", so dedupe silently keeps the 1.00 ct row as
+//        SEER-045's canonical one instead of the intended 0.50 ct — flagged
+//        to the client rather than silently "corrected" here, since this
+//        looks like a one-off typo in their sheet, not a parsing bug.
 type ParsedRow = {
   sku: string;
   norvikSku: string;
@@ -247,10 +265,20 @@ function parseHeaderDrivenV1(allRows: unknown[][], sheetName: string): ParsedRow
   const diamondWeightCol = findCol(header, ['diamond wt', 'diamond weight']);
   const diamondCountCols = findAllCols(header, ['count']);
   let norvikCol = findCol(header, ['norvik']);
-  // Batch-13 (29 Sep 2026): no header says "norvik" anywhere, but the
-  // piece's own code (e.g. "EPS-01201") sits in a column with NO header
-  // text at all, directly to the left of the Product name column — only
-  // fall back to it when that's the shape we see, so an ordinary blank
+  // Batch-16 (7 Oct 2026, Solitaire Earrings): the sheet's dedicated Norvik
+  // SKU column is headed literally "SKU" (not "Norvik SKU") — distinct from
+  // the manufacturer code column, headed "SKU Code", which skuCol above
+  // already claims. A plain substring match on "sku" would hit "SKU Code"
+  // first (it comes first in the sheet) and never reach this one at all, so
+  // this checks for a header that TRIMS+LOWERCASES to EXACTLY "sku" — no
+  // other text — which only ever matches a column meant as nothing else.
+  if (norvikCol < 0) {
+    norvikCol = header.findIndex((cell) => typeof cell === 'string' && cell.trim().toLowerCase() === 'sku');
+  }
+  // Batch-13 (29 Sep 2026): no header says "norvik" (or bare "sku") anywhere,
+  // but the piece's own code (e.g. "EPS-01201") sits in a column with NO
+  // header text at all, directly to the left of the Product name column —
+  // only fall back to it when that's the shape we see, so an ordinary blank
   // column next to an unrelated header elsewhere doesn't get mistaken for
   // this.
   if (norvikCol < 0 && nameCol > 0 && !isNonEmptyString(header[nameCol - 1])) {
@@ -381,11 +409,42 @@ function fillMissingNames(rows: ParsedRow[]): void {
 // specifically. Run BEFORE fillMissingNames so name-borrowing only ever
 // sees the one row per design that's actually going to be imported.
 const SIZE_SUFFIX_RE = /\s+size\s*\d+\s*$/i;
+
+// Batch-16 (7 Oct 2026): same multi-variant-rows-per-design shape as
+// Batch-15, but by CARAT instead of physical size — "S ER-45(0.50)"
+// through "...(2.00)" all share one Norvik SKU. The kept row's sku can
+// still carry that "(0.50)"-style suffix after dedupe below picks one
+// variant — stripped here the same way Batch-15 strips " Size N", so the
+// stored SKU reads as one design, not one specific carat of it.
+const CARAT_SUFFIX_RE = /\s*\(\d+(?:\.\d+)?\)\s*$/;
+
+// Batch-16's "Solitaire" sub-range uses a SHORTENED manufacturer code
+// ("S ER-45") instead of continuing this batch's own "ER-16NNN" numbering
+// the way ER-16001..ER-16034 do — but its photo folder on disk is still
+// named the LONG way ("16045", not "45"), continuing that exact same
+// sequence (verified against all 10 of this batch's "S ER-" photo
+// folders on the client's drive — every one is "16" plus its own number,
+// zero-padded to 3 digits, with zero exceptions). Rewriting `sku` to that
+// long form here ("ER-16045") lets the EXISTING trailing-digit
+// photo-folder match — used as-is by every batch, unmodified, in
+// app/admin/products/photos/page.tsx — work for this family too, instead
+// of loosening that shared matching code itself, which would make
+// folder-matching far more collision-prone across the WHOLE catalogue (a
+// loose short-digit suffix match could hit an unrelated product from a
+// completely different batch).
+const SOLITAIRE_SHORT_SKU_RE = /^S\s*ER-(\d+)/i;
+
+function normalizeDedupedSku(rawSku: string): string {
+  const stripped = rawSku.replace(SIZE_SUFFIX_RE, '').replace(CARAT_SUFFIX_RE, '').trim();
+  const m = stripped.match(SOLITAIRE_SHORT_SKU_RE);
+  return m ? `ER-16${m[1].padStart(3, '0')}` : stripped;
+}
+
 function dedupeByNorvikSku(rows: ParsedRow[]): ParsedRow[] {
   const seen = new Set<string>();
   const result: ParsedRow[] = [];
   for (const r of rows) {
-    r.sku = r.sku.replace(SIZE_SUFFIX_RE, '').trim();
+    r.sku = normalizeDedupedSku(r.sku);
     const key = r.norvikSku;
     if (key && seen.has(key)) continue;
     if (key) seen.add(key);

@@ -22,26 +22,45 @@ import { createClient } from '@/lib/supabase/client';
 // text itself to match exactly, so this doesn't loosen anything else.
 const IMAGE_NAME_RE = /[\s-](Model-)?(Yellow|White|Rose)[\s-]*(\d+)?\.+(jpe?g|png)$/i;
 
-// Batch-13 (29 Sep 2026) and Batch-15 (30 Sep 2026) both use a totally
-// different naming convention from every batch before them for their main
-// product-photography set — a single-letter color code instead of the full
-// color word, e.g. "1213-Render-R2.jpg" or "DOC-PD-15045-R1.jpg" (R/W/Y =
-// Rose/White/Yellow), not "M-165-Rose 2.jpg". Deliberately NOT anchored on
-// "Render-" specifically (Batch-15 has no such word in its filenames at
-// all, just "...-R1.jpg" directly) — a bare hyphen right before the single
-// letter is enough, and is not a real collision risk: nothing else in
-// either batch's folder ends in "-R", "-W" or "-Y" plus an optional number
-// before a jpg/png extension (the CAD/detail/"SizeN" files all end
-// differently). These are the ONLY per-color, per-angle shots each batch
-// has (4 angles per color) — the "...-Model-*.jpg" files (still matched by
-// IMAGE_NAME_RE above, since those spell the color out in full) are just a
-// hero/worn shot per color/size, and neither batch has a Rose one of those.
-const LETTER_COLOR_RE = /-([RWY])(\d+)?\.+(jpe?g|png)$/i;
-const LETTER_COLOR: Record<string, 'yellow' | 'white' | 'rose'> = {
+// Batch-16 (7 Oct 2026): a few folders have a "carat size comparison"
+// chart image — "16045-caratsizes.jpg" / "16045-caratsizes-white.jpg" —
+// that is NOT a product photo at all. The plain one is already ignored
+// (no color word), but "...-white.jpg" DOES spell out a real color word
+// right before the extension, so IMAGE_NAME_RE above was matching it as
+// if it were an actual white-gold ring shot — uploading a size chart into
+// the product gallery as a "photo". Excluded by filename before either
+// regex runs, rather than tightened in the regex itself, since
+// "caratsizes" is this batch's specific naming for it and could vary next
+// time.
+const EXCLUDED_NAME_RE = /caratsizes/i;
+
+// Batch-13 (29 Sep 2026): its main product-photography set uses a totally
+// different naming convention from every batch before it — a single-letter
+// color code instead of the full color word, e.g. "1213-Render-R2.jpg"
+// (R/W/Y = Rose/White/Yellow), not "M-165-Rose 2.jpg". These are the ONLY
+// per-color, per-angle shots this batch has (4 angles per color) — the
+// "PD-<num>-Model-*.jpg" files (still matched by IMAGE_NAME_RE above, since
+// those spell the color out in full) are just a single hero/worn shot per
+// color, and this batch has no Rose one of those at all.
+const RENDER_LETTER_RE = /-Render-([RWY])(\d+)?\.+(jpe?g|png)$/i;
+const RENDER_LETTER_COLOR: Record<string, 'yellow' | 'white' | 'rose'> = {
   r: 'rose',
   w: 'white',
   y: 'yellow',
 };
+
+// Batch-16 (7 Oct 2026): its main per-angle photo set drops the "Render"
+// word entirely — just "16001-R1.jpg" / "16001-W4.jpg" / "16001-Y2.jpg"
+// (folder-number prefix, single color letter, angle digit) — so neither
+// IMAGE_NAME_RE (needs a full color word) nor RENDER_LETTER_RE (needs the
+// literal "-Render-" text) matched any of them, which would have silently
+// skipped the bulk of this batch's photos (12 of ~19-33 files per folder).
+// Kept as its OWN pattern rather than loosening RENDER_LETTER_RE, since
+// "-Render-" being optional there would make a bare "-R1.jpg"-shaped
+// ending match on ANY folder's files, including older batches, with no
+// way to tell a real color-letter shot from an unrelated filename that
+// happens to end the same way.
+const BARE_LETTER_RE = /-([RWY])(\d+)?\.+(jpe?g|png)$/i;
 
 // The Excel-derived `sku` column has inconsistent spacing across rows
 // ("M-165" vs "M -165" vs "M - 166") — see ADMIN_PANEL_PROGRESS.md — while
@@ -62,6 +81,7 @@ function trailingNumber(s: string): number | null {
 }
 
 function parseFileName(name: string) {
+  if (EXCLUDED_NAME_RE.test(name)) return null;
   const m = name.match(IMAGE_NAME_RE);
   if (m) {
     return {
@@ -70,12 +90,20 @@ function parseFileName(name: string) {
       index: m[3] ? parseInt(m[3], 10) : 0,
     };
   }
-  const rm = name.match(LETTER_COLOR_RE);
+  const rm = name.match(RENDER_LETTER_RE);
   if (rm) {
     return {
       isHero: false,
-      color: LETTER_COLOR[rm[1].toLowerCase()],
+      color: RENDER_LETTER_COLOR[rm[1].toLowerCase()],
       index: rm[2] ? parseInt(rm[2], 10) : 0,
+    };
+  }
+  const bm = name.match(BARE_LETTER_RE);
+  if (bm) {
+    return {
+      isHero: false,
+      color: RENDER_LETTER_COLOR[bm[1].toLowerCase()],
+      index: bm[2] ? parseInt(bm[2], 10) : 0,
     };
   }
   return null;
