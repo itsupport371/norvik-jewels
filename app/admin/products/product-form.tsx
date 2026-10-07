@@ -140,6 +140,16 @@ export default function ProductForm({ initial }: { initial: ProductFormValue }) 
 
   const estimatedPrice = useMemo(() => computeBasePrice(v), [v]);
 
+  // Safety check (7 Oct 2026): a product with no photos should never be
+  // publishable — it would show up live on the site with a broken/blank
+  // image. Computed live off imagesText (not v.images) so the "Published"
+  // option disables/enables as the admin types into the Image URLs field,
+  // not just at initial load.
+  const hasImages = useMemo(
+    () => imagesText.split('\n').map((s) => s.trim()).filter(Boolean).length > 0,
+    [imagesText]
+  );
+
   function update<K extends keyof ProductFormValue>(key: K, value: ProductFormValue[K]) {
     setV((prev) => ({ ...prev, [key]: value }));
   }
@@ -166,13 +176,18 @@ export default function ProductForm({ initial }: { initial: ProductFormValue }) 
       return;
     }
 
-    setSaving(true);
-    const supabase = createClient();
-
     const images = imagesText
       .split('\n')
       .map((s) => s.trim())
       .filter(Boolean);
+
+    if (v.status === 'published' && images.length === 0) {
+      setError('Add at least one Image URL before publishing — keep it as Draft until photos are added.');
+      return;
+    }
+
+    setSaving(true);
+    const supabase = createClient();
 
     const metalOptions = buildMetalOptions(v.metal_option_keys);
     const metalImages: Record<string, string> = {};
@@ -410,8 +425,15 @@ export default function ProductForm({ initial }: { initial: ProductFormValue }) 
         <Field label="Status">
           <select className="input" value={v.status} onChange={(e) => update('status', e.target.value as 'draft' | 'published')}>
             <option value="draft">Draft (not visible on the site)</option>
-            <option value="published">Published (live on the site)</option>
+            <option value="published" disabled={!hasImages}>
+              Published (live on the site){!hasImages ? ' — add an image first' : ''}
+            </option>
           </select>
+          {!hasImages && (
+            <p className="mt-1 text-[12px] text-amber-700">
+              No Image URLs yet — this product can&apos;t be published until it has at least one photo.
+            </p>
+          )}
         </Field>
 
         <p className="text-[13px] text-charcoal">

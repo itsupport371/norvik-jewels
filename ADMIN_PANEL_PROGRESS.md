@@ -1169,3 +1169,30 @@ name from ANY variant row sharing a Norvik SKU (not just the kept one)
 before deduping, and backfills it onto the kept row if that row has no
 name of its own. General fix, not Batch-16-specific — protects every
 future batch with the same "name typed on a non-kept variant row" shape.
+
+## Can't publish a product with no images (7 Oct 2026)
+
+Client asked (re: Batch-16, where only 30/54 designs have photos so far):
+"jiski images nahi wo publish nahi hogi na?" — confirmed this wasn't
+actually enforced anywhere; `status: 'draft'|'published'` was a plain
+dropdown in `product-form.tsx` with no check against `images`/`imagesText`.
+A product could be set to "Published" with zero Image URLs and go live
+blank.
+
+Fixed in `app/admin/products/product-form.tsx`:
+- Added `hasImages`, computed live from `imagesText` (not just `v.images`,
+  so it updates as the admin types/pastes into the Image URLs field).
+- The "Published" `<option>` is now `disabled` when `hasImages` is false,
+  with inline text telling the admin why, plus a warning line under the
+  Status field.
+- `handleSubmit` also hard-blocks the save server-side-of-the-UI (i.e.
+  before the Supabase call) if `status === 'published'` and the parsed
+  `images` array is empty — covers the case where a product already has
+  `status: 'published'` saved and someone deletes all its Image URLs text
+  without touching the Status dropdown.
+
+Net effect: the 24 Batch-16 designs still waiting on manufacturer photos
+will import as Draft (per the bulk importer, unchanged) and now literally
+cannot be flipped to Published from the admin UI until at least one Image
+URL is present — closes the gap between "photo import ran" and "this
+product is safe to make live."
