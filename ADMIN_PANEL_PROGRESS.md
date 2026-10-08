@@ -1244,3 +1244,46 @@ lg:overflow-y-auto` (top-24 clears the site header; max-height +
 overflow-y-auto means on a short viewport the filter list scrolls on its
 own instead of ever getting clipped off-screen). Mobile is unaffected — it
 already uses the separate slide-in drawer, not this aside.
+
+## PDP: "Specifications" replaced with CaratLane-style "Product Details" (8 Oct 2026)
+
+Client shared a CaratLane PDP screenshot and asked for the old
+Specifications accordion (price-breakdown table: Gold value / Diamond
+charge / Making / Subtotal / GST / Grand Total) to be replaced with that
+card format instead: SKU with a copy button, a one-line "Set in X KT Metal
+(Y g) with diamonds (Z ct, colour·clarity)" summary, and boxed Gold /
+Diamond info panels.
+
+Clarified with the client before building (so nothing false gets shown):
+- **No "Manufactured by ..." line** — Norvik hasn't given a legal/company
+  text for this, client said skip it for now.
+- **No BIS Hallmark / "Trust of Tata" style badge row** — those are real
+  certification/partnership claims CaratLane can make; showing them for
+  Norvik without Norvik actually holding them would be a false claim, so
+  skipped.
+- **No "Dimensions" box** (width/height/gross weight) — not a client
+  decision, a data gap: nothing in the admin import pipeline captures
+  piece dimensions anywhere (not even though Batch-17's source Excel has
+  Length/Width columns — they're not parsed into `ParsedRow` today).
+  Rather than invent numbers, left out until that's actually wired up.
+
+Changes:
+- `lib/mock-products.ts` — added `norvikSku?: string` to the `Product`
+  type (the storefront type had NO sku field at all before this).
+- `lib/products-server.ts` — added `norvik_sku` to `PRODUCT_COLUMNS` and
+  the DB→Product mapping, so the storefront can actually read it (admin
+  panel always had it; it just wasn't being fetched for shoppers).
+- `components/product-specifications.tsx` — rewritten: title renamed
+  "Specifications" → "Product Details"; SKU row (click to copy, shows
+  "Copied" briefly); summary sentence; Gold box (purity/colour/net
+  weight); Diamond box (colour·clarity/total weight/diamond count — only
+  rendered when the product actually has diamonds, same as before); old
+  price-breakdown rows removed (the grand total is already shown right
+  under the product name higher up the page, so no transparency lost).
+- `components/product-configurator.tsx` — call site updated: now passes
+  `metalLabel={metalKey}` (e.g. "18 KT Yellow Gold", used to derive the
+  Colour field) instead of the now-unused goldValue/diamondCharge/
+  makingCharge/subtotal/gstAmount/grandTotal props.
+
+No SQL needed — `norvik_sku` already exists as a column, this just starts
+selecting it for the public storefront query too.

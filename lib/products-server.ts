@@ -35,6 +35,7 @@ type ProductRow = {
   diamond_piece_count: number | null;
   diamond_carat_total: number | string | null;
   is_signature: boolean | null;
+  norvik_sku: string | null;
 };
 
 function mapDbRowToProduct(row: ProductRow): Product {
@@ -56,11 +57,12 @@ function mapDbRowToProduct(row: ProductRow): Product {
     diamondCaratTotal:
       row.diamond_carat_total != null ? Number(row.diamond_carat_total) : undefined,
     isSignature: Boolean(row.is_signature),
+    norvikSku: row.norvik_sku ?? undefined,
   };
 }
 
 const PRODUCT_COLUMNS =
-  'slug, name, category, images, metal_images, base_price, compare_at_price, currency, metal_options, size_options, diamond, description, gold_weight_grams, diamond_piece_count, diamond_carat_total, is_signature';
+  'slug, name, category, images, metal_images, base_price, compare_at_price, currency, metal_options, size_options, diamond, description, gold_weight_grams, diamond_piece_count, diamond_carat_total, is_signature, norvik_sku';
 
 async function fetchPublishedDbProducts(): Promise<Product[]> {
   const supabase = createClient();

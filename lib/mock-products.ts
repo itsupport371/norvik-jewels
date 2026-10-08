@@ -52,6 +52,10 @@ export type Product = {
   diamondPieceCount?: number;
   diamondCaratTotal?: number;
   isSignature?: boolean; // featured in the homepage "Signature Collection" banner
+  // Norvik's own catalogue code (admin-panel "Norvik SKU"), shown on the PDP
+  // Product Details card (8 Oct 2026, CaratLane-style redesign). Optional —
+  // the old static showcase products in this file never had one.
+  norvikSku?: string;
 };
 
 // ---------- Shared IGI-standard diamond grading ----------

@@ -2,32 +2,40 @@
 
 import { useState } from 'react';
 import type { Product } from '@/lib/mock-products';
-import { useLocale } from '@/lib/locale-context';
 
+// Redesigned 8 Oct 2026 — client asked for the Specifications accordion to
+// be replaced with a CaratLane-style "Product Details" card: SKU with a
+// copy button, a one-line "Set in X KT Metal (Y g) with diamonds (Z ct)"
+// summary, and two boxed info panels (Gold / Diamond) instead of the old
+// price-breakdown table (Gold value / Diamond charge / Making / GST /
+// Grand Total). That breakdown isn't lost — the grand total is already
+// shown right under the product name above (see product-configurator.tsx),
+// this card is purely descriptive now, matching the reference screenshot.
+//
+// Two things CaratLane's reference has that this does NOT reproduce, by
+// the client's own choice (asked 8 Oct 2026):
+//  - No "Manufactured by ..." legal/company line — Norvik hasn't given one.
+//  - No BIS/Hallmark/"Trust of ..." badge row — those are real regulatory/
+//    partnership claims CaratLane can make and Norvik can't (yet), so
+//    showing them would be a false certification claim.
+// Also no "Dimensions" box — the catalogue doesn't capture piece width/
+// height/gross weight anywhere in the admin import pipeline yet, so rather
+// than invent numbers, it's left out until that data actually exists.
 export default function ProductSpecifications({
   product,
   colorKey,
   karat,
   goldWeightGrams,
-  goldValue,
-  diamondCharge,
-  makingCharge,
-  subtotal,
-  gstAmount,
-  grandTotal,
+  metalLabel,
 }: {
   product: Product;
   colorKey?: string;
   karat: number;
   goldWeightGrams: number;
-  goldValue: number;
-  diamondCharge: number;
-  makingCharge: number;
-  subtotal: number;
-  gstAmount: number;
-  grandTotal: number;
+  metalLabel: string;
 }) {
   const [open, setOpen] = useState(true);
+  const [copied, setCopied] = useState(false);
   // Deliberately NOT gated on `product.diamond` (the customizable Diamond
   // Details config) — a fixed pavé/cluster design (many small stones, no
   // swappable center stone) correctly has no `diamond` config at all, but
@@ -35,7 +43,18 @@ export default function ProductSpecifications({
   // the spec sheet. Whether a product offers Diamond Quality customization
   // and whether it *has* diamonds worth listing here are separate facts.
   const hasDiamond = (product.diamondCaratTotal ?? 0) > 0;
-  const { formatPrice } = useLocale();
+
+  // "18 KT Yellow Gold" -> "Yellow Gold" (metalLabel always starts with the
+  // karat number + "KT", stripped here since karat is shown separately).
+  const metalColorLabel = metalLabel.replace(/^\d+\s*KT\s*/i, '').trim();
+
+  function copySku() {
+    if (!product.norvikSku) return;
+    navigator.clipboard.writeText(product.norvikSku).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  }
 
   return (
     <div className="mt-10 border-t border-line pt-6">
@@ -43,62 +62,81 @@ export default function ProductSpecifications({
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center justify-between text-left"
       >
-        <h3 className="font-display text-lg font-medium leading-[1.05] tracking-[-0.01em] text-ink">Specifications</h3>
+        <h3 className="font-display text-lg font-medium leading-[1.05] tracking-[-0.01em] text-ink">Product Details</h3>
         <span className="text-xl text-charcoal">{open ? '−' : '+'}</span>
       </button>
 
       {open && (
-        <div className="mt-4 overflow-hidden border border-line">
-          <div className="border-b border-line bg-white py-2.5 text-center text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
-            Product Details
-          </div>
-
-          <div className="grid grid-cols-3 divide-x divide-line border-b border-line text-center text-[13px] leading-[1.35]">
-            <div className="px-3 py-3 font-medium text-ink">Gold ({karat}K)</div>
-            <div className="px-3 py-3 text-charcoal">{goldWeightGrams.toFixed(2)}gm</div>
-            <div className="px-3 py-3 text-charcoal">{formatPrice(goldValue)}</div>
-          </div>
-
-          {hasDiamond && (
-            <div className="grid grid-cols-3 divide-x divide-line border-b border-line text-center text-[13px] leading-[1.35]">
-              <div className="px-3 py-3 font-medium text-ink">
-                {colorKey ?? 'Diamond'}
-                {product.diamondPieceCount ? ` (${product.diamondPieceCount} Nos.)` : ''}
-              </div>
-              <div className="px-3 py-3 text-charcoal">
-                Lab Diamond
-                <br />
-                {product.diamondCaratTotal} ct
-              </div>
-              <div className="px-3 py-3 text-charcoal">{formatPrice(diamondCharge)}</div>
-            </div>
+        <div className="mt-4 space-y-4">
+          {product.norvikSku && (
+            <button
+              onClick={copySku}
+              className="flex items-center gap-1.5 text-[12px] font-medium uppercase tracking-[0.06em] text-antiquegold"
+              title="Copy SKU"
+            >
+              SKU {product.norvikSku}
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+              {copied && <span className="normal-case tracking-normal text-charcoal">Copied</span>}
+            </button>
           )}
 
-          <div className="grid grid-cols-3 divide-x divide-line border-b border-line text-center text-[13px] leading-[1.35]">
-            <div className="px-3 py-3 font-medium text-ink">Making</div>
-            <div className="px-3 py-3 text-charcoal">-</div>
-            <div className="px-3 py-3 text-charcoal">{formatPrice(makingCharge)}</div>
+          <p className="text-[13px] leading-[1.5] text-charcoal">
+            Set in {karat} KT {metalColorLabel} ({goldWeightGrams.toFixed(2)} g)
+            {hasDiamond && (
+              <>
+                {' '}with diamonds ({product.diamondCaratTotal} ct{colorKey ? `, ${colorKey}` : ''})
+              </>
+            )}
+          </p>
+
+          <div className={`grid gap-4 ${hasDiamond ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            <div className="border border-line bg-softwhite px-4 py-3.5">
+              <p className="text-[11px] font-semibold uppercase leading-[1.2] tracking-[0.08em] text-antiquegold">Gold</p>
+              <dl className="mt-2 space-y-1 text-[13px] leading-[1.4] text-ink">
+                <div className="flex justify-between gap-2">
+                  <dt className="text-charcoal">Purity</dt>
+                  <dd>{karat} KT</dd>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <dt className="text-charcoal">Colour</dt>
+                  <dd>{metalColorLabel}</dd>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <dt className="text-charcoal">Net weight</dt>
+                  <dd>{goldWeightGrams.toFixed(2)} g</dd>
+                </div>
+              </dl>
+            </div>
+
+            {hasDiamond && (
+              <div className="border border-line bg-softwhite px-4 py-3.5">
+                <p className="text-[11px] font-semibold uppercase leading-[1.2] tracking-[0.08em] text-antiquegold">Diamond</p>
+                <dl className="mt-2 space-y-1 text-[13px] leading-[1.4] text-ink">
+                  {colorKey && (
+                    <div className="flex justify-between gap-2">
+                      <dt className="text-charcoal">Colour · Clarity</dt>
+                      <dd>{colorKey}</dd>
+                    </div>
+                  )}
+                  <div className="flex justify-between gap-2">
+                    <dt className="text-charcoal">Total weight</dt>
+                    <dd>{product.diamondCaratTotal} ct</dd>
+                  </div>
+                  {Boolean(product.diamondPieceCount) && (
+                    <div className="flex justify-between gap-2">
+                      <dt className="text-charcoal">Diamonds</dt>
+                      <dd>{product.diamondPieceCount}</dd>
+                    </div>
+                  )}
+                </dl>
+              </div>
+            )}
           </div>
 
-          <div className="grid grid-cols-3 divide-x divide-line border-b border-line text-center text-[13px] leading-[1.35]">
-            <div className="px-3 py-3 font-medium text-ink">Subtotal</div>
-            <div className="px-3 py-3 text-charcoal">-</div>
-            <div className="px-3 py-3 text-charcoal">{formatPrice(subtotal)}</div>
-          </div>
-
-          <div className="grid grid-cols-3 divide-x divide-line border-b border-line text-center text-[13px] leading-[1.35]">
-            <div className="px-3 py-3 font-medium text-ink">GST (3%)</div>
-            <div className="px-3 py-3 text-charcoal">-</div>
-            <div className="px-3 py-3 text-charcoal">{formatPrice(gstAmount)}</div>
-          </div>
-
-          <div className="grid grid-cols-3 divide-x divide-line text-center text-[13px] leading-[1.35]">
-            <div className="px-3 py-3 font-semibold text-ink">Grand Total</div>
-            <div className="px-3 py-3 text-charcoal">-</div>
-            <div className="px-3 py-3 font-semibold text-ink">{formatPrice(grandTotal)}</div>
-          </div>
-
-          <p className="border-t border-line px-3 py-2 text-[12px] leading-[1.35] text-muted">
+          <p className="text-[12px] leading-[1.35] text-muted">
             *Weight may vary in the final product. Differential amount if any, will be charged extra.
           </p>
         </div>

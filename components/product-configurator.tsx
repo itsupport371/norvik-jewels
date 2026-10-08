@@ -653,12 +653,7 @@ export default function ProductConfigurator({
           colorKey={hasDiamond ? diamondQualityLabel ?? undefined : undefined}
           karat={karat}
           goldWeightGrams={effectiveGoldWeight}
-          goldValue={goldValue}
-          diamondCharge={diamondCharge}
-          makingCharge={makingCharge}
-          subtotal={subtotal}
-          gstAmount={gstAmount}
-          grandTotal={grandTotal}
+          metalLabel={metalKey}
         />
       </div>
 
