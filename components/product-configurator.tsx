@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import type { Product, OptionChoice } from '@/lib/mock-products';
@@ -102,6 +102,21 @@ export default function ProductConfigurator({
   // Lifted up here (was local state inside related-products.tsx) since the
   // trigger icon now lives in this component, not inside that one.
   const [showRelated, setShowRelated] = useState(false);
+  // Fix (9 Oct 2026): client reported the mobile icon "doesn't open" You May
+  // Also Like. It actually did toggle `showRelated` fine — the bug was
+  // purely positional: on mobile the icon sits right under the main photo,
+  // near the TOP of the page, but the related grid it reveals only renders
+  // much further down (after the whole configurator + Specifications, in
+  // normal single-column document order) — so nothing visibly changed
+  // anywhere near where the shopper just tapped, and it read as broken.
+  // Scrolling the revealed section into view on toggle makes the open
+  // action actually visible instead of silently happening off-screen.
+  const mobileRelatedRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (showRelated) {
+      mobileRelatedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [showRelated]);
   const [metalKey, setMetalKey] = useState(product.metalOptions[0].label);
   const [sizeKey, setSizeKey] = useState<string | null>(
     () => product.sizeOptions.find((o) => o.label === '9')?.label ?? null
@@ -662,7 +677,7 @@ export default function ProductConfigurator({
           copy sits inside the grid so on mobile (where the grid collapses
           to one column) it still falls in normal order right after
           Specifications. `lg:hidden` so desktop never renders this copy. */}
-      <div className="lg:hidden">
+      <div ref={mobileRelatedRef} className="scroll-mt-20 lg:hidden">
         <RelatedProducts related={related} open={showRelated} />
       </div>
 

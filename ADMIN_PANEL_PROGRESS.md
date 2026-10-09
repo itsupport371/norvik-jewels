@@ -1287,3 +1287,32 @@ Changes:
 
 No SQL needed — `norvik_sku` already exists as a column, this just starts
 selecting it for the public storefront query too.
+
+## Two mobile-only fixes (9 Oct 2026)
+
+Client: on mobile, (1) tapping the "You May Also Like" icon on the product
+page didn't seem to open anything, and (2) product photos on the shop/
+category grid looked too small. Both desktop was fine.
+
+**1. "You May Also Like" icon looked broken on mobile** —
+`components/product-configurator.tsx`. It actually worked — `showRelated`
+toggled fine — but the icon sits right under the main photo near the TOP
+of the page, while the related grid it reveals only renders far below (in
+normal single-column document order, after the whole configurator +
+Specifications). Nothing visible changed anywhere near where the shopper
+had just tapped, so it read as broken. Fixed by scrolling the revealed
+section into view on toggle: added a `mobileRelatedRef` + a `useEffect`
+that calls `scrollIntoView({behavior:'smooth', block:'start'})` when
+`showRelated` becomes true, with `scroll-mt-20` on that wrapper so the
+sticky header doesn't cover its top edge.
+
+**2. Shop grid photos cramped on mobile** — `components/shop-content.tsx`.
+The product tile was a perfect square (`aspect-square`); on a 2-per-row
+phone layout that left only ~60px of actual image height once the
+fixed-height caption block (88px) and padding were subtracted from a
+~163px-wide card. Changed the card to `aspect-[4/5]` (portrait) on mobile
+only — `sm:aspect-square` keeps tablet/desktop exactly as before — and
+shrank the mobile caption block 88px → 72px to match, roughly doubling the
+visible photo area. Also tightened the mobile column gap `gap-x-4` →
+`gap-x-3` (reverting to `gap-x-4` from `sm:` up) to give cards a little
+more width too.

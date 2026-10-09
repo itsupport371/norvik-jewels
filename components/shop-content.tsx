@@ -462,17 +462,27 @@ export default function ShopContent({ products }: { products: Product[] }) {
               No pieces found. Try clearing a few filters.
             </p>
           ) : (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-12">
+            <div className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-3 sm:gap-x-4 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-12">
               {filtered.map((product) => (
                 <div
                   key={product.slug}
                   className="group relative transition-all duration-300 ease-out hover:z-10 hover:scale-[1.04] hover:shadow-[0_18px_40px_-14px_rgba(0,0,0,0.3)]"
                 >
+                  {/* Mobile product photos were cramped (9 Oct 2026, client
+                      flagged): the card was a perfect square, and on a
+                      2-per-row phone layout that left barely ~60px of
+                      actual image height once the fixed-height caption
+                      block and padding were subtracted. `aspect-[4/5]`
+                      (portrait, not square) on mobile only gives the photo
+                      roughly double the room; `sm:aspect-square` keeps
+                      tablet/desktop exactly as before. Caption height
+                      shrunk 88px -> 72px on mobile to match (text still
+                      fits — category label + 2-line name + price). */}
                   <Link
                     href={`/product/${product.slug}`}
-                    className="relative block aspect-square bg-white p-2 sm:p-3 lg:p-2.5"
+                    className="relative block aspect-[4/5] bg-white p-2 sm:aspect-square sm:p-3 lg:p-2.5"
                   >
-                    <div className="relative h-[calc(100%-88px)] overflow-hidden sm:h-[calc(100%-104px)] lg:h-[calc(100%-80px)]">
+                    <div className="relative h-[calc(100%-72px)] overflow-hidden sm:h-[calc(100%-104px)] lg:h-[calc(100%-80px)]">
                       <Image
                         src={product.images[0]}
                         alt={product.name}
@@ -481,7 +491,7 @@ export default function ShopContent({ products }: { products: Product[] }) {
                         sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
                       />
                     </div>
-                    <div className="flex h-[88px] flex-col items-center justify-center overflow-hidden px-1 text-center sm:h-[104px] lg:h-[80px]">
+                    <div className="flex h-[72px] flex-col items-center justify-center overflow-hidden px-1 text-center sm:h-[104px] lg:h-[80px]">
                       <p className="text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                         {product.category}
                       </p>
