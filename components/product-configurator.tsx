@@ -10,6 +10,7 @@ import {
   stockFor,
   COLOR_CHARGE_PERCENT,
   CLARITY_CHARGE_PERCENT,
+  DIAMOND_QUALITY_TIERS,
 } from '@/lib/mock-products';
 import ProductSpecifications from '@/components/product-specifications';
 import RelatedProducts from '@/components/related-products';
@@ -134,6 +135,14 @@ export default function ProductConfigurator({
   const [clarityKey, setClarityKey] = useState(DEFAULT_CLARITY);
   const [colorKey, setColorKey] = useState('D-F');
 
+  // Rings-only CaratLane-style combined "Diamond Quality" tier (9 Oct
+  // 2026) — see DIAMOND_QUALITY_TIERS in lib/mock-products.ts for why.
+  // Separate state from clarityKey/colorKey above so non-ring categories
+  // are completely untouched; 'GH-SI' as the default matches CaratLane's
+  // own middle/"Classic" tier rather than their cheapest or priciest.
+  const isRing = product.category === 'Rings';
+  const [diamondQualityTier, setDiamondQualityTier] = useState('GH-SI');
+
   const allowedColors = useMemo(
     () => CLARITY_ALLOWED_COLORS[clarityKey] ?? [],
     [clarityKey]
@@ -181,8 +190,15 @@ export default function ProductConfigurator({
   const sizeWeightDelta = needsSize ? (selectedMM - baselineMM) * 0.03 : 0;
   const effectiveGoldWeight = Math.max(0.1, product.goldWeightGrams + sizeWeightDelta);
 
-  const colorChargePercent = hasDiamond ? COLOR_CHARGE_PERCENT[colorKey] ?? 0 : 0;
-  const clarityChargePercent = hasDiamond ? CLARITY_CHARGE_PERCENT[clarityKey] ?? 0 : 0;
+  // Rings use the single combined tier's own % (its clarity side is
+  // always SI, worth 0%, same as CLARITY_CHARGE_PERCENT.SI1 below) —
+  // every other category keeps the existing separate Color+Clarity charges.
+  const colorChargePercent = hasDiamond
+    ? isRing
+      ? DIAMOND_QUALITY_TIERS.find((t) => t.key === diamondQualityTier)?.priceChargePercent ?? 0
+      : COLOR_CHARGE_PERCENT[colorKey] ?? 0
+    : 0;
+  const clarityChargePercent = hasDiamond && !isRing ? CLARITY_CHARGE_PERCENT[clarityKey] ?? 0 : 0;
 
   const rawPricing = calculatePrice({
     goldRate24kPer10g: TEST_GOLD_RATE_24K_PER_10G,
@@ -205,12 +221,17 @@ export default function ProductConfigurator({
 
   const canAddToBag = !needsSize || sizeKey !== null;
 
-  // Combined "Diamond Quality" label — Color and Clarity together, the way
-  // CaratLane shows a single tier pill like "GH-VS" rather than exposing
-  // Color and Clarity as two separate facts. `colorKey` is reused everywhere
-  // downstream (cart line id/display, checkout summary, Specifications) as
-  // this combined string so none of those needed their own schema change.
-  const diamondQualityLabel = hasDiamond ? `${colorKey} · ${clarityKey}` : null;
+  // Combined "Diamond Quality" label — reused everywhere downstream (cart
+  // line id/display, checkout summary, Specifications) so none of those
+  // needed their own schema change. Rings (9 Oct 2026): the tier code
+  // itself, e.g. "GH-SI" — a real CaratLane-style combined badge, not just
+  // Color and Clarity joined with a separator. Every other category keeps
+  // the previous "Color · Clarity" display (e.g. "D-F · SI1").
+  const diamondQualityLabel = hasDiamond
+    ? isRing
+      ? diamondQualityTier
+      : `${colorKey} · ${clarityKey}`
+    : null;
 
   function handleAddToBag() {
     if (!canAddToBag) return;
@@ -559,35 +580,62 @@ export default function ProductConfigurator({
                   Diamond Details
                 </p>
                 <div className="space-y-6">
-                  {/* Clarity used to be fixed at SI1 (not shown here at all) —
-                      now selectable, same as Color below, so "Diamond
-                      Quality" is a real Clarity+Color choice instead of only
-                      a color swatch (client asked to match how CaratLane's
-                      own Customise panel lets shoppers pick a diamond
-                      quality tier, not just a color — Sep 2026). */}
-                  <CardGrid
-                    label="Clarity"
-                    cards={CLARITY_GRADES.map((grade) => ({
-                      key: grade.value,
-                      title: grade.value,
-                      sublabel: grade.sublabel,
-                      stock: '',
-                      selected: grade.value === clarityKey,
-                    }))}
-                    selected={clarityKey}
-                    onSelect={setClarityKey}
-                  />
-                  <CardGrid
-                    label="Color"
-                    cards={allowedColors.map((colorValue) => ({
-                      key: colorValue,
-                      title: colorValue,
-                      stock: stockFor(clarityKey, colorValue),
-                      selected: colorValue === colorKey,
-                    }))}
-                    selected={colorKey}
-                    onSelect={setColorKey}
-                  />
+                  {isRing ? (
+                    /* Rings (9 Oct 2026): one combined "Diamond Quality" tier
+                       pill instead of separate Clarity + Color pickers —
+                       client checked CaratLane's rings.html and individual
+                       product pages and asked to match that exactly: every
+                       ring there shows one badge like "FG-SI"/"GH-SI"/
+                       "IJ-SI", never a separate Clarity selector. See
+                       DIAMOND_QUALITY_TIERS in lib/mock-products.ts. */
+                    <CardGrid
+                      label="Diamond Quality"
+                      cards={DIAMOND_QUALITY_TIERS.map((tier) => ({
+                        key: tier.key,
+                        title: tier.key,
+                        sublabel: tier.sublabel,
+                        stock: '',
+                        selected: tier.key === diamondQualityTier,
+                      }))}
+                      selected={diamondQualityTier}
+                      onSelect={setDiamondQualityTier}
+                    />
+                  ) : (
+                    <>
+                      {/* Clarity used to be fixed at SI1 (not shown here at all) —
+                          now selectable, same as Color below, so "Diamond
+                          Quality" is a real Clarity+Color choice instead of only
+                          a color swatch (client asked to match how CaratLane's
+                          own Customise panel lets shoppers pick a diamond
+                          quality tier, not just a color — Sep 2026). Rings
+                          moved off this two-step picker onto the combined
+                          tier badge above (9 Oct 2026) — every other
+                          category still uses it. */}
+                      <CardGrid
+                        label="Clarity"
+                        cards={CLARITY_GRADES.map((grade) => ({
+                          key: grade.value,
+                          title: grade.value,
+                          sublabel: grade.sublabel,
+                          stock: '',
+                          selected: grade.value === clarityKey,
+                        }))}
+                        selected={clarityKey}
+                        onSelect={setClarityKey}
+                      />
+                      <CardGrid
+                        label="Color"
+                        cards={allowedColors.map((colorValue) => ({
+                          key: colorValue,
+                          title: colorValue,
+                          stock: stockFor(clarityKey, colorValue),
+                          selected: colorValue === colorKey,
+                        }))}
+                        selected={colorKey}
+                        onSelect={setColorKey}
+                      />
+                    </>
+                  )}
                 </div>
               </div>
             )}

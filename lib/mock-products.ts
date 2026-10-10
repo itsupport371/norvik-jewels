@@ -143,6 +143,26 @@ export const CLARITY_CHARGE_PERCENT: Record<string, number> = {
   VVS2: 5,
 };
 
+// ---------- Rings-only "Diamond Quality" tiers (9 Oct 2026) ----------
+// Client checked CaratLane's rings.html + individual product pages and
+// asked to match how they present diamond quality: not two separate
+// Clarity/Color pickers, but ONE combined tier badge like "FG-SI" —
+// checked live across ~20 CaratLane ring listings, every one showed
+// exactly one of three codes: FG-SI, GH-SI, or IJ-SI (no VS/VVS tier seen
+// anywhere in that catalogue section). Rings only, per the client's
+// request — other categories keep the existing separate Clarity + Color
+// pickers (CLARITY_GRADES/COLOR_GRADES above) unchanged.
+// Price impact % reuses the existing Color-charge scale (CaratLane's SI
+// clarity across all three tiers maps to this site's SI1, which is
+// already 0% — see CLARITY_CHARGE_PERCENT) rather than inventing a new
+// unrelated scale: FG (near D-F/G-J boundary) sits between those two
+// existing values, GH matches G-J exactly, IJ sits between G-J and K-M.
+export const DIAMOND_QUALITY_TIERS: { key: string; colorRange: string; sublabel: string; priceChargePercent: number }[] = [
+  { key: 'FG-SI', colorRange: 'F-G', sublabel: 'Near Colorless · Premium', priceChargePercent: 6 },
+  { key: 'GH-SI', colorRange: 'G-H', sublabel: 'Near Colorless · Classic', priceChargePercent: 4 },
+  { key: 'IJ-SI', colorRange: 'I-J', sublabel: 'Slightly Tinted · Value', priceChargePercent: 2 },
+];
+
 function extractKaratFromLabel(metalLabel: string): 9 | 14 | 18 {
   const match = metalLabel.match(/^(\d+)/);
   const num = match ? parseInt(match[1], 10) : 18;

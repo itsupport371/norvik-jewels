@@ -1316,3 +1316,38 @@ shrank the mobile caption block 88px → 72px to match, roughly doubling the
 visible photo area. Also tightened the mobile column gap `gap-x-4` →
 `gap-x-3` (reverting to `gap-x-4` from `sm:` up) to give cards a little
 more width too.
+
+## Rings: CaratLane-style "Diamond Quality" tiers (9 Oct 2026)
+
+Client asked to check CaratLane's rings listing (rings.html) and every
+combination it shows for diamond quality, then bring that into Norvik's
+own Customize panel for rings. Browsed CaratLane live (built-in browser —
+the Chrome extension wasn't connected this session) across the rings
+listing and ~20 individual product pages, including one Customisation
+panel (Lambent Solitaire Ring) showing the actual picker UI. Finding:
+CaratLane doesn't expose separate Clarity/Color pickers at all — every
+ring shows ONE combined badge, and across everything sampled only three
+codes ever appeared: **FG-SI**, **GH-SI**, **IJ-SI** (no VS/VVS tier
+anywhere in that catalogue section).
+
+Implemented for Rings only (client said "ring ke liye" — every other
+category is untouched):
+- `lib/mock-products.ts` — new `DIAMOND_QUALITY_TIERS` export: FG-SI
+  (F-G colour, "Near Colorless · Premium"), GH-SI (G-H, "...Classic"),
+  IJ-SI (I-J, "Slightly Tinted · Value"), each with a `priceChargePercent`
+  (6% / 4% / 2%) reusing the existing Color-charge scale rather than
+  inventing new units — GH-SI's 4% matches the existing G-J color band
+  exactly, FG/IJ sit either side of it.
+- `components/product-configurator.tsx` — added `isRing` check and a
+  `diamondQualityTier` state (default `'GH-SI'`, CaratLane's own
+  "Classic" middle tier). When `isRing`, the Diamond Details section now
+  shows ONE "Diamond Quality" CardGrid with the three tier pills instead
+  of the separate Clarity + Color grids; pricing (`colorChargePercent`)
+  and the combined label shown everywhere (cart, checkout, Product
+  Details SKU line) use the tier directly. Non-ring categories are fully
+  unchanged — same two-step Clarity/Color picker as before.
+
+Not done (out of scope for this request, flagging for later): Earrings,
+Pendants etc. still use the old split Clarity+Color picker — client can
+ask for the same CaratLane-tier treatment there if wanted, but wasn't
+asked for it this time.
