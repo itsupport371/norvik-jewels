@@ -408,7 +408,12 @@ export default function ShopContent({ products }: { products: Product[] }) {
             with a little breathing room; `max-h-[calc(100vh-6rem)]` +
             `overflow-y-auto` keeps it fully reachable and independently
             scrollable on short viewports instead of ever being clipped. */}
-        <aside className="hidden lg:sticky lg:top-24 lg:block lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto">
+        {/* `no-scrollbar` (defined in app/globals.css, already used on the
+            New Arrivals row) hides the native track+thumb bar here too —
+            client found the themed dark/gold scrollbar inside the sidebar
+            visually heavy next to the filter list (10 Oct 2026). Scrolling
+            still works via wheel/trackpad/touch, just no visible bar. */}
+        <aside className="no-scrollbar hidden lg:sticky lg:top-24 lg:block lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto">
           {sidebar}
         </aside>
 

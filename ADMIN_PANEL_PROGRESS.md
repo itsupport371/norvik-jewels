@@ -1431,3 +1431,19 @@ committed.
 push`, redeploy, then check an earring product page: Customise should now
 show a "Diamond Quality" section with EF-VVS/FG-SI/GH-SI/IJ-SI options
 (whichever apply to that product), same as rings.
+
+## Shop filters sidebar: hid the native scrollbar (10 Oct 2026)
+
+Client's screenshot showed the sticky filters sidebar (added earlier this
+session) with a visible dark-navy/gold scrollbar track+thumb running down
+its right edge — asked for scrolling to still work but without that bar
+showing, "jo proper lage website mein".
+
+**Fix (`components/shop-content.tsx`):** added the `no-scrollbar` class to
+the sidebar `<aside>`. This class already existed in `app/globals.css`
+(added earlier for the New Arrivals horizontal row) — it hides the
+track/thumb via `scrollbar-width: none` / `-ms-overflow-style: none` /
+`::-webkit-scrollbar { display: none }` while leaving `overflow-y-auto`
+scrolling fully functional (wheel, trackpad, touch). No new CSS needed.
+
+Verified: `tsc --noEmit` clean. Pushed to device and committed.
