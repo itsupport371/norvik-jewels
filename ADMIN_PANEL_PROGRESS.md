@@ -1447,3 +1447,91 @@ track/thumb via `scrollbar-width: none` / `-ms-overflow-style: none` /
 scrolling fully functional (wheel, trackpad, touch). No new CSS needed.
 
 Verified: `tsc --noEmit` clean. Pushed to device and committed.
+
+## Admin dashboard redesign — real stats + sidebar nav (10 Oct 2026)
+
+Client shared a reference concept image (full admin dashboard mockup — 9
+modules: Product Catalog, Orders & Fulfilment, Inventory, Website Content/
+CMS, Customers & CRM, Analytics, Marketing, Settings & Admin Controls,
+Reviews & Support, plus Recommended Access Roles) and said "client aisa
+kuch admin maang rahe". Asked where to start — client said "jo best ho".
+Decision: build the Dashboard home page for real first (matching the
+concept's layout — sidebar, KPI cards, sales chart, category breakdown,
+recent orders/products), with the rest of the sidebar's modules linking to
+real-but-minimal pages rather than building all 9 at once blind.
+
+**New: `components/admin-shell.tsx`** — the sidebar + topbar wrapper every
+admin page now imports and wraps its content in (not a Next.js
+`app/admin/layout.tsx` — that would also wrap `/admin/login`, which has its
+own full-bleed hero and no sidebar; splitting login into its own route
+group would mean moving every existing `admin/products/**` file, not safe
+to do over the device bridge without `git mv`). Dark sidebar uses Norvik's
+own existing `midnight` + `antiquegold` pair (same as the login hero and
+the themed scrollbar) rather than the reference image's maroon — matching
+the site's own established dark tone, not copying CaratLane-esque colors.
+Nav: Dashboard, Products, Orders, Customers, Inventory, Website Content,
+Marketing, Analytics, Reviews & Support, Settings — active item highlighted
+by route, mobile hamburger drawer, "View Store" + "Sign out" at the bottom.
+
+**New: `app/admin/page.tsx`** (full rewrite of the old bare "Products /
+Import" link grid) — real Dashboard:
+- KPI cards: Total Sales, Orders, Avg. Order Value, Products
+  (published/draft split), **Needs Attention** (draft products with zero
+  images — the admin-facing version of the publish-safety-check already
+  added to product-form.tsx).
+- Sales Overview: a 14-day bar chart (`components/admin-sales-chart.tsx`,
+  hover tooltip per day) of paid-orders totals by day.
+- Catalog by Category: real product counts per category, bar list.
+- Recent Orders / Recently Updated Products: last 6 of each, real data,
+  linking to the full Orders list / product edit page.
+
+Two things from the reference image are deliberately NOT shown because
+there's no real data behind them — not approximated, just left out:
+- **"Low Stock Alerts"** — there is no stock/quantity column anywhere on
+  `products` (see 0001_products_schema.sql) — every size/metal option only
+  ever stores a display label ('In Stock'/'Made to Order'), never a count.
+  Replaced with "Needs Attention" above, which is real.
+- **"New Customers"** (signup-based) — real signup dates live in
+  `auth.users`, not queryable without a service-role key (this project
+  deliberately has none). "Customers" is instead the distinct count of
+  emails that have placed an order — a real number, different definition.
+
+**New migration: `supabase/migrations/0006_admin_orders_select_policy.sql`**
+— `orders` only had a customer-facing RLS policy ("Users can view their
+own orders", `auth.uid() = user_id`) from 0005. Without an admin policy,
+every query the Dashboard/Orders/Customers pages make against `orders`
+would return zero rows for the admin (same RLS as a regular shopper sees).
+Adds an admin SELECT policy, same email-allowlist pattern as
+0002_admin_write_policy.sql on `products`. **Client needs to run this SQL
+in Supabase** — same as every other migration this session, no direct DB
+access from here.
+
+**New pages wired into the sidebar:**
+- `app/admin/orders/page.tsx` — real flat order list (email, items, total,
+  status, date, invoice link). No filters/pagination/refund actions yet.
+- `app/admin/customers/page.tsx` — real, aggregated from `orders` (email,
+  order count, lifetime spend, last order date) — there's no separate
+  customers table, so this only shows people who've placed at least one
+  order.
+- `app/admin/inventory/page.tsx`, `content/page.tsx` (Website Content/CMS),
+  `marketing/page.tsx`, `analytics/page.tsx`, `reviews/page.tsx`,
+  `settings/page.tsx` — honest "not built yet" pages, each explaining
+  specifically what's missing (e.g. Inventory needs a stock-tracking
+  schema decision; Website Content/Marketing have no database tables
+  backing them yet; Analytics points back to the Dashboard's real
+  sales/category numbers since visitor-traffic tracking isn't wired up
+  anywhere). Settings surfaces the one real thing available — the
+  ADMIN_EMAILS allow-list, read-only.
+
+**Edited: `app/admin/products/page.tsx`** — wrapped in the new AdminShell,
+otherwise unchanged.
+
+**Known gap, not done this round:** `app/admin/products/new/page.tsx`,
+`[id]/edit/page.tsx`, `import/page.tsx`, and `photos/page.tsx` are NOT
+wrapped in AdminShell yet — they still render standalone (no sidebar). The
+new/edit pages are thin wrappers around the 16KB `product-form.tsx`, which
+has its own internal page chrome; wrapping those safely needs reading that
+file properly first rather than a rushed edit. Flagged for a follow-up.
+
+Verified: `tsc --noEmit` clean on every new/edited file. Pushed to device
+and committed (13 files).

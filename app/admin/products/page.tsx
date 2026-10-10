@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import AdminShell from '@/components/admin-shell';
 import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
@@ -16,15 +17,18 @@ type Row = {
 
 export default async function AdminProductsPage() {
   const supabase = createClient();
-  const { data, error } = await supabase
-    .from('products')
-    .select('id, name, category, status, base_price, sku, norvik_sku, updated_at')
-    .order('updated_at', { ascending: false });
+  const [{ data: userData }, { data, error }] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase
+      .from('products')
+      .select('id, name, category, status, base_price, sku, norvik_sku, updated_at')
+      .order('updated_at', { ascending: false }),
+  ]);
 
   const products = (data ?? []) as Row[];
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-12">
+    <AdminShell adminEmail={userData.user?.email ?? undefined}>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl text-ink">Products</h1>
@@ -108,6 +112,6 @@ export default async function AdminProductsPage() {
           </tbody>
         </table>
       </div>
-    </main>
+    </AdminShell>
   );
 }
