@@ -131,6 +131,12 @@ export default function ProductConfigurator({
   const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
   const [buyLoading, setBuyLoading] = useState(false);
 
+  // `product.diamond` is the OLDER, narrower "full config" flag (shape/cut/
+  // carat/certification options) — it's only ever set by hand, never by the
+  // admin Excel importer (which always writes `diamond: null`, "fixed/pavé
+  // design", even when the row has real diamondCaratTotal/diamondPieceCount
+  // data — see app/admin/products/import/page.tsx). So `hasDiamond` below
+  // is false for every imported product, rings included.
   const hasDiamond = Boolean(product.diamond);
   const [clarityKey, setClarityKey] = useState(DEFAULT_CLARITY);
   const [colorKey, setColorKey] = useState('D-F');
@@ -140,7 +146,22 @@ export default function ProductConfigurator({
   // Separate state from clarityKey/colorKey above so non-ring categories
   // are completely untouched; 'GH-SI' as the default matches CaratLane's
   // own middle/"Classic" tier rather than their cheapest or priciest.
+  //
+  // Fix (10 Oct 2026): the tier picker was gated on `hasDiamond` (i.e.
+  // `product.diamond`) just like the old Clarity/Color pickers were — but
+  // since EVERY imported ring has `product.diamond: null` (see above), the
+  // picker never rendered on any real catalogue ring, only on a
+  // hand-built product with a full diamond config. CaratLane shows its
+  // quality badge on every diamond ring, including plain fixed-pavé
+  // designs with no swappable shape/cut/carat — so for rings specifically,
+  // "has diamonds worth a quality tier" should mean "has real diamond
+  // weight data" (`diamondCaratTotal > 0`, the same test
+  // product-specifications.tsx already uses), not "has a full config".
+  // Non-ring categories are untouched — still gated on `hasDiamond` as
+  // before, since that's a separate, pre-existing feature this request
+  // never asked to change.
   const isRing = product.category === 'Rings';
+  const hasAnyDiamond = (product.diamondCaratTotal ?? 0) > 0;
   const [diamondQualityTier, setDiamondQualityTier] = useState('GH-SI');
 
   const allowedColors = useMemo(
@@ -191,13 +212,18 @@ export default function ProductConfigurator({
   const effectiveGoldWeight = Math.max(0.1, product.goldWeightGrams + sizeWeightDelta);
 
   // Rings use the single combined tier's own % (its clarity side is
-  // always SI, worth 0%, same as CLARITY_CHARGE_PERCENT.SI1 below) —
-  // every other category keeps the existing separate Color+Clarity charges.
-  const colorChargePercent = hasDiamond
-    ? isRing
+  // always SI, worth 0%, same as CLARITY_CHARGE_PERCENT.SI1 below), gated
+  // on `hasAnyDiamond` (real diamond weight data) rather than `hasDiamond`
+  // (full config) — see the hasAnyDiamond comment above. Every other
+  // category keeps the existing separate Color+Clarity charges, still
+  // gated on `hasDiamond` exactly as before.
+  const colorChargePercent = isRing
+    ? hasAnyDiamond
       ? DIAMOND_QUALITY_TIERS.find((t) => t.key === diamondQualityTier)?.priceChargePercent ?? 0
-      : COLOR_CHARGE_PERCENT[colorKey] ?? 0
-    : 0;
+      : 0
+    : hasDiamond
+      ? COLOR_CHARGE_PERCENT[colorKey] ?? 0
+      : 0;
   const clarityChargePercent = hasDiamond && !isRing ? CLARITY_CHARGE_PERCENT[clarityKey] ?? 0 : 0;
 
   const rawPricing = calculatePrice({
@@ -227,15 +253,17 @@ export default function ProductConfigurator({
   // itself, e.g. "GH-SI" — a real CaratLane-style combined badge, not just
   // Color and Clarity joined with a separator. Every other category keeps
   // the previous "Color · Clarity" display (e.g. "D-F · SI1").
-  const diamondQualityLabel = hasDiamond
-    ? isRing
+  const diamondQualityLabel = isRing
+    ? hasAnyDiamond
       ? diamondQualityTier
-      : `${colorKey} · ${clarityKey}`
-    : null;
+      : null
+    : hasDiamond
+      ? `${colorKey} · ${clarityKey}`
+      : null;
 
   function handleAddToBag() {
     if (!canAddToBag) return;
-    const id = [product.slug, metalKey, hasDiamond ? diamondQualityLabel : '', sizeKey ?? ''].join('|');
+    const id = [product.slug, metalKey, diamondQualityLabel ?? '', sizeKey ?? ''].join('|');
     addToCart({
       id,
       slug: product.slug,
@@ -243,7 +271,7 @@ export default function ProductConfigurator({
       image: product.images[0],
       currency: product.currency,
       metalKey,
-      colorKey: hasDiamond ? diamondQualityLabel ?? undefined : undefined,
+      colorKey: diamondQualityLabel ?? undefined,
       sizeKey: sizeKey ?? undefined,
       price: grandTotal,
       goldValue,
@@ -274,7 +302,7 @@ export default function ProductConfigurator({
       makingCharge: String(makingCharge),
       gstAmount: String(gstAmount),
     });
-    if (hasDiamond && diamondQualityLabel) params.set('color', diamondQualityLabel);
+    if (diamondQualityLabel) params.set('color', diamondQualityLabel);
     if (sizeKey) params.set('size', sizeKey);
 
     router.push(`/checkout?${params.toString()}`);
@@ -501,7 +529,12 @@ export default function ProductConfigurator({
               <p className="text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">Metal</p>
               <p className="mt-0.5 truncate text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">{metalKey}</p>
             </div>
-            {hasDiamond && (
+            {/* `diamondQualityLabel` already self-encodes null vs. a real
+                value for both rings (hasAnyDiamond) and other categories
+                (hasDiamond) — see its definition above — so checking it
+                directly here (instead of `hasDiamond`) is what makes this
+                show up for imported rings too. */}
+            {diamondQualityLabel && (
               <div className="flex-1 px-3 py-3">
                 <p className="text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">Diamond Quality</p>
                 <p className="mt-0.5 text-[13px] font-medium leading-[1.35] text-ink sm:text-[14px]">{diamondQualityLabel}</p>
@@ -574,7 +607,14 @@ export default function ProductConfigurator({
               onSelect={setMetalKey}
             />
 
-            {hasDiamond && product.diamond && (
+            {/* Fix (10 Oct 2026): was `hasDiamond && product.diamond` — but
+                `product.diamond` is always null for imported products (see
+                `hasAnyDiamond` comment above), so this whole section,
+                ring tier picker included, never rendered for any real
+                catalogue ring. Rings now only need `hasAnyDiamond`; the
+                non-ring Clarity/Color branch keeps the original, untouched
+                `hasDiamond && product.diamond` check. */}
+            {((isRing && hasAnyDiamond) || (!isRing && hasDiamond && product.diamond)) && (
               <div className="border-t border-line pt-7">
                 <p className="mb-5 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                   Diamond Details
@@ -713,7 +753,7 @@ export default function ProductConfigurator({
       <div className="lg:col-start-1 lg:row-start-2">
         <ProductSpecifications
           product={product}
-          colorKey={hasDiamond ? diamondQualityLabel ?? undefined : undefined}
+          colorKey={diamondQualityLabel ?? undefined}
           karat={karat}
           goldWeightGrams={effectiveGoldWeight}
           metalLabel={metalKey}

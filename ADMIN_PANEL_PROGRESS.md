@@ -1351,3 +1351,44 @@ Not done (out of scope for this request, flagging for later): Earrings,
 Pendants etc. still use the old split Clarity+Color picker — client can
 ask for the same CaratLane-tier treatment there if wanted, but wasn't
 asked for it this time.
+
+## Fix: Ring "Diamond Quality" tier (FG-SI/GH-SI/IJ-SI) wasn't showing on real products (10 Oct 2026)
+
+**Bug:** right after shipping the ring-only Diamond Quality tier picker, a real
+catalogue ring with genuine diamond data (description: "18 diamonds, 0.17 ct
+total, set in 1.60g of gold.") showed Choice of Metal and Select Size but no
+Diamond Quality section at all.
+
+**Root cause:** the whole Diamond Details block (old Clarity/Color pickers OR
+the new ring tier picker) was gated on `hasDiamond = Boolean(product.diamond)`.
+`product.diamond` is a separate, older "fully customizable diamond config"
+object that the admin Excel importer always sets to `null` for every imported
+product (see `app/admin/products/import/page.tsx` — `diamond: null, // fixed/
+pavé designs`), even when the row has real `diamondCaratTotal`/
+`diamondPieceCount` data. So the gate was false for every imported ring,
+hiding the brand-new feature entirely.
+
+**Fix (`components/product-configurator.tsx`):** added
+`hasAnyDiamond = (product.diamondCaratTotal ?? 0) > 0` (same pattern already
+used correctly in `product-specifications.tsx`) and used it — instead of
+`hasDiamond` — everywhere the ring tier picker's visibility/pricing/label
+depends on "does this product have diamonds": the Diamond Details section's
+wrapping condition, the sticky-bar "Diamond Quality" label, the pricing calc,
+and `diamondQualityLabel`. Non-ring categories (Clarity/Color pickers) are
+completely untouched — still gated on `hasDiamond && product.diamond` exactly
+as before, per the original "ring ke liye" scope.
+
+Also simplified `handleAddToBag`'s cart-id, the cart `colorKey`, the Buy Now
+query param, and the `ProductSpecifications` `colorKey` prop — all previously
+wrapped in `hasDiamond ? diamondQualityLabel : ...`, now just use
+`diamondQualityLabel` directly since it already resolves to `null` when there's
+nothing to show, for both rings and non-rings.
+
+Verified: `tsc --noEmit` clean (only the expected TS5107 line). Pushed to
+device and committed.
+
+**Next step for client:** `git add -A && git commit -m "fix: ring diamond
+quality tier now shows for imported products" && git push`, then redeploy and
+recheck the same ring page — the Diamond Quality (FG-SI/GH-SI/IJ-SI) section
+should now appear between Choice of Metal and Select Size inside Customise,
+and the sticky bar below the price.
