@@ -1392,3 +1392,42 @@ quality tier now shows for imported products" && git push`, then redeploy and
 recheck the same ring page — the Diamond Quality (FG-SI/GH-SI/IJ-SI) section
 should now appear between Choice of Metal and Select Size inside Customise,
 and the sticky bar below the price.
+
+## Earrings: extended "Diamond Quality" tier picker + new EF-VVS tier (10 Oct 2026)
+
+Client asked to also check https://www.caratlane.com/jewellery/earrings.html
+("earring ka bhi dekh le"), same as the ring research.
+
+**Findings:**
+- Earrings use the exact same single combined "Diamond" tier picker as
+  rings (not separate Clarity + Color) — confirmed on both the listing
+  grid and an actual earring PDP's Customisation panel (Petite Heart Kids'
+  Diamond Earrings).
+- That PDP's Diamond picker showed a 4th code never seen in the earlier
+  ring sample: **EF-VVS** (E-F color, VVS clarity) — a step above FG-SI.
+  Live-priced it by clicking through the options on that product:
+  FG-SI $217 → EF-VVS $240 (~+10.6%), GH-SI $213 (~-2%). This tier exists
+  for rings too (spotted "18 KT • EF-VVS" on two ring listings on a
+  revisit) — the earlier ring research under-sampled and missed it.
+
+**Changes:**
+- `lib/mock-products.ts`: added `EF-VVS` to `DIAMOND_QUALITY_TIERS` as the
+  new top tier (`priceChargePercent: 10`, derived from FG-SI's existing 6
+  plus VVS's own +5 clarity premium already used elsewhere in
+  `CLARITY_CHARGE_PERCENT` — lines up almost exactly with the ~10.6%
+  live-priced delta above). FG-SI/GH-SI/IJ-SI numbers unchanged.
+- `components/product-configurator.tsx`: `isRing` (the flag that switches
+  a product onto the combined tier picker instead of the old Clarity+Color
+  pickers) now also matches `product.category === 'Earrings'`. Everything
+  that already depended on `isRing` — the Diamond Details section's
+  visibility, the sticky-bar label, pricing, `diamondQualityLabel` — picks
+  this up automatically, no other logic changed. Pendants/other categories
+  are still untouched, same as when this was rings-only.
+
+Verified: `tsc --noEmit` clean on both files. Pushed to device and
+committed.
+
+**Next step for client:** same as before — `git add -A`, commit, `git
+push`, redeploy, then check an earring product page: Customise should now
+show a "Diamond Quality" section with EF-VVS/FG-SI/GH-SI/IJ-SI options
+(whichever apply to that product), same as rings.

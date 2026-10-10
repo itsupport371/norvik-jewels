@@ -157,10 +157,18 @@ export default function ProductConfigurator({
   // "has diamonds worth a quality tier" should mean "has real diamond
   // weight data" (`diamondCaratTotal > 0`, the same test
   // product-specifications.tsx already uses), not "has a full config".
-  // Non-ring categories are untouched — still gated on `hasDiamond` as
+  // Other categories are untouched — still gated on `hasDiamond` as
   // before, since that's a separate, pre-existing feature this request
   // never asked to change.
-  const isRing = product.category === 'Rings';
+  //
+  // Extended to Earrings too (10 Oct 2026, "earring ka bhi dekh le") —
+  // checked CaratLane's earrings.html and an actual earring PDP's
+  // Customisation panel, same single combined "Diamond" tier picker as
+  // rings (see DIAMOND_QUALITY_TIERS comment in lib/mock-products.ts).
+  // Kept the name `isRing` for a minimal diff on every other usage below —
+  // it really means "this category uses the combined Diamond Quality tier
+  // picker instead of separate Clarity/Color".
+  const isRing = product.category === 'Rings' || product.category === 'Earrings';
   const hasAnyDiamond = (product.diamondCaratTotal ?? 0) > 0;
   const [diamondQualityTier, setDiamondQualityTier] = useState('GH-SI');
 
@@ -621,12 +629,13 @@ export default function ProductConfigurator({
                 </p>
                 <div className="space-y-6">
                   {isRing ? (
-                    /* Rings (9 Oct 2026): one combined "Diamond Quality" tier
-                       pill instead of separate Clarity + Color pickers —
-                       client checked CaratLane's rings.html and individual
-                       product pages and asked to match that exactly: every
-                       ring there shows one badge like "FG-SI"/"GH-SI"/
-                       "IJ-SI", never a separate Clarity selector. See
+                    /* Rings + Earrings (9-10 Oct 2026): one combined "Diamond
+                       Quality" tier pill instead of separate Clarity + Color
+                       pickers — client checked CaratLane's rings.html, then
+                       earrings.html, and individual product pages on both
+                       and asked to match that exactly: every piece there
+                       shows one badge like "EF-VVS"/"FG-SI"/"GH-SI"/"IJ-SI",
+                       never a separate Clarity selector. See
                        DIAMOND_QUALITY_TIERS in lib/mock-products.ts. */
                     <CardGrid
                       label="Diamond Quality"

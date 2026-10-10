@@ -143,7 +143,7 @@ export const CLARITY_CHARGE_PERCENT: Record<string, number> = {
   VVS2: 5,
 };
 
-// ---------- Rings-only "Diamond Quality" tiers (9 Oct 2026) ----------
+// ---------- Rings + Earrings "Diamond Quality" tiers (9-10 Oct 2026) ----------
 // Client checked CaratLane's rings.html + individual product pages and
 // asked to match how they present diamond quality: not two separate
 // Clarity/Color pickers, but ONE combined tier badge like "FG-SI" —
@@ -152,12 +152,25 @@ export const CLARITY_CHARGE_PERCENT: Record<string, number> = {
 // anywhere in that catalogue section). Rings only, per the client's
 // request — other categories keep the existing separate Clarity + Color
 // pickers (CLARITY_GRADES/COLOR_GRADES above) unchanged.
+//
+// 10 Oct 2026: client asked to check earrings.html too ("earring ka bhi
+// dekh le"). Earrings use the exact same single "Diamond" picker pattern —
+// but an actual earring PDP's Customisation panel (Petite Heart Kids'
+// Diamond Earrings) showed a 4th code never seen in the ~20 ring listings
+// sampled earlier: EF-VVS (E-F color, VVS clarity) — a step above FG-SI.
+// Live-priced it on that same product: FG-SI $217 → EF-VVS $240 (~+10.6%),
+// GH-SI $213 (~-2%) — confirms a real ladder, not a typo. Added as the new
+// top tier; FG/GH/IJ numbers unchanged. Extended to Earrings category too.
 // Price impact % reuses the existing Color-charge scale (CaratLane's SI
-// clarity across all three tiers maps to this site's SI1, which is
+// clarity across the three SI-tier codes maps to this site's SI1, which is
 // already 0% — see CLARITY_CHARGE_PERCENT) rather than inventing a new
 // unrelated scale: FG (near D-F/G-J boundary) sits between those two
 // existing values, GH matches G-J exactly, IJ sits between G-J and K-M.
+// EF-VVS stacks FG's color premium with VVS's own +5 clarity premium
+// (CLARITY_CHARGE_PERCENT.VVS1/VVS2) for 10 — also matches the ~10.6%
+// live-priced delta above almost exactly.
 export const DIAMOND_QUALITY_TIERS: { key: string; colorRange: string; sublabel: string; priceChargePercent: number }[] = [
+  { key: 'EF-VVS', colorRange: 'E-F', sublabel: 'Exceptional White · Top Grade', priceChargePercent: 10 },
   { key: 'FG-SI', colorRange: 'F-G', sublabel: 'Near Colorless · Premium', priceChargePercent: 6 },
   { key: 'GH-SI', colorRange: 'G-H', sublabel: 'Near Colorless · Classic', priceChargePercent: 4 },
   { key: 'IJ-SI', colorRange: 'I-J', sublabel: 'Slightly Tinted · Value', priceChargePercent: 2 },
