@@ -1585,3 +1585,40 @@ pricing source of truth as before (top price + Specifications table), so
 both stay in sync automatically.
 
 Verified: `tsc --noEmit` clean. Pushed to device and committed.
+
+## Contact page built — footer link was dead (10 Oct 2026)
+
+Client: "isme contact banale apne hisab se best" — the footer's "Contact"
+link (`components/site-footer.tsx`, under Company) pointed at `/contact`,
+which didn't exist (404). Built it from scratch, left to my own judgment.
+
+**`app/contact/page.tsx`** (new) — hero (`bg-midnight`, same pattern as
+`app/about/page.tsx`) + a two-column section: Contact Details on the left,
+the form on the right. Contact Details reuses the exact real values
+already used sitewide — not invented for this page — pulled from
+`app/api/chat/route.ts`, `app/policies/terms/page.tsx`, and
+`components/chat-widget.tsx`: email `info@norvikgold.com`, phone/WhatsApp
+`+971 585 622 369`, address `Down Town, Business Bay, sweden, UAE`.
+
+**`components/contact-form.tsx`** (new) — client component, writes
+straight to a new `contact_messages` table via the same browser Supabase
+client every other customer-facing write in this project uses (addresses,
+wishlist). No email service is configured anywhere in this project, so
+this is where a submission actually lands, not a decorative form that
+silently does nothing. Shows a success state ("Send another message") and
+an inline error pointing to `info@norvikgold.com` as a fallback if the
+insert fails.
+
+**`supabase/migrations/0007_contact_messages.sql`** (new) — `contact_messages`
+table (name, email, phone, message, created_at) with RLS: public INSERT
+(a contact form that requires login defeats the point), admin-only SELECT
+via the same email-allowlist pattern as 0002 and 0006. **User still needs
+to run this migration in the Supabase SQL editor.**
+
+Deliberately left out: a "Hours" / business-hours line — there is no
+source for actual hours anywhere in the codebase, so one isn't invented.
+Submissions are readable only via Supabase directly for now (no admin inbox
+page yet) — a natural follow-up once there's a request for one.
+
+Verified: `tsc --noEmit` clean on both `.tsx` files. Pushed to device and
+committed (3 new files).
