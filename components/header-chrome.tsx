@@ -211,9 +211,12 @@ export default function HeaderChrome({
             </Link>
           </nav>
 
-          {/* Icon actions */}
+          {/* Icon actions — `relative` added (10 Oct 2026) so SearchTrigger's
+              expanding bar below `lg` can anchor to THIS row's own width
+              instead of the search icon's exact x-position; see the
+              positioning comment in search-trigger.tsx for why. */}
           <div
-            className={`flex items-center gap-3 transition-colors duration-300 sm:gap-5 ${
+            className={`relative flex items-center gap-3 transition-colors duration-300 sm:gap-5 ${
               solid ? 'text-inknavy/80' : 'text-ivory'
             }`}
           >

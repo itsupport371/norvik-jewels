@@ -85,19 +85,29 @@ export default function SearchTrigger({
     window.setTimeout(() => inputRef.current?.focus(), 160);
   }
 
-  const barWidth = 'w-[min(80vw,21rem)]';
+  // Fix (10 Oct 2026, "search bar overlap ho raha hein"): below `lg` the
+  // main nav is hidden (see header-chrome.tsx), so this icon sits fairly
+  // close to the logo with much less room to its left than on desktop. The
+  // bar used to always grow leftward from the icon's own x-position at a
+  // fixed `min(80vw, 21rem)` width — on a narrow phone that's wide enough
+  // to run straight into the hamburger+logo on the left. Below `lg` it now
+  // anchors to the icon-ACTIONS row instead (header-chrome.tsx gave that
+  // row `relative` for exactly this) and drops down full-width below the
+  // icons rather than sliding out sideways from one icon's position — the
+  // icon-actions row's own left edge is already clear of the logo, so this
+  // can never overlap it. `lg:` and up keeps the original sideways-grow-
+  // from-the-icon behavior unchanged (desktop has the full nav to the
+  // left, so there's always room).
+  const barWidth = 'w-full lg:w-[min(80vw,21rem)]';
 
   return (
     <div
-      className="relative flex items-center"
+      className="flex items-center lg:relative"
       ref={rootRef}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
-      {/* Anchor for the growing bar + its results — sits to the left of the
-          icon (right: 100% of this row) so it never pushes the icon or the
-          account/wishlist/cart icons after it. */}
-      <div className="absolute right-full top-1/2 z-50 mr-2 -translate-y-1/2">
+      <div className="absolute inset-x-0 top-full z-50 mt-2 lg:inset-x-auto lg:right-full lg:top-1/2 lg:mr-2 lg:mt-0 lg:-translate-y-1/2">
         {/* The width-animated wrapper. overflow-hidden is what makes the
             fixed-width bar inside it look like it's sliding out instead of
             just appearing. */}

@@ -758,8 +758,10 @@ export default function ProductConfigurator({
         </p>
       </div>
 
-      {/* Specifications — last on mobile, back under the image on desktop */}
-      <div className="lg:col-start-1 lg:row-start-2">
+      {/* Specifications — last on mobile; on desktop, under the Buy Box in
+          the RIGHT column (10 Oct 2026, "specifications wala right side
+          dikha") — was under the image in the left column before. */}
+      <div className="lg:col-start-2 lg:row-start-2">
         <ProductSpecifications
           product={product}
           colorKey={diamondQualityLabel ?? undefined}

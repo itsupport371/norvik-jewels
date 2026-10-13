@@ -1535,3 +1535,34 @@ file properly first rather than a rushed edit. Flagged for a follow-up.
 
 Verified: `tsc --noEmit` clean on every new/edited file. Pushed to device
 and committed (13 files).
+
+## Header search bar overlap + Specifications moved to the right column (10 Oct 2026, PDP)
+
+Client: "ek to search bar overlap ho raha hein wo proper kar and jo
+specifications wala hein usko right side dikha".
+
+**Search bar overlap (`components/search-trigger.tsx` + `header-chrome.tsx`)**
+— the search icon's dropdown bar (the "grows sideways out of the icon"
+design from earlier this project) always expanded leftward from the
+icon's own x-position at a fixed `min(80vw, 21rem)` width. Below `lg`
+(1024px) the main nav is hidden (see header-chrome.tsx), so the icon sits
+close to the logo/hamburger with much less room to its left than on
+desktop — on a narrow phone the bar was wide enough to run straight into
+the logo. Fix: below `lg` the bar now anchors to the icon-actions row
+itself (given `relative` in header-chrome.tsx for this) and drops down
+full-width below the icon row instead of sliding out sideways from one
+icon's exact position — that row's own left edge is already clear of the
+logo, so it can't overlap it. `lg:` and up (desktop, full nav visible,
+plenty of room) keeps the original sideways-grow-from-the-icon behavior
+completely unchanged.
+
+**Specifications moved to the right column (`components/product-configurator.tsx`)**
+— was `lg:col-start-1 lg:row-start-2` (under the product image, left
+column); changed to `lg:col-start-2 lg:row-start-2` (under the Buy Box,
+right column, same column as price/Add to Bag). Related Products
+(desktop, full-width `lg:col-span-2` row below everything) is unaffected.
+Mobile order unchanged — the grid collapses to one column there, so it
+still falls in the same place in normal document flow.
+
+Verified: `tsc --noEmit` clean on all three files. Pushed to device and
+committed.
