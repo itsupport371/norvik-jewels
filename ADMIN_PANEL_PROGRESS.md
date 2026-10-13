@@ -1566,3 +1566,22 @@ still falls in the same place in normal document flow.
 
 Verified: `tsc --noEmit` clean on all three files. Pushed to device and
 committed.
+
+## Ring size → gold weight: flat 100mg per size step (10 Oct 2026)
+
+Client: "har ek size change kar pe 100 milli add kar wt" — replaced the
+ring-size weight formula in `components/product-configurator.tsx`.
+
+Was: an mm-difference-from-size-9 formula (`(selectedMM - baselineMM) * 0.03`,
+reading the millimetre value out of each size option's sublabel) — a
+placeholder noted as "pending real per-size weight data from the client".
+
+Now: a flat **+0.1g (100 milligrams) per size step** away from size 9 (the
+default), using each size's own position in the fixed 5–25 size list
+(`product.sizeOptions`), not its mm sublabel at all — e.g. size 11 (2 steps
+above 9) = +0.2g, size 7 (2 steps below) = −0.2g. `effectiveGoldWeight`
+still floors at 0.1g minimum, unchanged. This feeds the same single
+pricing source of truth as before (top price + Specifications table), so
+both stay in sync automatically.
+
+Verified: `tsc --noEmit` clean. Pushed to device and committed.

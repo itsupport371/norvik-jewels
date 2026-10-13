@@ -206,17 +206,17 @@ export default function ProductConfigurator({
   const needsSize = product.sizeOptions.length > 1;
   const karat = extractKarat(metalKey);
 
-  // Ring size changes gold weight slightly — larger sizes use a bit more
-  // metal. Placeholder ratio (grams per mm difference from size 9, the
-  // default) — pending real per-size weight data from the client.
-  function parseMM(sublabel?: string): number {
-    if (!sublabel) return 0;
-    const match = sublabel.match(/[\d.]+/);
-    return match ? parseFloat(match[0]) : 0;
-  }
-  const baselineMM = parseMM(product.sizeOptions.find((o) => o.label === '9')?.sublabel);
-  const selectedMM = parseMM(product.sizeOptions.find((o) => o.label === sizeKey)?.sublabel);
-  const sizeWeightDelta = needsSize ? (selectedMM - baselineMM) * 0.03 : 0;
+  // Ring size changes gold weight — larger sizes use a bit more metal.
+  // Fix (10 Oct 2026, "har ek size change pe 100 milli add kar wt" — was an
+  // mm-difference-from-size-9 formula (0.03g per mm, a placeholder pending
+  // real client data); replaced with what the client actually asked for: a
+  // flat +0.1g (100 milligrams) per size STEP away from size 9 (the
+  // default), using each size's position in the list — not the mm
+  // measurement in its sublabel, which no longer factors in at all.
+  const baselineIndex = product.sizeOptions.findIndex((o) => o.label === '9');
+  const selectedIndex = product.sizeOptions.findIndex((o) => o.label === sizeKey);
+  const sizeWeightDelta =
+    needsSize && baselineIndex !== -1 && selectedIndex !== -1 ? (selectedIndex - baselineIndex) * 0.1 : 0;
   const effectiveGoldWeight = Math.max(0.1, product.goldWeightGrams + sizeWeightDelta);
 
   // Rings use the single combined tier's own % (its clarity side is
