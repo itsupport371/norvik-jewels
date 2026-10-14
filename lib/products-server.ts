@@ -91,7 +91,9 @@ export async function getProductBySlugServer(slug: string): Promise<Product | un
   return data ? mapDbRowToProduct(data as ProductRow) : undefined;
 }
 
-/** "You May Also Like" — same category, excluding the current product. */
+/** "You May Also Like" — same category, excluding the current product.
+ *  Limit 3 (was 4) — 14 Oct 2026, matches related-products.tsx now showing
+ *  exactly one row of 3 instead of a 2-column/4-card grid. */
 export async function getRelatedServer(category: string, slug: string): Promise<Product[]> {
   const supabase = createClient();
   const { data } = await supabase
@@ -100,6 +102,6 @@ export async function getRelatedServer(category: string, slug: string): Promise<
     .eq('category', category)
     .eq('status', 'published')
     .neq('slug', slug)
-    .limit(4);
+    .limit(3);
   return ((data as ProductRow[] | null) ?? []).map(mapDbRowToProduct);
 }

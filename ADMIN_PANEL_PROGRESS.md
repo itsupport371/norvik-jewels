@@ -1622,3 +1622,35 @@ page yet) — a natural follow-up once there's a request for one.
 
 Verified: `tsc --noEmit` clean on both `.tsx` files. Pushed to device and
 committed (3 new files).
+
+## Specifications moved up (no blank space) + "You May Also Like" capped to 3 with animation (14 Oct 2026, PDP)
+
+Client: "jo specification hein usko thoda uper place kar and also no blank
+spaces more" + "you may also like usme bhi teen hi product dikha line mein
+with good animation".
+
+**Specifications blank-space fix (`components/product-configurator.tsx`)**
+— Specifications was its own grid cell at `lg:col-start-2 lg:row-start-2`.
+That row's vertical start is set by the *taller* of the two row-1 columns
+(almost always the product image), so on desktop it only began once the
+image's height was cleared — leaving dead white space below the Buy Box
+column the whole time, on top of the grid's own `lg:gap-y-10` row gap.
+Fix: render `<ProductSpecifications />` as a normal child inside the
+details/Buy-Box column instead (right after the "Certified 18K gold…"
+line), so it starts immediately after the Buy Box with zero dependency on
+the image's height — higher up, no gap. Mobile order is unchanged, it
+already fell in this exact spot in document flow.
+
+**"You May Also Like" capped at 3, one row, animated (`components/related-products.tsx`
++ `lib/products-server.ts`)** — was up to 4 cards in a 2-column wrapping
+grid. `getRelatedServer` now `.limit(3)` (was 4); the grid is `grid-cols-3`
+unconditionally (`.slice(0, 3)` as a belt-and-suspenders cap) so it's
+always exactly one row, never wraps. Animation: each card fades + slides
+up on reveal, staggered left-to-right via inline `animationDelay`
+(`.animate-fade-up-in` keyframe added to `app/globals.css`); on hover the
+whole card lifts with a shadow, the image zooms a bit more than before
+(110% vs 105%), and a thin gold underline slides in under the product
+name — reads as one deliberate hover motion, not just the photo zooming.
+
+Verified: `tsc --noEmit` clean on all three `.ts`/`.tsx` files. Pushed to
+device and committed (4 files).

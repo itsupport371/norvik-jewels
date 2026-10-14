@@ -756,12 +756,19 @@ export default function ProductConfigurator({
         <p className="mt-4 text-[13px] leading-[1.35] text-muted">
           Certified 18K gold · Free insured shipping · 15-day returns on ready pieces
         </p>
-      </div>
 
-      {/* Specifications — last on mobile; on desktop, under the Buy Box in
-          the RIGHT column (10 Oct 2026, "specifications wala right side
-          dikha") — was under the image in the left column before. */}
-      <div className="lg:col-start-2 lg:row-start-2">
+        {/* Specifications — moved IN-FLOW right after the Buy Box inside
+            this same right column (14 Oct 2026, "specification thoda uper
+            place kar and no blank spaces"). Was its own `lg:row-start-2`
+            grid cell — that tied its vertical position to the grid's row
+            height, which is set by the (usually taller) image in column 1,
+            so on desktop it only started once the image's height was
+            cleared, leaving dead white space below the Buy Box the whole
+            time. Rendering it as a normal child of the column instead
+            means it starts right after "Certified 18K gold…" with no
+            dependency on the image's height at all — higher up, no gap.
+            Mobile order is unchanged: it already fell right here, after
+            the buy box, before Related. */}
         <ProductSpecifications
           product={product}
           colorKey={diamondQualityLabel ?? undefined}

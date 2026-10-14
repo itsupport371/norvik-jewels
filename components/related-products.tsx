@@ -25,8 +25,20 @@ import WishlistQuickButton from '@/components/wishlist-quick-button';
 // product-configurator.tsx) — so `open` is fully controlled by the parent
 // now, nothing is rendered here at all (not even a heading) until that icon
 // is tapped.
+//
+// 14 Oct 2026 ("teen hi product dikha line mein with good animation"):
+// was a 2-column, up-to-4-card wrapping grid. Capped to exactly 3 — one
+// row, never wraps — on every breakpoint (`.slice(0, 3)` here is the
+// belt-and-suspenders; `getRelatedServer` in lib/products-server.ts was
+// also changed to fetch only 3). Each card now fades/slides up on reveal,
+// staggered left-to-right (`.animate-fade-up-in` + per-index delay, see
+// app/globals.css), on top of the existing hover image zoom — plus a
+// hover lift + shadow on the whole card and a gold underline sliding in
+// under the name, so hovering reads as one deliberate motion instead of
+// just the photo zooming.
 export default function RelatedProducts({ related, open }: { related: Product[]; open: boolean }) {
   if (!open || related.length === 0) return null;
+  const items = related.slice(0, 3);
 
   return (
     <div className="mt-10 border-t border-line pt-6">
@@ -34,21 +46,31 @@ export default function RelatedProducts({ related, open }: { related: Product[];
         You May Also Like
       </h2>
 
-      <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-6">
-        {related.map((p) => (
-          <div key={p.slug} className="group relative">
-            <Link href={`/product/${p.slug}`} className="relative block aspect-square overflow-hidden bg-white p-2">
+      <div className="mt-5 grid grid-cols-3 gap-x-3 gap-y-6 sm:gap-x-4">
+        {items.map((p, i) => (
+          <div
+            key={p.slug}
+            className="animate-fade-up-in group relative transition-transform duration-300 hover:-translate-y-1"
+            style={{ animationDelay: `${i * 100}ms` }}
+          >
+            <Link
+              href={`/product/${p.slug}`}
+              className="relative block aspect-square overflow-hidden bg-white p-2 shadow-[0_0_0_rgba(0,0,0,0)] transition-shadow duration-300 group-hover:shadow-lg"
+            >
               <div className="relative h-[calc(100%-56px)] overflow-hidden">
                 <Image
                   src={p.images[0]}
                   alt={p.name}
                   fill
-                  className="object-contain transition-transform duration-500 group-hover:scale-105"
-                  sizes="(min-width: 1024px) 22vw, 50vw"
+                  className="object-contain transition-transform duration-500 group-hover:scale-110"
+                  sizes="(min-width: 1024px) 15vw, 33vw"
                 />
               </div>
               <div className="flex h-14 flex-col items-center justify-center overflow-hidden px-1 text-center">
-                <p className="line-clamp-2 w-full text-[12px] font-medium leading-[1.3] text-ink">{p.name}</p>
+                <p className="relative line-clamp-2 w-full text-[12px] font-medium leading-[1.3] text-ink">
+                  {p.name}
+                  <span className="absolute inset-x-1/4 bottom-0 h-px origin-center scale-x-0 bg-antiquegold transition-transform duration-300 group-hover:scale-x-100" />
+                </p>
                 <p className="mt-1 text-[12px] leading-[1.3] text-muted">
                   {p.currency}{p.basePrice.toLocaleString('en-IN')}
                 </p>
