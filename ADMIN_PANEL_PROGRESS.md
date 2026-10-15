@@ -1654,3 +1654,52 @@ name — reads as one deliberate hover motion, not just the photo zooming.
 
 Verified: `tsc --noEmit` clean on all three `.ts`/`.tsx` files. Pushed to
 device and committed (4 files).
+
+## Excel import fix — Tanmaniya Vol.1 (15 Oct 2026, `app/admin/products/import/page.tsx`)
+
+Client sent `Lelo Meri Tanmaniya Vol.1_Norvik.xlsx` to upload via Products → Import.
+Checked it against the importer before telling the client to upload for real — found
+and fixed a real parsing gap this file's shape exposed, not present in any batch
+imported so far.
+
+**Workbook shape:** 3 sheets — `Fancy` (10 mixed-cut designs), `Round` (same 10
+designs, all-round-diamond cut), `COMPLEMENTARY-INDIAN-TN-VOL1` (empty — already
+safely skipped by the existing "fewer than 2 rows" guard, no fix needed). Both real
+sheets use the SAME manufacturer SKU per design (`T-201`...`T-210`) — Fancy and Round
+are two separate products for the same design, told apart only by their *Norvik* SKU
+prefix (`ITNF-` vs `ITNR-`).
+
+**Bug found:** the `Fancy` sheet has no "Display Name" column at all (unlike `Round`,
+which has one) — and its own Norvik SKU column has no header text either, sitting in
+the very last column. The existing unlabeled-column fallback (added for Batch-13) only
+fires relative to a Name column's position (`nameCol - 1`), so with no Name column at
+all it never fired — `Fancy` rows would have silently imported with the WRONG Norvik
+SKU (the bare manufacturer code "T-201" instead of "ITNF-0201", the real one, which
+would've just been dropped) and a generic placeholder name ("T-201 piece") instead of
+anything descriptive.
+
+**Fix 1 — Norvik SKU:** when there's no Name column at all (`nameCol < 0`) AND the
+sheet's last column is itself unlabeled, treat that last column as the Norvik SKU
+column. Safe no-op for any sheet whose trailing column is genuinely blank/unused.
+
+**Fix 2 — Name borrowing:** `fillMissingNames` only borrowed a name across sibling
+sheets when the SKU had a "-Rounds"-style suffix to strip (Taka Tak Studs Vol.3's
+shape). This file's Fancy/Round pair share the exact same bare SKU, no suffix — added
+a direct (unstripped) SKU match tried first, tagged with the sheet name itself (e.g.
+"Eternal Link Mangalsutra Pendant (Fancy)") instead of the old "(All Diamond)" wording,
+which was specific to the older file's naming, not this one. Strictly additive — can't
+fire for the existing suffixed shape (a suffixed key never equals its own unsuffixed
+base key), so Taka Tak Studs Vol.3 behavior is unchanged.
+
+**Verified** by re-implementing the exact parsing logic in a standalone script and
+running it against the real uploaded file (not just read through by eye): all 10 Fancy
+rows now get the correct `ITNF-02xx` Norvik SKU and a real borrowed name; all 10 Round
+rows parse clean as before (unaffected — it already has its own Name/Norvik-SKU
+columns); no `norvik_sku` collisions between the two sheets. `tsc --noEmit` clean.
+Pushed to device and committed.
+
+**Told the client:** safe to upload now via Products → Import at `/admin/products/import`.
+Category must be set to **Tanmaniya** in the dropdown before importing (the importer
+defaults to "Earrings" for header-labelled sheets — not auto-detected from the file).
+Both sheets ("Fancy" and "Round") can stay checked — they're genuinely two different
+products per design, not duplicates.

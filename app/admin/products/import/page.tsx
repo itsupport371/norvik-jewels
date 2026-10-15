@@ -284,6 +284,23 @@ function parseHeaderDrivenV1(allRows: unknown[][], sheetName: string): ParsedRow
   if (norvikCol < 0 && nameCol > 0 && !isNonEmptyString(header[nameCol - 1])) {
     norvikCol = nameCol - 1;
   }
+  // Tanmaniya Vol.1 (15 Oct 2026): the "Fancy" sheet has no Name/Display
+  // column AT ALL (unlike its "Round" sibling sheet, which has one) — so
+  // the Batch-13 fallback just above never fires (it's anchored to
+  // `nameCol - 1`, which only exists when nameCol does). This sheet's own
+  // Norvik SKU ("ITNF-0201" etc.) instead sits in the very LAST column,
+  // again with no header text. Only used when there's no Name column at
+  // all (nameCol < 0) and that last column is itself unlabeled — so an
+  // ordinary sheet whose trailing column is just unused/blank doesn't get
+  // mistaken for this (the per-row isNonEmptyString check below already
+  // leaves norvikSkuFound unset on a genuinely empty column, so this is
+  // a safe no-op in that case either way).
+  if (norvikCol < 0 && nameCol < 0) {
+    const lastCol = header.length - 1;
+    if (lastCol >= 0 && !isNonEmptyString(header[lastCol])) {
+      norvikCol = lastCol;
+    }
+  }
 
   const results: ParsedRow[] = [];
   let current: ParsedRow | null = null;
@@ -383,6 +400,23 @@ function fillMissingNames(rows: ParsedRow[]): void {
   }
   for (const r of rows) {
     if (r.hasName) continue;
+    // Tanmaniya Vol.1 (15 Oct 2026): its "Fancy" and "Round" sheets share
+    // the EXACT SAME manufacturer SKU per design (e.g. both "T-201") — no
+    // "-Rounds"-style suffix at all, unlike Taka Tak Studs Vol.3, where the
+    // two variant sheets are distinguished by a suffix on the SKU itself.
+    // Try a direct, unstripped SKU match first; this is a strict superset
+    // of the stripped match below (a suffixed sku like "ER-123-Rounds"
+    // never equals its own un-suffixed base key "er-123" once normalized,
+    // so this never fires for that existing shape — it only catches the
+    // new bare-SKU-match shape). Tagged with the sheet name itself (e.g.
+    // "(Fancy)") rather than the older "(All Diamond)" wording below, which
+    // is specific to Taka Tak Studs' Round-diamond variant, not accurate
+    // for an unrelated sheet-naming scheme.
+    const directBorrowed = nameByBaseSku.get(normalizeSkuForMatch(r.sku));
+    if (directBorrowed) {
+      r.name = `${directBorrowed} (${r.sheetName})`;
+      continue;
+    }
     const strippedSku = r.sku.replace(ROUND_VARIANT_SUFFIX_RE, '');
     const borrowed =
       normalizeSkuForMatch(strippedSku) !== normalizeSkuForMatch(r.sku)
