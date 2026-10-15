@@ -125,11 +125,27 @@ function isNonEmptyString(v: unknown): v is string {
   return typeof v === 'string' && v.trim().length > 0;
 }
 
+// Tanmaniya Vol.2 (15 Oct 2026): this sheet's diamond-weight header is
+// literally "Diamond\n Weight" — the line break (plus the stray leading
+// space after it) sits BETWEEN the two words themselves, not before the
+// whole phrase like every sheet seen until now (e.g. "Total\nDiamond
+// Wt."). A plain `.toLowerCase()` left the newline in place, so the
+// pattern "diamond weight" was never a contiguous substring and the
+// column silently went unmatched — diamondCaratTotal would have come out
+// 0 for every row. Collapsing all whitespace (including newlines) to a
+// single space before matching fixes this sheet and is strictly more
+// permissive than before for every other header already handled — it can
+// only make new matches possible, never un-match something that matched
+// previously.
+function normalizeHeaderText(cell: unknown): string | null {
+  if (typeof cell !== 'string') return null;
+  return cell.toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
 function findCol(header: unknown[], patterns: string[]): number {
   for (let i = 0; i < header.length; i++) {
-    const cell = header[i];
-    if (typeof cell !== 'string') continue;
-    const norm = cell.toLowerCase();
+    const norm = normalizeHeaderText(header[i]);
+    if (norm === null) continue;
     if (patterns.some((p) => norm.includes(p))) return i;
   }
   return -1;
@@ -141,9 +157,8 @@ function findCol(header: unknown[], patterns: string[]): number {
 function findAllCols(header: unknown[], patterns: string[]): number[] {
   const result: number[] = [];
   for (let i = 0; i < header.length; i++) {
-    const cell = header[i];
-    if (typeof cell !== 'string') continue;
-    const norm = cell.toLowerCase();
+    const norm = normalizeHeaderText(header[i]);
+    if (norm === null) continue;
     if (patterns.some((p) => norm.includes(p))) result.push(i);
   }
   return result;
@@ -155,9 +170,8 @@ function findAllCols(header: unknown[], patterns: string[]): number[] {
 // separately-labelled "Est.Final Gold Wt" one (Batch-15, 30 Sep 2026).
 function findColExcluding(header: unknown[], patterns: string[], excludePatterns: string[]): number {
   for (let i = 0; i < header.length; i++) {
-    const cell = header[i];
-    if (typeof cell !== 'string') continue;
-    const norm = cell.toLowerCase();
+    const norm = normalizeHeaderText(header[i]);
+    if (norm === null) continue;
     if (excludePatterns.some((p) => norm.includes(p))) continue;
     if (patterns.some((p) => norm.includes(p))) return i;
   }

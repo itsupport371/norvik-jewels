@@ -1703,3 +1703,43 @@ Category must be set to **Tanmaniya** in the dropdown before importing (the impo
 defaults to "Earrings" for header-labelled sheets — not auto-detected from the file).
 Both sheets ("Fancy" and "Round") can stay checked — they're genuinely two different
 products per design, not duplicates.
+
+## Excel import fix #2 — Tanmaniya Vol.2 (15 Oct 2026, `app/admin/products/import/page.tsx`)
+
+Client sent a second file, `Le lo Meri Tanmaniya Vol.2_excel_norvik.xlsx`. Checked it the
+same way before telling the client to upload — found and fixed a DIFFERENT real parsing
+gap than Vol.1's.
+
+**Workbook shape:** 1 sheet (`COMPLEMENTARY->Indian->TN->VOL2`), 25 SKU blocks
+(`TAN-325`...`TAN-367`, gap between 330 and 349 is genuinely in the source data, not a
+parsing drop — checked the raw SKU column against the parsed output row count, matches
+exactly). Otherwise a clean header-driven-v1 shape: labelled Norvik SKU column position
+(unlabeled, immediately left of "Display name" — the Batch-13 fallback already handles
+this), Display name column present on every row. No name-borrowing or missing-SKU issue
+this time.
+
+**Bug found:** the diamond-weight column header is literally `"Diamond\n Weight"` — the
+line break sits BETWEEN the two words themselves (plus a stray leading space after it),
+not before the whole phrase like every sheet seen until now (e.g. Vol.1's `"Total\nDiamond
+Wt."`, where the break comes before "Diamond", not inside "Diamond Weight"). `findCol`'s
+matching only ever did a plain `.toLowerCase()` with no whitespace normalization, so the
+pattern `"diamond weight"` was never a contiguous substring of `"diamond\n weight"` — the
+column would have gone completely unmatched, and every one of the 25 products would have
+imported with `diamond_carat_total = 0` (silently wrong, not an error — nothing would have
+flagged it).
+
+**Fix:** added a shared `normalizeHeaderText()` used by `findCol`/`findAllCols`/
+`findColExcluding` — collapses ALL whitespace (including embedded newlines) to a single
+space before matching, instead of just lowercasing. Strictly more permissive than before
+(can only create new matches, never remove one that worked previously), so no sheet
+already importing correctly can regress from this.
+
+**Verified** by re-running the same standalone parser re-implementation against BOTH
+files together: Vol.1 (regression check) — identical output to before, byte-for-byte same
+names/SKUs/weights as the previous fix's verification; Vol.2 — all 25 rows now get a
+correct, non-zero diamond carat total (0.1–0.85 ct range, matches what's plausible for
+these piece sizes) alongside the Norvik SKU and name, which were already parsing fine.
+`tsc --noEmit` clean. Pushed to device and committed.
+
+**Told the client:** safe to upload. Category = **Tanmaniya** again (this file only has
+one sheet, no Fancy/Round split to worry about this time).
