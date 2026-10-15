@@ -1743,3 +1743,52 @@ these piece sizes) alongside the Norvik SKU and name, which were already parsing
 
 **Told the client:** safe to upload. Category = **Tanmaniya** again (this file only has
 one sheet, no Fancy/Round split to worry about this time).
+
+## Excel import fix #1, corrected (15 Oct 2026, `app/admin/products/import/page.tsx`)
+
+Client re-tested the Tanmaniya Vol.1 import after the earlier fix shipped (hard refresh,
+confirmed the right URL, confirmed the right commit was live on Production via the
+Vercel deployments list) — the Norvik SKU column still showed the wrong value ("T-201"
+instead of "ITNF-0201") for every Fancy-sheet row, even though the Name fix from the
+same commit WAS visibly working ("Eternal Link Mangalsutra Pendant (Fancy)"). That
+split — one fix from the same file/commit working, the other not — was the tell that
+the deployment wasn't the problem; the fix itself had a real bug.
+
+**Root cause:** the original fix computed the Fancy sheet's "last column" as
+`header.length - 1`. Verified by unzipping the actual `.xlsx` and reading the raw
+worksheet XML directly (not through a library that silently pads gaps): Excel omits a
+cell from a row's XML entirely when it has no value and no style, rather than writing an
+empty placeholder — and this sheet's row 1 (the header) genuinely has no `R1` cell at
+all, while every SKU-bearing data row (row 3, row 12, etc. — the ones that actually
+carry a value like "ITNF-0201" in that column) DOES have an `R` cell. So
+`header`/`allRows[0]` only ever had 17 entries (columns A–Q) even though the sheet is 18
+columns wide (A–R) — `header.length - 1` pointed at column Q (which has real "20%
+Reduction" text, so the unlabeled-check correctly rejected it) instead of the real last
+column, R, where the Norvik SKU actually lives. My first verification used openpyxl to
+re-implement the parsing logic standalone, which pads every row to the sheet's overall
+`max_column` — that padding is exactly what hid this bug from that test; it never
+reflects what the real `xlsx`/SheetJS library hands the browser.
+
+**Fix:** measure the sheet's true width from the WIDEST row across the WHOLE sheet
+(`Math.max(header.length, ...allRows.map(r => r.length))`), not just the header row's
+own length — since at least one data row in any sheet shaped like this one will have the
+real trailing column populated (that's the whole reason the column exists), that row
+sets the correct width even when the header row itself is short.
+
+**Verified properly this time:** wrote a second, from-the-XML standalone parser
+(bypassing openpyxl entirely) that reproduces each row's array exactly as SheetJS's
+`sheet_to_json(sheet, {header:1, raw:true})` would — trimmed to each row's own last
+actually-present cell, not padded to the sheet's overall column count — confirmed this
+reproduces the real bug (header row 17 cells vs. data rows 18) before confirming the fix
+resolves it. Re-ran the exact same check against Vol.1's Round sheet and Vol.2 (neither
+was broken, both still correct) to confirm no regression. `tsc --noEmit` clean. Pushed
+to device and committed.
+
+Lesson for next time a parsing fix needs verifying against a real client file: a
+Python-library-based (openpyxl) stand-in for the actual `xlsx`/SheetJS parser is NOT
+trustworthy for anything involving "how wide is this row" — it silently pads gaps that
+the real browser-side library does not. Go to the raw worksheet XML (or get the `xlsx`
+npm package installed properly) for that class of check.
+
+**Told the client:** hard refresh once more and re-upload — should now show the correct
+`ITNF-02xx` Norvik SKU values, not italicized/placeholder.

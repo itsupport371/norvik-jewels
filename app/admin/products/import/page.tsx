@@ -309,8 +309,25 @@ function parseHeaderDrivenV1(allRows: unknown[][], sheetName: string): ParsedRow
   // mistaken for this (the per-row isNonEmptyString check below already
   // leaves norvikSkuFound unset on a genuinely empty column, so this is
   // a safe no-op in that case either way).
+  //
+  // Fix (15 Oct 2026, found live after this shipped — the first version
+  // used `header.length - 1` here and it silently never fired): Excel
+  // omits a cell from a row's XML entirely when it's truly blank — no
+  // value, no style — rather than writing an empty one, and `header`
+  // (`allRows[0]`) only has entries for the cells the header row actually
+  // has. This sheet's row 1 XML genuinely has no R1 cell at all, so
+  // `header` came out length 17 (columns A–Q), even though the SHEET
+  // itself is 18 columns wide (A–R) — confirmed by inspecting the raw
+  // worksheet XML, where every data row DOES have an R cell (that's where
+  // "ITNF-0201" etc. live). `header.length - 1` therefore pointed at
+  // column Q (which has real "20% Reduction" header text, so the
+  // unlabeled-check correctly rejected it) instead of the real last
+  // column, R. Fixed by measuring the sheet's real width from the WIDEST row
+  // across the whole sheet (data rows included), not the header row's own
+  // just-however-many-cells-it-happens-to-have length.
   if (norvikCol < 0 && nameCol < 0) {
-    const lastCol = header.length - 1;
+    const sheetWidth = Math.max(header.length, ...allRows.map((r) => r.length));
+    const lastCol = sheetWidth - 1;
     if (lastCol >= 0 && !isNonEmptyString(header[lastCol])) {
       norvikCol = lastCol;
     }
