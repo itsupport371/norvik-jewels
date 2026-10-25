@@ -1792,3 +1792,91 @@ npm package installed properly) for that class of check.
 
 **Told the client:** hard refresh once more and re-upload — should now show the correct
 `ITNF-02xx` Norvik SKU values, not italicized/placeholder.
+
+## Tanmaniya Vol.2, Rings Vol.1/Vol.2, "Moo Uthake" Pendant Set/Earring batches imported (25 Oct 2026)
+
+Same import → photo-folder-rename → publish pipeline used for several more client
+batches this session:
+
+- **Tanmaniya Vol.2** (25 products, `ITN-0325`–`ITN-0367`): Excel parsed clean on the
+  first try (fix from the Vol.1 session already covers this shape). Photo folders were
+  named `<number>-TAN[-Rounds]` (e.g. `325-TAN-Rounds`) — reversed order vs. the
+  product's manufacturer SKU (`TAN-325`), plus an inconsistent `-Rounds` suffix on a few
+  folders that doesn't correspond to any real second product (this batch has no
+  Fancy/Round split at all, one SKU = one product). Fixed by renaming folders to
+  `TAN-<number>` via a PowerShell regex rename (not a code change — see the chat for the
+  exact script). Published via one SQL UPDATE once photos were confirmed uploaded.
+- **Rings "Is type ka Vol.1"** (24 products, `ILR-0403`–`ILR-0416` + `ILR-030069`–
+  `ILR-030078`, two different manufacturer numbering ranges in one sheet — confirmed
+  genuine in the raw file, not a parsing bug). Same folder-naming mismatch, this time
+  TWO shapes mixed in one batch: `<number>-R[-Rounds]` and `R-<number>[-Rounds]` (the
+  second range already had the right order, just an inconsistent `-Rounds` suffix). One
+  combined PowerShell rename handled both shapes. Caught before import that the
+  client defaults to "Earrings"/"One Size" for any header-labelled sheet regardless of
+  what it actually contains — flagged to switch Category to Rings and Sizes to "Ring
+  sizes (5–25)" (actual finger rings, not jewellery that should ship in one size).
+- **Rings "Is Type ka Vol.2"** (20 products, `ILR-0368`–`ILR-0387`): same reversed-order
+  folder naming (`<number>-R`), no `-Rounds` inconsistency this time. Same rename
+  pattern, same Category/Sizes reminder.
+- **"Moo Uthake Vol.1"** (Pendant sets, 24 products across 2 sheets): workbook has an
+  "Earring" sheet (12 rows) and a "Pendants" sheet (12 rows) — these are two DIFFERENT
+  site categories (Earrings vs. Pendant Set — note: "Pendant Set" is the already-planned
+  category from the Sep 2026 category expansion, not "Pendants"; this sheet's own
+  product names literally say "... Pendant Set"), so the importer's single
+  "Category for this batch" dropdown can't cover both in one pass — had to be imported
+  TWICE from the same file, checking only one sheet at a time (Earring → category
+  Earrings, Pendants → category Pendant Set). The Earring sheet also has no Display
+  Name column at all (all 12 import with a placeholder name, e.g. "ER-417 piece" — real
+  names need to be typed in later via Edit) and 7 of its 12 rows have no Norvik SKU in
+  the sheet (manufacturer SKU reused for those, not a bug — genuinely blank in the
+  client's file). Photos were nested one level deeper than usual
+  (`417/417-ER-Rounds/*.jpg` and `417/417-P-Rounds/*.jpg` — a wrapper folder per design
+  number, with the earring and pendant photos in their own sub-folders inside it) — the
+  Import Photos tool only looks at each file's IMMEDIATE parent folder, so the wrapper
+  folder itself didn't need renaming, only the two sub-folder shapes
+  (`<number>-ER[-Rounds]` → `ER-<number>`, `<number>-P[-Rounds]` → `PD-<number>`), done
+  with one recursive PowerShell rename.
+
+No app code changes needed for any of the above — every fix was a one-time Excel/folder
+data-shape issue on the client's drive, not a bug in the import tool itself (the import
+tool's existing fixes from the Tanmaniya Vol.1 session already covered the parsing side
+correctly for all of these).
+
+## Fix: "Download Invoice" missing on some orders — Stripe PDF-timing race (25 Oct 2026)
+
+Client reported: first test purchase's invoice downloaded fine; the next one didn't —
+neither in My Orders nor Admin → Orders, and it stayed missing.
+
+**Root cause:** `app/checkout/success/page.tsx` fetches the Stripe Checkout Session
+(with `invoice` expanded) exactly once, the moment the browser lands on that page after
+redirect, and writes whatever `invoice.invoice_pdf` it finds straight into
+`orders.invoice_pdf_url` — it never runs again for that order. `invoice_creation`
+finalizes the actual Invoice object (and renders its PDF) a moment AFTER the Checkout
+Session itself reports `payment_status: 'paid'`, not atomically with it. Whether the
+very first fetch here wins that race is pure timing on Stripe's side — not specific to
+"the second purchase," it can happen to any of them. Once a null gets saved, there was
+no code path to ever update it again.
+
+**Fix 1 (stops it happening on new orders):** `getSessionDetails()` now retries the
+Stripe fetch up to 5 times with a 1.2s delay between attempts, stopping early once the
+PDF is actually present (or immediately if payment never succeeded) — adds at most ~5s
+to the success page in the worst case, in exchange for the saved URL being correct the
+one time this page runs.
+
+**Fix 2 (backfills orders already saved with a null invoice link):**
+`0008_orders_update_policy.sql` adds an UPDATE RLS policy — 0005's orders table only
+ever had SELECT/INSERT, nothing let a shopper's own session fix a row that already
+existed. `app/api/orders/retry-invoice/route.ts` (new) re-fetches the Stripe session by
+its stored `stripe_session_id` and updates just that order's `invoice_pdf_url`, running
+under the signed-in user's own session same as every other write in this project (no
+service-role key). My Orders (`components/account-dashboard.tsx`) now shows a
+"Retry Invoice" link in place of "Download Invoice" whenever `invoice_pdf_url` is null —
+clicking it calls that route and swaps in the real link once Stripe has it. Admin →
+Orders needed no separate fix — it reads the same `invoice_pdf_url` column, so it picks
+up the backfilled link automatically once retried from My Orders.
+
+**To apply:** run `supabase/migrations/0008_orders_update_policy.sql` in the Supabase
+SQL Editor (same as every other migration in this project — no CLI/service-role access
+set up). `tsc --noEmit` clean on all 3 changed/added files (`app/checkout/success/
+page.tsx`, `components/account-dashboard.tsx`, `app/api/orders/retry-invoice/
+route.ts`). Pushed to device and committed.

@@ -32,15 +32,40 @@ export const dynamic = 'force-dynamic';
 //      a closed tab mid-redirect means no order row. Fine for this demo;
 //      worth moving to a proper webhook + service role later if this becomes
 //      real order tracking.
+// Bug (found live 25 Oct 2026): the client's first test purchase showed a
+// working "Download Invoice" link; the very next one didn't, in either My
+// Orders or Admin → Orders — and once it's missing it stays missing (this
+// page only ever runs once per session and writes whatever it found
+// straight into `orders.invoice_pdf_url`). Root cause: `invoice_creation`
+// makes Stripe generate the Invoice object + its PDF, but that happens a
+// moment AFTER the Checkout Session itself flips to `payment_status:
+// 'paid'` — not atomically with it. The very first fetch here, right after
+// the browser lands on this page post-redirect, can beat that — the PDF
+// just isn't ready yet. It isn't a one-off: whether it wins the race is
+// pure timing on Stripe's side, so it can happen on any purchase, not just
+// a "second one" specifically. Retries a few times with a short delay
+// before giving up, so the link (and what gets saved below) is correct the
+// one time this page normally runs for a given session, instead of only
+// when the race happens to be won.
 async function getSessionDetails(sessionId: string | undefined) {
   if (!sessionId) return null;
   const secretKey = process.env.STRIPE_SECRET_KEY;
   if (!secretKey) return null;
   try {
     const stripe = new Stripe(secretKey.trim());
-    return await stripe.checkout.sessions.retrieve(sessionId, {
-      expand: ['invoice', 'line_items'],
-    });
+    let session: Stripe.Checkout.Session | null = null;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      session = await stripe.checkout.sessions.retrieve(sessionId, {
+        expand: ['invoice', 'line_items'],
+      });
+      const invoice = session.invoice;
+      const pdfReady = Boolean(invoice && typeof invoice !== 'string' && invoice.invoice_pdf);
+      // Nothing to wait for if the payment didn't actually succeed, or the
+      // PDF is already there, or this was the last attempt.
+      if (pdfReady || session.payment_status !== 'paid' || attempt === 4) break;
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+    }
+    return session;
   } catch (err) {
     console.error('Could not fetch checkout session:', err);
     return null;

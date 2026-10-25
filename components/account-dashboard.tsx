@@ -28,6 +28,7 @@ type Order = {
   total: number;
   status: string;
   invoice_pdf_url: string | null;
+  stripe_session_id: string | null;
   created_at: string;
 };
 
@@ -139,6 +140,14 @@ export default function AccountDashboard({ email }: { email: string }) {
   const [loadingAddresses, setLoadingAddresses] = useState(false);
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [loadingOrders, setLoadingOrders] = useState(false);
+  // "Retry invoice" (25 Oct 2026) — for an order saved with invoice_pdf_url
+  // null because Stripe's PDF wasn't ready the one time
+  // app/checkout/success/page.tsx ran (see that file's comment). Tracks
+  // which order is mid-retry, and a per-order message when Stripe still
+  // doesn't have it (rare — only if retried within a second or two of the
+  // purchase) rather than a generic alert.
+  const [retryingOrderId, setRetryingOrderId] = useState<string | null>(null);
+  const [retryMessages, setRetryMessages] = useState<Record<string, string>>({});
   const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
@@ -168,6 +177,36 @@ export default function AccountDashboard({ email }: { email: string }) {
         setLoadingOrders(false);
       });
   }, [tab, orders]);
+
+  async function handleRetryInvoice(order: Order) {
+    if (!order.stripe_session_id) return;
+    setRetryingOrderId(order.id);
+    setRetryMessages((prev) => ({ ...prev, [order.id]: '' }));
+    try {
+      const res = await fetch('/api/orders/retry-invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stripeSessionId: order.stripe_session_id }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setRetryMessages((prev) => ({ ...prev, [order.id]: data.error || 'Could not refresh the invoice.' }));
+      } else if (data.invoicePdfUrl) {
+        setOrders((prev) =>
+          prev?.map((o) => (o.id === order.id ? { ...o, invoice_pdf_url: data.invoicePdfUrl } : o)) ?? prev
+        );
+      } else {
+        setRetryMessages((prev) => ({
+          ...prev,
+          [order.id]: 'Invoice is still being generated — try again in a moment.',
+        }));
+      }
+    } catch {
+      setRetryMessages((prev) => ({ ...prev, [order.id]: 'Could not refresh the invoice.' }));
+    } finally {
+      setRetryingOrderId(null);
+    }
+  }
 
   async function handleRemoveAddress(id: string) {
     setAddresses((prev) => prev?.filter((a) => a.id !== id) ?? prev);
@@ -304,7 +343,20 @@ export default function AccountDashboard({ email }: { email: string }) {
                             Download Invoice
                           </a>
                         )}
+                        {!order.invoice_pdf_url && order.stripe_session_id && (
+                          <button
+                            type="button"
+                            onClick={() => handleRetryInvoice(order)}
+                            disabled={retryingOrderId === order.id}
+                            className="text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-ink underline underline-offset-4 hover:text-antiquegold disabled:opacity-50"
+                          >
+                            {retryingOrderId === order.id ? 'Checking…' : 'Retry Invoice'}
+                          </button>
+                        )}
                       </div>
+                      {retryMessages[order.id] && (
+                        <p className="mt-2 text-[11.5px] leading-[1.4] text-muted">{retryMessages[order.id]}</p>
+                      )}
                     </div>
                   ))}
                 </div>
