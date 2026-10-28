@@ -1880,3 +1880,38 @@ SQL Editor (same as every other migration in this project — no CLI/service-rol
 set up). `tsc --noEmit` clean on all 3 changed/added files (`app/checkout/success/
 page.tsx`, `components/account-dashboard.tsx`, `app/api/orders/retry-invoice/
 route.ts`). Pushed to device and committed.
+
+## Fix: Import tool parsing bugs found via "Thako mat Thuko mat Rings Vol.2" (28 Oct 2026)
+
+Unlike every earlier batch, this one exposed two real bugs in the import tool's parsing
+logic itself (`app/admin/products/import/page.tsx`), not just a client-side data/folder
+naming mismatch — found by running the file through the raw-XML + full-pipeline
+simulation before importing, same discipline as every prior batch.
+
+**Bug 1 — Norvik SKU column picked wrong.** This sheet has TWO columns both headed
+literally bare "SKU" — the manufacturer code in column 0 (e.g. `151-R`) and the real
+Norvik SKU in column 6 (e.g. `ILR-0151`). The existing fallback (`header.findIndex(cell
+=> cell.trim().toLowerCase() === 'sku')`, added for an earlier batch) always returns
+the FIRST such column — which `skuCol` had already claimed as the manufacturer-SKU
+column — so every row's Norvik SKU silently got set to its own manufacturer code
+instead. Fixed by excluding whatever column `skuCol` already claimed from that search,
+so it lands on the real second "SKU" column.
+
+**Bug 2 — diamond piece count corrupted.** This sheet has no diamond-piece-count column
+at all (no header anywhere says "count"). The old fallback, when no count column was
+found, assumed column 2 was always a count column (true for every earlier sheet shape,
+so it never actually fired before) — in this sheet column 2 is the GOLD weight, so
+`diamond_piece_count` was coming out equal to gold weight in grams (e.g. "1.87 pieces"
+for a ring with 0.13ct of diamonds). Fixed by removing the hardcoded `[2]` fallback —
+when no count column is found, `diamond_piece_count` is left at 0 rather than guessing.
+
+Both fixes verified via TypeScript syntax check (no new errors from either edit) and
+pushed to device. 40 products (`ILR-0151`–`ILR-0192`, excluding 186/187, same gap
+pattern as the client's prior Rings batches) — all 40 have a real Norvik SKU and a real
+display name in this sheet, no data gaps this time.
+
+**Photo folders:** same reversed-order mismatch as every earlier Rings batch — folders
+named `R-<number>-Round[s]` vs. the product's manufacturer SKU `<number>-R`, plus the
+usual `-Round`/`-Rounds` inconsistency (this batch has no real Fancy/Round split, one
+SKU = one product). Fixed via PowerShell rename to `<number>-R` (see chat for the exact
+script). Confirmed 1:1 — all 40 folders map to exactly one of the 40 sheet SKUs.

@@ -286,8 +286,24 @@ function parseHeaderDrivenV1(allRows: unknown[][], sheetName: string): ParsedRow
   // first (it comes first in the sheet) and never reach this one at all, so
   // this checks for a header that TRIMS+LOWERCASES to EXACTLY "sku" — no
   // other text — which only ever matches a column meant as nothing else.
+  //
+  // Fix ("Thako mat Thuko mat Rings Vol.2", 28 Oct 2026): this sheet's
+  // manufacturer code column is ALSO headed bare "SKU" (not "SKU Code"), so
+  // skuCol above already claimed it via the plain substring match — and
+  // `findIndex` then found that SAME column again here (it's the first
+  // column whose text trims+lowercases to exactly "sku"), never reaching
+  // the sheet's actual second "SKU" column (the real Norvik SKU,
+  // "ILR-0151" etc.) seven columns later. Every row silently got its own
+  // manufacturer code ("151-R") as its "Norvik SKU" instead — wrong, but
+  // not obviously wrong in the preview, since every row still showed SOME
+  // SKU-shaped value in that column. Excluding whatever column skuCol
+  // already claimed makes this always land on a genuinely SECOND
+  // "SKU"-headed column, which is what this fallback was always meant to
+  // find.
   if (norvikCol < 0) {
-    norvikCol = header.findIndex((cell) => typeof cell === 'string' && cell.trim().toLowerCase() === 'sku');
+    norvikCol = header.findIndex(
+      (cell, i) => i !== skuCol && typeof cell === 'string' && cell.trim().toLowerCase() === 'sku'
+    );
   }
   // Batch-13 (29 Sep 2026): no header says "norvik" (or bare "sku") anywhere,
   // but the piece's own code (e.g. "EPS-01201") sits in a column with NO
@@ -399,7 +415,17 @@ function parseHeaderDrivenV1(allRows: unknown[][], sheetName: string): ParsedRow
       const v = row[diamondWeightCol];
       if (typeof v === 'number') diamondWeightFound = v;
     }
-    const countCols = diamondCountCols.length > 0 ? diamondCountCols : [2];
+    // Fix ("Thako mat Thuko mat Rings Vol.2", 28 Oct 2026): the `: [2]`
+    // fallback here used to assume a sheet with no header-matched "count"
+    // column still had a real diamond-piece-count sitting in column 2 (true
+    // for every sheet shape seen before this one, which all had a labelled
+    // count column anyway, so this never actually fired). This sheet has NO
+    // piece-count column of any kind, and column 2 here is its GOLD weight
+    // column — the fallback was silently summing gold weight into
+    // diamond_piece_count (e.g. "1.8728216 pieces" for a ring with 0.13ct
+    // of diamonds). When no count column is found, there's nothing
+    // meaningful to sum — leave it at 0 rather than guessing a column.
+    const countCols = diamondCountCols;
     for (const col of countCols) {
       const count = row[col];
       if (typeof count === 'number') pieceCount += count;
