@@ -16,18 +16,23 @@ type Slide = {
   mobilePosition: string;
   eyebrow: string;
   heading: [string, string];
+  // Full brief body copy — kept on the slide data but NOT rendered in full
+  // on the hero (30 Oct 2026, client: paragraph made the banner look
+  // cluttered); shown instead as a short "Read more" link via
+  // `readMoreHref`, when set.
   body: string;
+  readMoreHref?: string;
   ctaLabel: string;
   ctaHref: string;
 };
 
-// Content brief (28 Oct 2026, "Ecommerce_Mann_2"): approved homepage hero is
-// ONE headline/body/CTA, not a rotating multi-offer carousel like the old
-// "Radiance, Redefined." / "Details That Endure." slides (each pointing at a
-// different category). Collapsed SLIDES to a single entry carrying the
-// approved copy — the carousel/dots machinery below is left in place
-// (harmless with one slide, `useCarousel` already no-ops when count<=1) so a
-// second slide can be added back later without restructuring this file.
+// 30 Oct 2026 (client): back to a 2-slide carousel like the original —
+// slide 1 carries the new approved "sun" hero copy from the content brief
+// (28 Oct 2026, "Ecommerce_Mann_2"); slide 2 restores the original "Details
+// That Endure" rings slide that was here before that brief was applied (the
+// other original slide, "Radiance, Redefined.", shared the same navy photo
+// now used by slide 1, so it isn't brought back alongside it — would've
+// been a duplicate image across two slides).
 const SLIDES: Slide[] = [
   {
     desktopImage: '/images/campaign-navy-desktop.jpg',
@@ -46,8 +51,20 @@ const SLIDES: Slide[] = [
     eyebrow: 'NORVIK JEWELS',
     heading: ['Some light', 'stays with you.'],
     body: "One sun lingers through a Swedish summer night. The other leaves Arabia glowing as the day draws to a close. In Norvik's 18K gold, their quiet and warmth become something intimate — a piece whose meaning grows with you.",
+    readMoreHref: '/our-world',
     ctaLabel: 'Explore the collections',
     ctaHref: '/collections',
+  },
+  {
+    desktopImage: '/images/campaign-gold-desktop.jpg',
+    desktopPosition: 'object-[75%_22%]',
+    mobileImage: '/images/campaign-gold-mobile.jpg',
+    mobilePosition: 'object-[62%_42%]',
+    eyebrow: 'Crafted in 18K Gold',
+    heading: ['Details That', 'Endure.'],
+    body: '',
+    ctaLabel: 'Explore Rings',
+    ctaHref: '/shop?category=rings',
   },
 ];
 
@@ -136,9 +153,17 @@ export default function CampaignHero() {
                 <br />
                 {slide.heading[1]}
               </h1>
-              <p className="mt-5 max-w-md text-[14px] leading-[1.6] text-ivory/85 sm:text-[15px]">
-                {slide.body}
-              </p>
+              {/* "Read more" link instead of the full body paragraph (30 Oct
+                  2026, client: the paragraph made the banner look cluttered)
+                  — only shown when a slide sets readMoreHref. */}
+              {slide.readMoreHref && (
+                <Link
+                  href={slide.readMoreHref}
+                  className="mt-4 inline-block text-[12px] font-medium uppercase leading-[1.2] tracking-[0.1em] text-ivory/85 underline underline-offset-4 transition-colors hover:text-ivory sm:text-[13px]"
+                >
+                  Read more
+                </Link>
+              )}
               <Link
                 href={slide.ctaHref}
                 className="mt-8 inline-block bg-ivory px-8 py-3.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-ink transition-opacity hover:opacity-90 sm:text-[12px]"

@@ -174,8 +174,13 @@ export default async function HomePage() {
               A little more presence. A detail you return to. Gold that gives a
               moment a form, so you can carry it beyond the day.
             </p>
+            {/* Links to /shop (all products), not /shop?collection=signature
+                (30 Oct 2026, client: "jo products daale hein wo saare
+                signature hein" — every product in the catalogue right now
+                IS the Signature edit, so filtering down to a `collection`
+                field would just show the same thing, if not less). */}
             <Link
-              href="/shop?collection=signature"
+              href="/shop"
               className="border border-antiquegold px-8 py-3.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-softwhite transition-colors hover:bg-antiquegold hover:text-midnight sm:text-[12px]"
             >
               Explore Signature
