@@ -3,6 +3,7 @@ import Image from "next/image";
 import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
 import CampaignHero from "@/components/campaign-hero";
+import PhilosophySlider from "@/components/philosophy-slider";
 import NewArrivalsRow from "@/components/new-arrivals-row";
 import { getAllProductsServer } from "@/lib/products-server";
 
@@ -21,27 +22,9 @@ export default async function HomePage() {
       <main className="bg-ivory">
         <CampaignHero />
 
-        {/* Philosophy — content brief (28 Oct 2026, "Ecommerce_Mann_2"),
-            Homepage section. A different quote/section than the old "Our
-            Philosophy" block removed in the Sep 2026 hero restructure (see
-            [[homepage-hero-restructure]]) — new approved copy, not a revert. */}
-        <section className="bg-softwhite px-6 py-20 text-center lg:px-10">
-          <h2 className="font-display mx-auto max-w-xl text-[26px] font-medium leading-[1.15] tracking-[-0.01em] text-inknavy sm:text-[34px]">
-            Some things are felt before they are seen.
-          </h2>
-          <p className="mx-auto mt-5 max-w-lg text-[14px] leading-[1.6] text-charcoal sm:text-[15px]">
-            The ease of a well-balanced form. The warmth of gold against the skin. A
-            detail that feels right without asking why. At Norvik, restraint leaves
-            room for feeling. We give each piece enough presence to be itself, and
-            enough simplicity to become yours.
-          </p>
-          <Link
-            href="/our-world"
-            className="mt-7 inline-block text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-inknavy underline underline-offset-4 transition-colors hover:text-antiquegold sm:text-[12px]"
-          >
-            Enter our world
-          </Link>
-        </section>
+        {/* Philosophy — now a 3-slide carousel (30 Oct 2026, client request),
+            see components/philosophy-slider.tsx for the 3 texts and why. */}
+        <PhilosophySlider />
 
         {/* Shop by Collection — row layout, Soft White cards. Sits right
             after the campaign hero now — the "Our Philosophy" quote section
