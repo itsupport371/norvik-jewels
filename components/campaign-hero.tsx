@@ -24,6 +24,11 @@ type Slide = {
   readMoreHref?: string;
   ctaLabel: string;
   ctaHref: string;
+  // Brief's "Secondary hero link" (bespoke enquiry) — gated on a real
+  // enquiry route existing; now that /bespoke exists (30 Oct 2026, client:
+  // "ha bana de na no worries"), restored on slide 1.
+  secondaryCtaLabel?: string;
+  secondaryCtaHref?: string;
 };
 
 // 30 Oct 2026 (client): back to a 2-slide carousel like the original —
@@ -54,6 +59,8 @@ const SLIDES: Slide[] = [
     readMoreHref: '/our-world',
     ctaLabel: 'Explore the collections',
     ctaHref: '/collections',
+    secondaryCtaLabel: 'Enquire about a bespoke piece',
+    secondaryCtaHref: '/bespoke',
   },
   {
     // 30 Oct 2026: client replaced "Details That Endure" with the content
@@ -182,12 +189,22 @@ export default function CampaignHero() {
                   </p>
                 )
               )}
-              <Link
-                href={slide.ctaHref}
-                className="mt-8 inline-block bg-ivory px-8 py-3.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-ink transition-opacity hover:opacity-90 sm:text-[12px]"
-              >
-                {slide.ctaLabel}
-              </Link>
+              <div className="mt-8 flex flex-wrap items-center gap-5">
+                <Link
+                  href={slide.ctaHref}
+                  className="inline-block bg-ivory px-8 py-3.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-ink transition-opacity hover:opacity-90 sm:text-[12px]"
+                >
+                  {slide.ctaLabel}
+                </Link>
+                {slide.secondaryCtaHref && (
+                  <Link
+                    href={slide.secondaryCtaHref}
+                    className="text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-ivory underline underline-offset-4 transition-colors hover:text-ivory/80 sm:text-[12px]"
+                  >
+                    {slide.secondaryCtaLabel}
+                  </Link>
+                )}
+              </div>
             </div>
           ))}
         </div>
