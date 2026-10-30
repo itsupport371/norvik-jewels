@@ -77,6 +77,70 @@ export default function OurWorldPage() {
           </div>
         </section>
 
+        {/* Co-Founder Story — content brief (28 Oct 2026, "Ecommerce_Mann_2"),
+            section 5. Added here (not a standalone page — none existed) so
+            the homepage's "Read the co-founder's story" link
+            (/our-world#co-founder) has a real destination. No portrait yet —
+            same reason as the homepage Founder teaser: brief says to use an
+            approved photo, none is on file. Sign-off name used exactly as
+            given in the brief; flagged there to confirm the preferred public
+            spelling before this goes live. */}
+        <section id="co-founder" className="bg-white px-6 py-20 lg:px-10">
+          <div className="mx-auto max-w-2xl">
+            <p className="mb-3 text-center text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
+              Co-Founder
+            </p>
+            <h2 className="font-display mb-8 text-center text-[28px] font-medium leading-[1.1] tracking-[-0.01em] text-ink sm:text-[36px]">
+              A life between two worlds.
+            </h2>
+            <div className="space-y-5 text-[14px] leading-[1.7] text-charcoal sm:text-[15px]">
+              <p>
+                When I moved to Sweden, I was not planning to create a jewellery
+                house. But living there changed the way I understood beauty. I
+                began to notice the confidence of clear lines, the care within a
+                proportion, and the strength of leaving only what was essential.
+                Beauty could be quiet and still leave a lasting impression.
+              </p>
+              <p>
+                My years in Dubai introduced me to another expression of luxury.
+                I was drawn to its warmth, its attention to detail, and the
+                confidence with which it celebrates beauty. Gold carried a
+                presence that felt both expressive and personal.
+              </p>
+              <p>
+                Over time, I found myself drawn to the space between these two
+                perspectives. Could a piece hold the richness of Dubai and the
+                restraint of Scandinavian design? Could it feel luxurious the
+                moment you put it on, and entirely natural to the way you are?
+              </p>
+              <p>
+                That question became the beginning of Norvik Jewels. As a
+                co-founder, I wanted to bring these two feelings together in
+                gold: clear in its form, considered in its details, and warm in
+                the way it meets the person wearing it.
+              </p>
+              <p>
+                For me, luxury is a feeling of balance. A piece has a presence
+                of its own, while leaving room for your individuality. Its
+                meaning grows through the life you wear it in: the moment you
+                chose it, the person who gave it, the memories it comes to
+                hold.
+              </p>
+              <p>
+                My hope is that you find a piece that feels unmistakably yours.
+                Something you enjoy wearing, and come to feel part of yourself.
+                Because the most beautiful jewellery becomes part of your
+                story. And, in time, part of you.
+              </p>
+            </div>
+            <p className="mt-8 text-center text-[14px] leading-[1.6] text-ink">
+              Neha S Shah
+              <br />
+              <span className="text-[12px] text-charcoal">Co-founder, Norvik Jewels</span>
+            </p>
+          </div>
+        </section>
+
         {/* CTA strip */}
         <section className="bg-midnight px-6 py-16 text-center">
           <p className="mb-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">

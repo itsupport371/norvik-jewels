@@ -58,6 +58,15 @@ export default function SiteFooter() {
                   Our Story
                 </Link>
               </li>
+              {/* 30 Oct 2026 (client): links to the homepage's Philosophy
+                  slider section (components/philosophy-slider.tsx), which
+                  carries an id="philosophy" anchor — there's no separate
+                  philosophy page. */}
+              <li>
+                <Link href="/#philosophy" className="hover:text-white">
+                  Our Philosophy
+                </Link>
+              </li>
               <li>
                 <Link href="/contact" className="hover:text-white">
                   Contact

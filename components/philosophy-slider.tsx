@@ -44,7 +44,7 @@ export default function PhilosophySlider() {
   }, []);
 
   return (
-    <section className="bg-softwhite px-6 py-20 text-center lg:px-10">
+    <section id="philosophy" className="bg-softwhite px-6 py-20 text-center lg:px-10">
       <div className="relative mx-auto min-h-[180px] max-w-xl sm:min-h-[150px]">
         {SLIDES.map((slide, i) => (
           <div
