@@ -153,11 +153,22 @@ export default function CampaignHero() {
 
       <div className="absolute inset-0 flex flex-col items-start justify-end px-6 pb-24 text-left sm:px-16 lg:px-24">
         <div className="relative flex min-h-[260px] w-full max-w-2xl flex-col items-start justify-end">
+          {/* 30 Oct 2026 fix: the client's new secondary link (bespoke
+              enquiry) on slide 1 wasn't clickable. Both slides' text blocks
+              are `absolute inset-0` siblings with no z-index — the one
+              rendered later in the array (slide 2) sat on top in the
+              stacking order regardless of its opacity, so its invisible
+              area was still intercepting clicks over slide 1's buttons
+              whenever slide 1 was the one showing. This never surfaced
+              before because the original single-link layout happened not to
+              overlap, but it's a general bug in this 2-slide setup — fixed
+              here with the same pointer-events toggle already used in
+              components/philosophy-slider.tsx. */}
           {SLIDES.map((slide, i) => (
             <div
               key={slide.desktopImage}
               className="absolute inset-0 flex flex-col items-start justify-end transition-opacity duration-1000"
-              style={{ opacity: i === index ? 1 : 0 }}
+              style={{ opacity: i === index ? 1 : 0, pointerEvents: i === index ? 'auto' : 'none' }}
             >
               {slide.eyebrow && (
                 <p className="mb-4 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
