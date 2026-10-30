@@ -216,9 +216,8 @@ export default async function HomePage() {
         </section>
 
         {/* Client Care introduction — content brief (28 Oct 2026), Homepage
-            section. CTA points at /contact — there's no dedicated Client
-            Care page yet, this is the closest real destination; flagged to
-            the client. */}
+            section. CTA points at the dedicated /client-care page (added
+            30 Oct 2026) — see that file's own comment for why. */}
         <section className="bg-scandi px-6 py-20 text-center lg:px-10">
           <h2 className="font-display mx-auto max-w-lg text-[26px] font-medium leading-[1.15] tracking-[-0.01em] text-inknavy sm:text-[34px]">
             Beauty deserves clarity.
@@ -227,8 +226,13 @@ export default async function HomePage() {
             Know the gold. Understand the stone. Find the right fit. We make
             room for the questions that help a piece feel truly yours.
           </p>
+          {/* Was /contact (30 Oct 2026 fix, client: "client care wala
+              content daala hi nahi hein hamara jo contact form mein wahi
+              hein") — now points to the new /client-care page, which has
+              the brief's actual "Why Norvik" content (gold/stones/fit
+              guidance), not just the plain contact form. */}
           <Link
-            href="/contact"
+            href="/client-care"
             className="mt-7 inline-block text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-inknavy underline underline-offset-4 transition-colors hover:text-antiquegold sm:text-[12px]"
           >
             Visit Client Care
