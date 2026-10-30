@@ -56,15 +56,21 @@ const SLIDES: Slide[] = [
     ctaHref: '/collections',
   },
   {
+    // 30 Oct 2026: client replaced "Details That Endure" with the content
+    // brief's "Supporting brand story" copy instead — no new photo supplied,
+    // so the same gold/rings image set stays. CTA changed from "Explore
+    // Rings" to "Enter our world" since this slide isn't ring-specific any
+    // more. No eyebrow label, matching the reference image she sent (just
+    // heading + full body paragraph, no small uppercase line above it).
     desktopImage: '/images/campaign-gold-desktop.jpg',
     desktopPosition: 'object-[75%_22%]',
     mobileImage: '/images/campaign-gold-mobile.jpg',
     mobilePosition: 'object-[62%_42%]',
-    eyebrow: 'Crafted in 18K Gold',
-    heading: ['Details That', 'Endure.'],
-    body: '',
-    ctaLabel: 'Explore Rings',
-    ctaHref: '/shop?category=rings',
+    eyebrow: '',
+    heading: ['Born between', 'two suns.'],
+    body: 'One shines through the night in a Swedish summer. The other pours gold across Arabia every evening. Norvik lives where their light meets — in 18K gold that holds the calm of the North and the fire of the East.',
+    ctaLabel: 'Enter our world',
+    ctaHref: '/our-world',
   },
 ];
 
@@ -145,24 +151,35 @@ export default function CampaignHero() {
               className="absolute inset-0 flex flex-col items-start justify-end transition-opacity duration-1000"
               style={{ opacity: i === index ? 1 : 0 }}
             >
-              <p className="mb-4 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
-                {slide.eyebrow}
-              </p>
+              {slide.eyebrow && (
+                <p className="mb-4 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
+                  {slide.eyebrow}
+                </p>
+              )}
               <h1 className="font-display max-w-2xl text-[44px] font-medium leading-[0.98] tracking-[-0.02em] text-ivory sm:text-[clamp(64px,5vw,72px)] sm:leading-[0.95]">
                 {slide.heading[0]}
                 <br />
                 {slide.heading[1]}
               </h1>
-              {/* "Read more" link instead of the full body paragraph (30 Oct
-                  2026, client: the paragraph made the banner look cluttered)
-                  — only shown when a slide sets readMoreHref. */}
-              {slide.readMoreHref && (
+              {/* A slide with `readMoreHref` set shows a short "Read more"
+                  link instead of its paragraph (30 Oct 2026, client: the
+                  paragraph made that banner look cluttered). A slide without
+                  it (like the "Born between two suns" one, 30 Oct 2026 —
+                  client sent a reference image showing the full paragraph)
+                  shows its `body` in full, same as the original slides did. */}
+              {slide.readMoreHref ? (
                 <Link
                   href={slide.readMoreHref}
                   className="mt-4 inline-block text-[12px] font-medium uppercase leading-[1.2] tracking-[0.1em] text-ivory/85 underline underline-offset-4 transition-colors hover:text-ivory sm:text-[13px]"
                 >
                   Read more
                 </Link>
+              ) : (
+                slide.body && (
+                  <p className="mt-5 max-w-md text-[14px] leading-[1.6] text-ivory/85 sm:text-[15px]">
+                    {slide.body}
+                  </p>
+                )
               )}
               <Link
                 href={slide.ctaHref}
