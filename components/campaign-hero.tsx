@@ -69,6 +69,7 @@ const SLIDES: Slide[] = [
     eyebrow: '',
     heading: ['Born between', 'two suns.'],
     body: 'One shines through the night in a Swedish summer. The other pours gold across Arabia every evening. Norvik lives where their light meets — in 18K gold that holds the calm of the North and the fire of the East.',
+    readMoreHref: '/our-world',
     ctaLabel: 'Enter our world',
     ctaHref: '/our-world',
   },
