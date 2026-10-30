@@ -80,20 +80,31 @@ export default function OurWorldPage() {
         {/* Co-Founder Story — content brief (28 Oct 2026, "Ecommerce_Mann_2"),
             section 5. Added here (not a standalone page — none existed) so
             the homepage's "Read the co-founder's story" link
-            (/our-world#co-founder) has a real destination. No portrait yet —
-            same reason as the homepage Founder teaser: brief says to use an
-            approved photo, none is on file. Sign-off name used exactly as
-            given in the brief; flagged there to confirm the preferred public
-            spelling before this goes live. */}
-        <section id="co-founder" className="bg-white px-6 py-20 lg:px-10">
-          <div className="mx-auto max-w-2xl">
-            <p className="mb-3 text-center text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
+            (/our-world#co-founder) has a real destination. Reworked 30 Oct
+            2026 into the same 2-column (text + photo) layout as the
+            homepage Founder teaser (app/page.tsx), from a reference image
+            the client sent — photo reused from the campaign hero's navy
+            slide (components/campaign-hero.tsx), not a new upload. Sign-off
+            name used exactly as given in the brief; flagged there to
+            confirm the preferred public spelling before this goes live. */}
+        <section id="co-founder" className="grid grid-cols-1 lg:grid-cols-2">
+          <div className="relative order-first aspect-[4/3] lg:order-none lg:aspect-auto">
+            <Image
+              src="/images/campaign-navy-desktop.jpg"
+              alt="Neha S Shah, Co-founder, Norvik Jewels"
+              fill
+              className="object-cover object-[75%_35%]"
+              sizes="(min-width: 1024px) 50vw, 100vw"
+            />
+          </div>
+          <div className="flex flex-col items-start justify-center bg-white px-8 py-16 lg:px-16">
+            <p className="mb-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
               Co-Founder
             </p>
-            <h2 className="font-display mb-8 text-center text-[28px] font-medium leading-[1.1] tracking-[-0.01em] text-ink sm:text-[36px]">
+            <h2 className="font-display mb-6 max-w-md text-[28px] font-medium leading-[1.1] tracking-[-0.01em] text-ink sm:text-[36px]">
               A life between two worlds.
             </h2>
-            <div className="space-y-5 text-[14px] leading-[1.7] text-charcoal sm:text-[15px]">
+            <div className="max-w-md space-y-4 text-[14px] leading-[1.7] text-charcoal sm:text-[15px]">
               <p>
                 When I moved to Sweden, I was not planning to create a jewellery
                 house. But living there changed the way I understood beauty. I
@@ -133,7 +144,7 @@ export default function OurWorldPage() {
                 story. And, in time, part of you.
               </p>
             </div>
-            <p className="mt-8 text-center text-[14px] leading-[1.6] text-ink">
+            <p className="mt-6 text-[14px] leading-[1.6] text-ink">
               Neha S Shah
               <br />
               <span className="text-[12px] text-charcoal">Co-founder, Norvik Jewels</span>

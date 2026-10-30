@@ -190,29 +190,44 @@ export default async function HomePage() {
             Client Care introduction (also 30 Oct 2026). */}
 
         {/* Founder teaser — content brief (28 Oct 2026), Homepage section.
-            No portrait — the brief itself says to "use the approved founder
-            name, portrait and designation" and there's no approved photo on
-            file yet, so this is text-only for now; swap in a photo layout
-            once one's provided. CTA points at the new Co-Founder Story
-            section added to /our-world (id="co-founder"), not a standalone
-            page — there wasn't one. */}
-        <section className="bg-white px-6 py-20 text-center lg:px-10">
-          <p className="mb-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
-            Co-Founder
-          </p>
-          <h2 className="font-display mx-auto max-w-lg text-[26px] font-medium leading-[1.15] tracking-[-0.01em] text-ink sm:text-[34px]">
-            A life between two worlds.
-          </h2>
-          <p className="mx-auto mt-5 max-w-lg text-[14px] leading-[1.6] text-charcoal sm:text-[15px]">
-            Norvik began with a feeling: that the quiet of Sweden and the warmth
-            of Dubai could belong in the same piece of jewellery.
-          </p>
-          <Link
-            href="/our-world#co-founder"
-            className="mt-7 inline-block text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-ink underline underline-offset-4 transition-colors hover:text-antiquegold sm:text-[12px]"
-          >
-            Read the co-founder&rsquo;s story
-          </Link>
+            Reworked 30 Oct 2026 (client sent a reference image: text left,
+            portrait right) from the earlier centered text-only version —
+            same split layout already used by the Signature banner above.
+            Photo reused from the campaign hero's navy slide (the same
+            butterfly-earring/ring shot already used on the login/signup
+            pages, see components/campaign-hero.tsx) — not a new upload, and
+            not a stand-in invented without approval; client pointed at this
+            exact image for this exact placement. CTA points at the
+            Co-Founder Story section on /our-world (id="co-founder"), not a
+            standalone page — there wasn't one. */}
+        <section className="grid grid-cols-1 lg:grid-cols-2">
+          <div className="flex flex-col items-start justify-center bg-white px-8 py-16 lg:px-16">
+            <p className="mb-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
+              Co-Founder&rsquo;s Story
+            </p>
+            <h2 className="font-display mb-5 max-w-md text-[30px] font-medium leading-[1.08] tracking-[-0.01em] text-ink sm:text-[38px]">
+              A life between two worlds.
+            </h2>
+            <p className="mb-6 max-w-md text-[14px] leading-[1.6] text-charcoal sm:text-[15px]">
+              Norvik began with a feeling: that the quiet of Sweden and the warmth
+              of Dubai could belong in the same piece of jewellery.
+            </p>
+            <Link
+              href="/our-world#co-founder"
+              className="text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-ink underline underline-offset-4 hover:text-antiquegold sm:text-[12px]"
+            >
+              Read the co-founder&rsquo;s story
+            </Link>
+          </div>
+          <div className="relative aspect-[4/3] lg:aspect-auto">
+            <Image
+              src="/images/campaign-navy-desktop.jpg"
+              alt="Neha S Shah, Co-founder, Norvik Jewels"
+              fill
+              className="object-cover object-[75%_35%]"
+              sizes="(min-width: 1024px) 50vw, 100vw"
+            />
+          </div>
         </section>
 
         {/* Client Care introduction — content brief (28 Oct 2026), Homepage
