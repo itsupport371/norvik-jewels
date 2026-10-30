@@ -181,6 +181,13 @@ export default function HeaderChrome({
             <Link href="/our-world" className="transition-colors hover:text-antiquegold">
               Our World
             </Link>
+            {/* Added (30 Oct 2026, client: "bespoke kaha hein?") — she'd
+                asked to pull the bespoke link out of the hero banner, then
+                asked where it had gone; picked header nav when asked where
+                it should be prominent. */}
+            <Link href="/bespoke" className="transition-colors hover:text-antiquegold">
+              Bespoke
+            </Link>
           </nav>
 
           {/* Icon actions — `relative` added (10 Oct 2026) so SearchTrigger's
@@ -293,6 +300,9 @@ export default function HeaderChrome({
                   the desktop nav above. */}
               <Link href="/our-world" onClick={closeMobileMenu} className="border-b border-warmstone/60 py-3.5">
                 Our World
+              </Link>
+              <Link href="/bespoke" onClick={closeMobileMenu} className="border-b border-warmstone/60 py-3.5">
+                Bespoke
               </Link>
             </nav>
           </div>
