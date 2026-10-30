@@ -109,26 +109,10 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Collections teaser — content brief (28 Oct 2026), Homepage
-            "Collections" block. Distinct from the category tiles just above:
-            this points at the curated /collections page (Signature etc.),
-            not a product-type filter. Text-only band, no new imagery
-            required. */}
-        <section className="bg-scandi px-6 py-16 text-center lg:px-10">
-          <h2 className="font-display mx-auto max-w-lg text-[24px] font-medium leading-[1.15] tracking-[-0.01em] text-inknavy sm:text-[30px]">
-            Different expressions. A shared light.
-          </h2>
-          <p className="mx-auto mt-4 max-w-md text-[14px] leading-[1.6] text-charcoal sm:text-[15px]">
-            Some forms feel like still water. Others carry the warmth of sand or
-            the movement of light. Find the collection that feels closest to you.
-          </p>
-          <Link
-            href="/collections"
-            className="mt-6 inline-block text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-inknavy underline underline-offset-4 transition-colors hover:text-antiquegold sm:text-[12px]"
-          >
-            Discover the collections
-          </Link>
-        </section>
+        {/* Collections teaser section removed (30 Oct 2026, client request)
+            — was "Different expressions. A shared light." / "Discover the
+            collections", added from the content brief's Homepage
+            "Collections" block, right after the category tiles above. */}
 
         {/* Signature Collection banner */}
         <section className="grid grid-cols-1 bg-midnight lg:grid-cols-2">
