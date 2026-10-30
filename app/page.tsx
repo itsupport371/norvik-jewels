@@ -21,6 +21,28 @@ export default async function HomePage() {
       <main className="bg-ivory">
         <CampaignHero />
 
+        {/* Philosophy — content brief (28 Oct 2026, "Ecommerce_Mann_2"),
+            Homepage section. A different quote/section than the old "Our
+            Philosophy" block removed in the Sep 2026 hero restructure (see
+            [[homepage-hero-restructure]]) — new approved copy, not a revert. */}
+        <section className="bg-softwhite px-6 py-20 text-center lg:px-10">
+          <h2 className="font-display mx-auto max-w-xl text-[26px] font-medium leading-[1.15] tracking-[-0.01em] text-inknavy sm:text-[34px]">
+            Some things are felt before they are seen.
+          </h2>
+          <p className="mx-auto mt-5 max-w-lg text-[14px] leading-[1.6] text-charcoal sm:text-[15px]">
+            The ease of a well-balanced form. The warmth of gold against the skin. A
+            detail that feels right without asking why. At Norvik, restraint leaves
+            room for feeling. We give each piece enough presence to be itself, and
+            enough simplicity to become yours.
+          </p>
+          <Link
+            href="/our-world"
+            className="mt-7 inline-block text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-inknavy underline underline-offset-4 transition-colors hover:text-antiquegold sm:text-[12px]"
+          >
+            Enter our world
+          </Link>
+        </section>
+
         {/* Shop by Collection — row layout, Soft White cards. Sits right
             after the campaign hero now — the "Our Philosophy" quote section
             and the second product hero carousel (HeroCarousel, still in
@@ -104,6 +126,27 @@ export default async function HomePage() {
           </div>
         </section>
 
+        {/* Collections teaser — content brief (28 Oct 2026), Homepage
+            "Collections" block. Distinct from the category tiles just above:
+            this points at the curated /collections page (Signature etc.),
+            not a product-type filter. Text-only band, no new imagery
+            required. */}
+        <section className="bg-scandi px-6 py-16 text-center lg:px-10">
+          <h2 className="font-display mx-auto max-w-lg text-[24px] font-medium leading-[1.15] tracking-[-0.01em] text-inknavy sm:text-[30px]">
+            Different expressions. A shared light.
+          </h2>
+          <p className="mx-auto mt-4 max-w-md text-[14px] leading-[1.6] text-charcoal sm:text-[15px]">
+            Some forms feel like still water. Others carry the warmth of sand or
+            the movement of light. Find the collection that feels closest to you.
+          </p>
+          <Link
+            href="/collections"
+            className="mt-6 inline-block text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-inknavy underline underline-offset-4 transition-colors hover:text-antiquegold sm:text-[12px]"
+          >
+            Discover the collections
+          </Link>
+        </section>
+
         {/* Signature Collection banner */}
         <section className="grid grid-cols-1 bg-midnight lg:grid-cols-2">
           <div className="relative min-h-[360px] lg:order-2 lg:min-h-[560px]">
@@ -120,52 +163,54 @@ export default async function HomePage() {
             <p className="mb-4 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
               Norvik Signature
             </p>
+            {/* Headline/body/CTA updated per content brief (28 Oct 2026) —
+                eyebrow kept as "Norvik Signature" per the brief's own note to
+                retain the current staging collection name until a renamed
+                collection is approved. */}
             <h2 className="font-display mb-6 text-[34px] font-medium leading-[1] tracking-[-0.015em] text-softwhite sm:text-[46px]">
-              The Signature Collection
+              For the moments that stay.
             </h2>
             <p className="mb-9 max-w-md text-[14px] leading-[1.6] text-warmstone sm:text-[15px]">
-              A curated edit of our most-loved designs — one defining piece from
-              every category, chosen for the way it catches the light.
+              A little more presence. A detail you return to. Gold that gives a
+              moment a form, so you can carry it beyond the day.
             </p>
             <Link
               href="/shop?collection=signature"
               className="border border-antiquegold px-8 py-3.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-softwhite transition-colors hover:bg-antiquegold hover:text-midnight sm:text-[12px]"
             >
-              Shop the Collection
+              Explore Signature
             </Link>
           </div>
         </section>
 
-        {/* New Arrivals — commented out for now (3 Oct 2026), client asked
-            to hide this whole homepage section along with the header's
-            "New Arrivals"/"Best Sellers" links, kept here (not deleted) so
-            it can go back exactly as it was by uncommenting. `products`
-            (fetched above) and the `NewArrivalsRow` import are now unused
-            while this is hidden — harmless (no unused-var build errors in
-            this project's tsconfig), left in place so re-enabling needs no
-            other changes.
+        {/* The Norvik Edit — content brief (28 Oct 2026), Homepage "Curated
+            jewellery" block. Reuses the New Arrivals row that was hidden on
+            3 Oct 2026 (kept, not deleted, per that comment) and the
+            `products` already fetched above — real published/static
+            catalogue, not invented. Renamed per the brief's own
+            implementation note: "Use real approved jewellery and
+            photographs. No invented Best Sellers or New Arrivals claims." */}
         <section className="bg-scandi px-6 py-20 lg:px-10">
           <div className="mx-auto max-w-7xl">
             <div className="mb-10 flex items-end justify-between border-b border-warmstone pb-6">
               <div>
-                <p className="mb-2 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
-                  Just In
-                </p>
                 <h2 className="font-display text-[26px] font-medium leading-[1.05] tracking-[-0.01em] text-inknavy sm:text-[36px]">
-                  New Arrivals
+                  The Norvik Edit
                 </h2>
+                <p className="mt-2 max-w-sm text-[13px] leading-[1.5] text-charcoal sm:text-[14px]">
+                  A few pieces to begin with. The rest of the story is yours.
+                </p>
               </div>
               <Link
                 href="/shop"
-                className="text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-inknavy underline underline-offset-4 transition-colors hover:text-antiquegold sm:text-[12px]"
+                className="whitespace-nowrap text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-inknavy underline underline-offset-4 transition-colors hover:text-antiquegold sm:text-[12px]"
               >
-                View All
+                Explore all jewellery
               </Link>
             </div>
             <NewArrivalsRow products={products} />
           </div>
         </section>
-        */}
 
         {/* Craftsmanship / Brand story */}
         <section className="grid grid-cols-1 lg:grid-cols-2">
@@ -192,8 +237,11 @@ export default async function HomePage() {
               minimalism to 18K gold and certified diamonds — designed in Dubai,
               made to last a lifetime.
             </p>
+            {/* Points to /our-world, not /about — the header nav now keeps
+                only one of "Our World" / "About Norvik" (see header-chrome
+                changes, 30 Oct 2026); /about has no nav link anymore. */}
             <Link
-              href="/about"
+              href="/our-world"
               className="text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-ink underline underline-offset-4 hover:text-antiquegold sm:text-[12px]"
             >
               Our Story

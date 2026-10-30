@@ -16,10 +16,18 @@ type Slide = {
   mobilePosition: string;
   eyebrow: string;
   heading: [string, string];
+  body: string;
   ctaLabel: string;
   ctaHref: string;
 };
 
+// Content brief (28 Oct 2026, "Ecommerce_Mann_2"): approved homepage hero is
+// ONE headline/body/CTA, not a rotating multi-offer carousel like the old
+// "Radiance, Redefined." / "Details That Endure." slides (each pointing at a
+// different category). Collapsed SLIDES to a single entry carrying the
+// approved copy — the carousel/dots machinery below is left in place
+// (harmless with one slide, `useCarousel` already no-ops when count<=1) so a
+// second slide can be added back later without restructuring this file.
 const SLIDES: Slide[] = [
   {
     desktopImage: '/images/campaign-navy-desktop.jpg',
@@ -35,20 +43,11 @@ const SLIDES: Slide[] = [
     // across — bias right so a narrow-phone horizontal crop doesn't push her
     // out of frame the way a centered crop would.
     mobilePosition: 'object-[68%_50%]',
-    eyebrow: 'Fine Diamond Jewellery',
-    heading: ['Radiance,', 'Redefined.'],
-    ctaLabel: 'Explore Earrings',
-    ctaHref: '/shop?category=earrings',
-  },
-  {
-    desktopImage: '/images/campaign-gold-desktop.jpg',
-    desktopPosition: 'object-[75%_22%]',
-    mobileImage: '/images/campaign-gold-mobile.jpg',
-    mobilePosition: 'object-[62%_42%]',
-    eyebrow: 'Crafted in 18K Gold',
-    heading: ['Details That', 'Endure.'],
-    ctaLabel: 'Explore Rings',
-    ctaHref: '/shop?category=rings',
+    eyebrow: 'NORVIK JEWELS',
+    heading: ['Some light', 'stays with you.'],
+    body: "One sun lingers through a Swedish summer night. The other leaves Arabia glowing as the day draws to a close. In Norvik's 18K gold, their quiet and warmth become something intimate — a piece whose meaning grows with you.",
+    ctaLabel: 'Explore the collections',
+    ctaHref: '/collections',
   },
 ];
 
@@ -137,6 +136,9 @@ export default function CampaignHero() {
                 <br />
                 {slide.heading[1]}
               </h1>
+              <p className="mt-5 max-w-md text-[14px] leading-[1.6] text-ivory/85 sm:text-[15px]">
+                {slide.body}
+              </p>
               <Link
                 href={slide.ctaHref}
                 className="mt-8 inline-block bg-ivory px-8 py-3.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-ink transition-opacity hover:opacity-90 sm:text-[12px]"
@@ -147,19 +149,21 @@ export default function CampaignHero() {
           ))}
         </div>
 
-        {/* Dots */}
-        <div className="mt-8 flex gap-2">
-          {SLIDES.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setIndex(i)}
-              aria-label={`Go to slide ${i + 1}`}
-              className={`h-1.5 rounded-full transition-all ${
-                i === index ? 'w-6 bg-[#D9BE93]' : 'w-1.5 bg-ivory/40'
-              }`}
-            />
-          ))}
-        </div>
+        {/* Dots — only meaningful with more than one slide. */}
+        {SLIDES.length > 1 && (
+          <div className="mt-8 flex gap-2">
+            {SLIDES.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setIndex(i)}
+                aria-label={`Go to slide ${i + 1}`}
+                className={`h-1.5 rounded-full transition-all ${
+                  i === index ? 'w-6 bg-[#D9BE93]' : 'w-1.5 bg-ivory/40'
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import WishlistBadge from '@/components/wishlist-badge';
@@ -9,19 +9,21 @@ import SearchTrigger from '@/components/search-trigger';
 import LocaleSwitcher from '@/components/locale-switcher';
 import type { Product } from '@/lib/mock-products';
 
-const CHEVRON = (
-  <svg
-    width="9"
-    height="9"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.5"
-    className="ml-1 inline-block"
-  >
-    <path d="M6 9l6 6 6-6" />
-  </svg>
-);
+// 30 Oct 2026 (client content pass, "Ecommerce_Mann_2"): header nav no
+// longer has a "Shop" dropdown — client asked to show the main categories
+// directly in the nav line instead ("shop ki jagah saare options dikha line
+// wise ring earring tanmaniya pendants"). Hardcoded to these 4 named
+// categories, not all 8 live ones — Pendant Set, Nose Pin, Baby Earrings and
+// Bracelet are still reachable from the Shop page's own filters, just not
+// from the header. Module-level (not derived from `products`) since the
+// client named these specifically, unlike the old SHOP_CATEGORIES list this
+// replaces.
+const NAV_CATEGORIES = [
+  { label: 'Rings', href: '/shop?category=rings' },
+  { label: 'Earrings', href: '/shop?category=earrings' },
+  { label: 'Tanmaniya', href: '/shop?category=tanmaniya' },
+  { label: 'Pendants', href: '/shop?category=pendants' },
+];
 
 export default function HeaderChrome({
   accountHref,
@@ -34,16 +36,6 @@ export default function HeaderChrome({
   transparentOnHero?: boolean;
   products: Product[];
 }) {
-  // Phase 5: SHOP_CATEGORIES used to be computed once at module load from
-  // the static `products` import. It's now derived from the `products` prop
-  // (static + real admin-managed catalogue, fetched server-side in
-  // site-header.tsx) — a category shows up here the moment a *published*
-  // product exists with it, no manual upkeep needed either way.
-  const SHOP_CATEGORIES = useMemo(
-    () => Array.from(new Set(products.map((p) => p.category))),
-    [products]
-  );
-
   // On pages with a full-bleed hero (currently just the homepage), the header
   // starts transparent so it blends into the hero photo's own dark
   // background instead of sitting on top of it as a solid white bar — then
@@ -51,14 +43,12 @@ export default function HeaderChrome({
   // hovers over it, so the nav is always easy to read once they interact.
   const [scrolled, setScrolled] = useState(!transparentOnHero);
   const [hovered, setHovered] = useState(false);
-  const [shopOpen, setShopOpen] = useState(false);
 
   // Mobile/tablet nav — the desktop <nav> below is `hidden lg:flex`, so
   // under 1024px only the logo and icon actions were showing (no way to
   // reach Shop/Collections/New Arrivals/etc. at all). This adds a hamburger
   // button that opens a slide-in drawer with the same links.
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mobileShopOpen, setMobileShopOpen] = useState(false);
 
   useEffect(() => {
     if (!transparentOnHero) return;
@@ -82,7 +72,6 @@ export default function HeaderChrome({
 
   function closeMobileMenu() {
     setMobileMenuOpen(false);
-    setMobileShopOpen(false);
   }
 
   const solid = !transparentOnHero || scrolled || hovered;
@@ -166,33 +155,11 @@ export default function HeaderChrome({
               solid ? 'text-inknavy/85' : 'text-ivory'
             }`}
           >
-            <div
-              className="relative flex h-full items-center self-stretch"
-              onMouseEnter={() => setShopOpen(true)}
-              onMouseLeave={() => setShopOpen(false)}
-            >
-              <Link href="/shop" className="flex items-center transition-colors hover:text-antiquegold">
-                Shop
-                {CHEVRON}
+            {NAV_CATEGORIES.map((cat) => (
+              <Link key={cat.href} href={cat.href} className="transition-colors hover:text-antiquegold">
+                {cat.label}
               </Link>
-              {shopOpen && (
-                <div className="absolute left-0 top-full z-50 min-w-[200px] border border-warmstone bg-white py-2 normal-case tracking-normal shadow-lg">
-                  {SHOP_CATEGORIES.map((cat) => (
-                    <Link
-                      key={cat}
-                      href={`/shop?category=${encodeURIComponent(cat.toLowerCase())}`}
-                      className="block px-5 py-2.5 text-[12px] font-medium uppercase leading-[1.2] tracking-[0.06em] text-inknavy transition-colors hover:bg-softwhite hover:text-antiquegold"
-                    >
-                      {cat}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-            <Link href="/collections" className="flex items-center transition-colors hover:text-antiquegold">
-              Collections
-              {CHEVRON}
-            </Link>
+            ))}
             {/* Commented out for now (3 Oct 2026) — client asked to hide
                 these two nav links until they're ready to be shown again,
                 keeping the code here for later rather than deleting it.
@@ -203,11 +170,16 @@ export default function HeaderChrome({
               Best Sellers
             </Link>
             */}
+            {/* "Collections" link removed (30 Oct 2026, client request) —
+                was /collections, a curated-collections page separate from
+                product categories; still reachable from the homepage
+                "Discover the collections" section, just not the header.
+                "About Norvik" also removed per client's "do mein se koi ek"
+                (keep only one of Our World / About Norvik) — kept Our World
+                to match the new content brief's nav/footer naming. /about
+                itself still exists, just not linked from here any more. */}
             <Link href="/our-world" className="transition-colors hover:text-antiquegold">
               Our World
-            </Link>
-            <Link href="/about" className="transition-colors hover:text-antiquegold">
-              About Norvik
             </Link>
           </nav>
 
@@ -295,50 +267,19 @@ export default function HeaderChrome({
                 the categories already use, instead of one being different
                 from the rest. */}
             <nav className="flex flex-col px-6 py-2 text-[13px] font-medium leading-[1.2] tracking-[0.06em] text-inknavy">
-              <div className="border-b border-warmstone/60">
-                <button
-                  type="button"
-                  onClick={() => setMobileShopOpen((v) => !v)}
-                  className="flex w-full items-center justify-between py-3.5"
+              {/* Flat category links (30 Oct 2026) — replaces the old
+                  collapsible "Shop" section, same reasoning as the desktop
+                  nav above. */}
+              {NAV_CATEGORIES.map((cat) => (
+                <Link
+                  key={cat.href}
+                  href={cat.href}
+                  onClick={closeMobileMenu}
+                  className="border-b border-warmstone/60 py-3.5"
                 >
-                  Shop
-                  <svg
-                    width="11"
-                    height="11"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    className={`transition-transform ${mobileShopOpen ? 'rotate-180' : ''}`}
-                  >
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
-                </button>
-                {mobileShopOpen && (
-                  <div className="flex flex-col pb-2 normal-case tracking-normal">
-                    <Link
-                      href="/shop"
-                      onClick={closeMobileMenu}
-                      className="py-2 text-[12.5px] font-semibold tracking-[0.06em] text-antiquegold"
-                    >
-                      All Shop
-                    </Link>
-                    {SHOP_CATEGORIES.map((cat) => (
-                      <Link
-                        key={cat}
-                        href={`/shop?category=${encodeURIComponent(cat.toLowerCase())}`}
-                        onClick={closeMobileMenu}
-                        className="py-2 text-[13px] text-inknavy/80 transition-colors hover:text-antiquegold"
-                      >
-                        {cat}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <Link href="/collections" onClick={closeMobileMenu} className="border-b border-warmstone/60 py-3.5">
-                Collections
-              </Link>
+                  {cat.label}
+                </Link>
+              ))}
               {/* Commented out for now (3 Oct 2026) — same as the desktop
                   nav above, kept for later rather than deleted.
               <Link href="/shop?sort=new" onClick={closeMobileMenu} className="border-b border-warmstone/60 py-3.5">
@@ -348,11 +289,10 @@ export default function HeaderChrome({
                 Best Sellers
               </Link>
               */}
+              {/* Collections + About Norvik removed (30 Oct 2026) — same as
+                  the desktop nav above. */}
               <Link href="/our-world" onClick={closeMobileMenu} className="border-b border-warmstone/60 py-3.5">
                 Our World
-              </Link>
-              <Link href="/about" onClick={closeMobileMenu} className="border-b border-warmstone/60 py-3.5">
-                About Norvik
               </Link>
             </nav>
           </div>
