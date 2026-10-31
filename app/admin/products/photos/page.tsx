@@ -32,7 +32,24 @@ const IMAGE_NAME_RE = /[\s-](Model-)?(Yellow|White|Rose)[\s-]*(\d+)?\.+(jpe?g|pn
 // regex runs, rather than tightened in the regex itself, since
 // "caratsizes" is this batch's specific naming for it and could vary next
 // time.
-const EXCLUDED_NAME_RE = /caratsizes/i;
+//
+// 31 Oct 2026 (Thako mat Thuko mat Rings, both volumes — client found it
+// via a live product, "Whisper Cluster Ring"/ILR-0165, and it turned out
+// to affect 74 ring products across the whole batch): every one of these
+// folders also has ONE generic design-render export per design, named
+// just "<digits>-r.jpg" (e.g. "165-r.jpg") — a flat screenshot of the CAD
+// file (Matrix for Rhino), not a product photo, where "r" means "render",
+// not "Rose". Its bare, no-digit-after-letter shape used to satisfy
+// BARE_LETTER_RE below (that regex was written for Batch-16's
+// "16001-R1.jpg"-style per-angle shots, where a digit always follows the
+// letter, so making the digit optional there was the actual bug — fixed
+// below too). With no angle number, parseFileName gave it index 0, which
+// sorted it BEFORE the real rose photos (index 1-4) and made it the
+// stored metal_images.rose cover for every affected product — so clicking
+// "Rose Gold" on the live site showed a CAD screenshot instead of a rose
+// gold photo. Excluded here by filename too (belt and suspenders with the
+// BARE_LETTER_RE fix), the same way "caratsizes" is above.
+const EXCLUDED_NAME_RE = /caratsizes|^\d+-[rwy]\.(jpe?g|png)$/i;
 
 // Batch-13 (29 Sep 2026): its main product-photography set uses a totally
 // different naming convention from every batch before it — a single-letter
@@ -60,7 +77,16 @@ const RENDER_LETTER_COLOR: Record<string, 'yellow' | 'white' | 'rose'> = {
 // ending match on ANY folder's files, including older batches, with no
 // way to tell a real color-letter shot from an unrelated filename that
 // happens to end the same way.
-const BARE_LETTER_RE = /-([RWY])(\d+)?\.+(jpe?g|png)$/i;
+//
+// 31 Oct 2026: the angle digit was originally optional here ((\d+)?) —
+// Batch-16's real files always have one, so this was meant as a harmless
+// safety net. It wasn't: it let a totally different batch's bare CAD
+// render ("165-r.jpg", "403-r.jpg", etc. — see EXCLUDED_NAME_RE above)
+// match as if it were a no-angle-number "Rose" shot, with index 0 sorting
+// it ahead of the real rose photos. The digit is now required, so only
+// genuine "<folder>-R1.jpg"-shaped files match; EXCLUDED_NAME_RE still
+// catches the bad ones too, as a second layer.
+const BARE_LETTER_RE = /-([RWY])(\d+)\.+(jpe?g|png)$/i;
 
 // The Excel-derived `sku` column has inconsistent spacing across rows
 // ("M-165" vs "M -165" vs "M - 166") — see ADMIN_PANEL_PROGRESS.md — while

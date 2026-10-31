@@ -1915,3 +1915,43 @@ named `R-<number>-Round[s]` vs. the product's manufacturer SKU `<number>-R`, plu
 usual `-Round`/`-Rounds` inconsistency (this batch has no real Fancy/Round split, one
 SKU = one product). Fixed via PowerShell rename to `<number>-R` (see chat for the exact
 script). Confirmed 1:1 — all 40 folders map to exactly one of the 40 sheet SKUs.
+
+## Fix: "Rose Gold" showing a CAD screenshot instead of a photo — 74 ring products (31 Oct 2026)
+
+**Client report:** clicking "Rose Gold" on the live "Whisper Cluster Ring" product page
+showed a screenshot of the manufacturer's CAD software (Matrix for Rhino, title bar
+"165-R.3dm") instead of a rose-gold photo.
+
+**Root cause:** every "Thako mat Thuko mat Rings" folder (both volumes) has one generic
+design-render export per design, named just `<digits>-r.jpg` (e.g. `165-r.jpg`) — a flat
+screenshot of the CAD file, where "r" means "render", not "Rose". In
+`app/admin/products/photos/page.tsx`, `BARE_LETTER_RE` (added for Batch-16's
+`16001-R1.jpg`-style per-angle shots) had its angle-digit made optional as a safety net
+that was never actually needed — Batch-16's real files always have the digit. That
+optional digit let `165-r.jpg` match as if it were a no-angle-number "Rose" shot, giving
+it index 0, which sorted it BEFORE the real rose photos (index 1-4) and made it the
+stored `metal_images.rose` cover.
+
+**Scope:** queried the live site's own embedded product data for every image filename
+shaped like `<digits>-r.jpg` with no angle number — found 74 affected ring products
+(`ILR-0151`–`ILR-0416` range, both Rings Vol.1 and Vol.2 batches), all with their Rose
+Gold cover wrongly set to this CAD render.
+
+**Fix — two parts:**
+1. `app/admin/products/photos/page.tsx`: `BARE_LETTER_RE`'s angle digit is now required
+   (`(\d+)` instead of `(\d+)?`), and `EXCLUDED_NAME_RE` now also excludes the
+   `^\d+-[rwy]\.(jpe?g|png)$` filename shape directly (belt and suspenders) — prevents
+   this from happening on any future import.
+2. New one-time cleanup tool, `app/admin/products/fix-rose-covers/page.tsx` — scans every
+   product for this exact bad-filename pattern, strips it from Image URLs, and repoints
+   `metal_images.rose` (or white/yellow, if the same pattern ever shows up there) at the
+   first real photo of that color still in the gallery. Only touches products where the
+   bug is actually found; shows a before/after review table with thumbnails before
+   applying. Not wired into any nav — reached directly at `/admin/products/fix-rose-covers`,
+   safe to leave in place and re-run any time.
+
+Both files verified via TypeScript syntax check (no new errors). Client needs to open
+`/admin/products/fix-rose-covers` while logged in as admin, click "Scan all products",
+review the list, then "Fix all" to apply — this part needs her own logged-in session
+(RLS-only architecture, no service-role key in this project), so it couldn't be run from
+here directly.
