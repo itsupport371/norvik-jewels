@@ -65,8 +65,15 @@ export default function OurWorldPage() {
             "Some things are felt before they are seen.") — that's the
             brief's homepage section 2 copy; this is the brief's separate
             Our World section 4 copy, paired with the Image captions on the
-            editorial grid right below. */}
-        <section className="bg-scandi px-6 pb-16 pt-16 text-center lg:pb-20">
+            editorial grid right below.
+            id="philosophy" added here (31 Oct 2026) so the footer's "Our
+            Philosophy" link (components/site-footer.tsx) can point straight
+            at /our-world#philosophy and land on THIS section specifically —
+            previously it pointed at the homepage's own /#philosophy, which
+            is a different block; client wanted it on the editorial page
+            instead, scrolled to the section, not just dropped at the same
+            top-of-page spot plain "Our World" nav already goes to. */}
+        <section id="philosophy" className="bg-scandi px-6 pb-16 pt-16 text-center lg:pb-20">
           <p className="mb-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
             Philosophy
           </p>

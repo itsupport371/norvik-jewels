@@ -58,12 +58,15 @@ export default function SiteFooter() {
                   Our Story
                 </Link>
               </li>
-              {/* 30 Oct 2026 (client): links to the homepage's Philosophy
-                  slider section (components/philosophy-slider.tsx), which
-                  carries an id="philosophy" anchor — there's no separate
-                  philosophy page. */}
+              {/* 31 Oct 2026 (client): was pointing at the homepage's own
+                  Philosophy slider (/#philosophy) — client wanted it on the
+                  /our-world page instead (its own dedicated Philosophy
+                  section, id="philosophy" in app/our-world/page.tsx, added
+                  the same day), scrolled straight to that section rather
+                  than just landing at the top of the page the way plain
+                  "Our World" nav does. */}
               <li>
-                <Link href="/#philosophy" className="hover:text-white">
+                <Link href="/our-world#philosophy" className="hover:text-white">
                   Our Philosophy
                 </Link>
               </li>
