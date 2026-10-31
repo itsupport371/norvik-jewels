@@ -3,18 +3,23 @@ import Link from "next/link";
 import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
 
+// Captions are the content brief's ("Ecommerce_Mann_2", 28 Oct 2026, section
+// 4 "Our World") own "Image captions" — written to pair with the Philosophy
+// block just above this grid, not the old generic per-product descriptions
+// that were here before (31 Oct 2026: client flagged the brief's "Our World"
+// Philosophy content was missing from the live page entirely).
 const EDITORIAL = [
   {
     image: "/images/hero-web-1.jpg",
-    caption: "Trillion-cut studs, styled for everyday wear.",
+    caption: "A considered curve.",
   },
   {
     image: "/images/hero-web-4.jpg",
-    caption: "Floral mangalsutras, reimagined in 18K gold.",
+    caption: "Light, held close.",
   },
   {
     image: "/images/hero-web-5.jpg",
-    caption: "Necklaces designed in sweden, worn worldwide.",
+    caption: "Gold in its own rhythm.",
   },
 ];
 
@@ -49,6 +54,29 @@ export default function OurWorldPage() {
             Norvik Jewels is designed at our sweden studio and worn across the
             world — from everyday studs to heirloom mangalsutras. Every order
             ships insured, wherever you are.
+          </p>
+        </section>
+
+        {/* Philosophy — content brief (28 Oct 2026, "Ecommerce_Mann_2"),
+            section 4 "Our World". This block ("Philosophy heading" /
+            "Philosophy paragraph") was in the brief but never made it onto
+            this page — client flagged it 31 Oct 2026. Not the same text as
+            the homepage's own Philosophy slider (components/philosophy-slider.tsx,
+            "Some things are felt before they are seen.") — that's the
+            brief's homepage section 2 copy; this is the brief's separate
+            Our World section 4 copy, paired with the Image captions on the
+            editorial grid right below. */}
+        <section className="bg-scandi px-6 pb-16 pt-16 text-center lg:pb-20">
+          <p className="mb-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
+            Philosophy
+          </p>
+          <h2 className="font-display mx-auto max-w-lg text-[26px] font-medium leading-[1.15] tracking-[-0.01em] text-inknavy sm:text-[34px]">
+            Luxury lives in what is left out.
+          </h2>
+          <p className="mx-auto mt-5 max-w-lg text-[14px] leading-[1.6] text-inknavy/75 sm:text-[15px]">
+            Restraint creates room for a feeling to come through. We are
+            drawn to forms that are clear, details that feel considered, and
+            a presence that belongs naturally to the person wearing it.
           </p>
         </section>
 
