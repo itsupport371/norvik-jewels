@@ -16,12 +16,14 @@ type Slide = {
   mobilePosition: string;
   eyebrow: string;
   heading: [string, string];
-  // Full brief body copy — kept on the slide data but NOT rendered in full
-  // on the hero (30 Oct 2026, client: paragraph made the banner look
-  // cluttered); shown instead as a short "Read more" link via
-  // `readMoreHref`, when set.
+  // Full brief body copy — not rendered up front on the hero (30 Oct 2026,
+  // client: paragraph made the banner look cluttered), shown instead behind
+  // a short "Read more" toggle when `showReadMore` is set. 2 Nov 2026
+  // (client): "Read more" used to navigate to /our-world — client wants it
+  // to reveal this same `body` text right here on the banner instead, no
+  // page change.
   body: string;
-  readMoreHref?: string;
+  showReadMore?: boolean;
   ctaLabel: string;
   ctaHref: string;
 };
@@ -51,7 +53,7 @@ const SLIDES: Slide[] = [
     eyebrow: 'NORVIK JEWELS',
     heading: ['Some light', 'stays with you.'],
     body: "One sun lingers through a Swedish summer night. The other leaves Arabia glowing as the day draws to a close. In Norvik's 18K gold, their quiet and warmth become something intimate — a piece whose meaning grows with you.",
-    readMoreHref: '/our-world',
+    showReadMore: true,
     ctaLabel: 'Explore the collections',
     ctaHref: '/collections',
   },
@@ -69,7 +71,7 @@ const SLIDES: Slide[] = [
     eyebrow: '',
     heading: ['Born between', 'two suns.'],
     body: 'One shines through the night in a Swedish summer. The other pours gold across Arabia every evening. Norvik lives where their light meets — in 18K gold that holds the calm of the North and the fire of the East.',
-    readMoreHref: '/our-world',
+    showReadMore: true,
     ctaLabel: 'Enter our world',
     ctaHref: '/our-world',
   },
@@ -93,6 +95,16 @@ function useCarousel(count: number, intervalMs = 5000) {
 // transparent-over-hero header floats above (see components/header-chrome.tsx).
 export default function CampaignHero() {
   const [index, setIndex] = useCarousel(SLIDES.length);
+  // 2 Nov 2026: "Read more" now expands the paragraph in place instead of
+  // navigating (see the Slide type comment). Tracked per slide index, and
+  // reset to fully collapsed every time the active slide changes (autoplay
+  // or the dots) — otherwise an expanded paragraph from a previous visit to
+  // this slide would still be showing the next time it comes around.
+  const [expanded, setExpanded] = useState<Record<number, boolean>>({});
+
+  useEffect(() => {
+    setExpanded({});
+  }, [index]);
 
   return (
     <section className="relative h-[92vh] min-h-[640px] w-full overflow-hidden bg-ink">
@@ -172,24 +184,39 @@ export default function CampaignHero() {
                 <br />
                 {slide.heading[1]}
               </h1>
-              {/* A slide with `readMoreHref` set shows a short "Read more"
-                  link instead of its paragraph (30 Oct 2026, client: the
-                  paragraph made that banner look cluttered). A slide without
-                  it (like the "Born between two suns" one, 30 Oct 2026 —
-                  client sent a reference image showing the full paragraph)
-                  shows its `body` in full, same as the original slides did. */}
-              {slide.readMoreHref ? (
-                <Link
-                  href={slide.readMoreHref}
-                  className="mt-4 inline-block text-[12px] font-medium uppercase leading-[1.2] tracking-[0.1em] text-ivory/85 underline underline-offset-4 transition-colors hover:text-ivory sm:text-[13px]"
+              {/* A slide with `showReadMore` set shows a short "Read more"
+                  toggle instead of its paragraph up front (30 Oct 2026,
+                  client: the paragraph made that banner look cluttered).
+                  Clicking it reveals the same `body` text right here (2 Nov
+                  2026, client: it used to navigate to /our-world — she
+                  wants it to just expand in place, no page change) and
+                  turns into a "Read less" to collapse it again. A slide
+                  without `showReadMore` just shows its `body` in full,
+                  same as the original slides did. */}
+              {slide.showReadMore && !expanded[i] ? (
+                <button
+                  type="button"
+                  onClick={() => setExpanded((prev) => ({ ...prev, [i]: true }))}
+                  className="mt-4 inline-block text-left text-[12px] font-medium uppercase leading-[1.2] tracking-[0.1em] text-ivory/85 underline underline-offset-4 transition-colors hover:text-ivory sm:text-[13px]"
                 >
                   Read more
-                </Link>
+                </button>
               ) : (
                 slide.body && (
-                  <p className="mt-5 max-w-md text-[14px] leading-[1.6] text-ivory/85 sm:text-[15px]">
-                    {slide.body}
-                  </p>
+                  <>
+                    <p className="mt-5 max-w-md text-[14px] leading-[1.6] text-ivory/85 sm:text-[15px]">
+                      {slide.body}
+                    </p>
+                    {slide.showReadMore && (
+                      <button
+                        type="button"
+                        onClick={() => setExpanded((prev) => ({ ...prev, [i]: false }))}
+                        className="mt-3 inline-block text-left text-[12px] font-medium uppercase leading-[1.2] tracking-[0.1em] text-ivory/85 underline underline-offset-4 transition-colors hover:text-ivory sm:text-[13px]"
+                      >
+                        Read less
+                      </button>
+                    )}
+                  </>
                 )
               )}
               <Link
