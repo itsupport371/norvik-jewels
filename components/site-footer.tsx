@@ -20,8 +20,11 @@ export default function SiteFooter() {
             <p className="mt-1 text-[10px] font-medium tracking-[0.3em] text-[#B8935A]">
               JEWELS
             </p>
+            {/* 2 Nov 2026 (client): was generic placeholder copy, not from
+                the brief — replaced with the brief's own "Brand descriptor"
+                line ("Ecommerce_Mann_2" Excel, Brand Essentials section). */}
             <p className="mt-4 text-[14px] leading-[1.6] text-white/50">
-              Timeless Scandinavian luxury, from sweden to the world.
+              18K gold jewellery. Scandinavian restraint. Dubai brilliance.
             </p>
           </div>
 
