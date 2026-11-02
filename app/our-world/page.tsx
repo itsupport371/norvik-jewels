@@ -3,6 +3,12 @@ import Link from "next/link";
 import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
 
+export const metadata = {
+  title: 'Our World | Norvik Jewels',
+  description:
+    "Enter the world of Norvik Jewels, born between two suns. Discover how the calm of Sweden and Dubai's warmth shape our approach to gold jewellery.",
+};
+
 // Captions are the content brief's ("Ecommerce_Mann_2", 28 Oct 2026, section
 // 4 "Our World") own "Image captions" — written to pair with the Philosophy
 // block just above this grid, not the old generic per-product descriptions
@@ -43,18 +49,44 @@ export default function OurWorldPage() {
               Our World
             </p>
             <h1 className="font-display mx-auto max-w-xl text-[34px] font-medium leading-[1] tracking-[-0.015em] text-softwhite sm:text-[46px]">
-              Designed in sweden. Worn everywhere.
+              Where their light meets.
             </h1>
           </div>
         </section>
 
-        {/* Intro */}
+        {/* Intro — content brief ("Ecommerce_Mann_2"), section 4, rows
+            37-40. 2 Nov 2026 content recheck: this was still the old
+            pre-brief hero/intro copy (generic shipping line, "sweden"
+            typo'd for Dubai) even though the Philosophy/Co-Founder
+            sections below it were already fixed — easy to miss since the
+            page "looks done" once you scroll past the top. */}
         <section className="bg-scandi px-6 py-16 text-center lg:py-20">
-          <p className="mx-auto max-w-2xl text-[14px] leading-[1.6] text-inknavy/75 sm:text-[15px]">
-            Norvik Jewels is designed at our sweden studio and worn across the
-            world — from everyday studs to heirloom mangalsutras. Every order
-            ships insured, wherever you are.
-          </p>
+          <div className="mx-auto max-w-2xl space-y-4 text-[14px] leading-[1.6] text-inknavy/75 sm:text-[15px]">
+            <p>
+              There are places that change the way we see. Sweden gave Norvik
+              a love of calm proportions, clear lines, and the beauty of
+              enough. Dubai gave it warmth, radiance, and a deep connection to
+              gold.
+            </p>
+            <p>
+              We bring these feelings together through design. The curve is
+              considered. The detail has a purpose. The light has room to
+              move. What remains is a piece with a character of its own, and
+              space for the person who will wear it.
+            </p>
+            <p>
+              Jewellery becomes meaningful in the life around it. The hand
+              that fastens it. The person who gives it. The morning you
+              choose it for yourself. At Norvik, we begin with gold and leave
+              room for that meaning to grow.
+            </p>
+          </div>
+          <Link
+            href="/collections"
+            className="mt-7 inline-block border border-antiquegold px-8 py-3.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-inknavy transition-colors hover:bg-antiquegold hover:text-softwhite sm:text-[12px]"
+          >
+            Explore the Collections
+          </Link>
         </section>
 
         {/* Philosophy — content brief (28 Oct 2026, "Ecommerce_Mann_2"),
@@ -185,6 +217,22 @@ export default function OurWorldPage() {
               <span className="text-[12px] text-charcoal">Co-founder, Norvik Jewels</span>
             </p>
           </div>
+        </section>
+
+        {/* Closing brand line + pull-quote — brief rows 51-52, missing
+            entirely before the 2 Nov 2026 content recheck. */}
+        <section className="bg-white px-6 py-16 text-center lg:py-20">
+          <p className="text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
+            Norvik Jewels
+          </p>
+          <p className="font-display mt-2 text-[20px] font-medium leading-[1.2] tracking-[-0.01em] text-ink sm:text-[24px]">
+            Modern luxury. Unmistakably yours.
+          </p>
+          <blockquote className="mx-auto mt-8 max-w-lg text-[17px] italic leading-[1.5] text-charcoal sm:text-[19px]">
+            &ldquo;I wanted to bring the richness of Dubai and the restraint
+            of Scandinavian design into gold that feels entirely your
+            own.&rdquo;
+          </blockquote>
         </section>
 
         {/* CTA strip */}

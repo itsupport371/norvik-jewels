@@ -8,6 +8,22 @@ import ContactForm from '@/components/contact-form';
 // the same real details already used sitewide (app/api/chat/route.ts,
 // app/policies/terms/page.tsx, components/chat-widget.tsx) — not new
 // ones invented for this page.
+//
+// 2 Nov 2026 — content recheck against the brief ("Ecommerce_Mann_2"):
+// headline/body swapped to the brief's own section 13 copy (row 98-99);
+// the old body invented a "1-2 business days" reply-time promise the
+// brief explicitly warns against stating unless confirmed (row 97's own
+// implementation note) — removed, not replaced with another guess. Studio
+// line's "sweden" fixed to "Dubai" (same sitewide typo as the footer).
+// Hours / in-person-visit details the brief also asks for (row 100) are
+// left off entirely rather than invented — Neha still needs to confirm
+// those.
+export const metadata = {
+  title: 'Contact Norvik Jewels | Client Care',
+  description:
+    'Contact the Norvik Jewels team for product details, sizing, gift guidance, bespoke enquiries, or help with an order.',
+};
+
 export default function ContactPage() {
   return (
     <>
@@ -18,11 +34,11 @@ export default function ContactPage() {
             Get in Touch
           </p>
           <h1 className="font-display mx-auto max-w-2xl text-[30px] font-medium leading-[1.08] tracking-[-0.01em] text-softwhite sm:text-[40px]">
-            We&apos;d love to hear from you.
+            We would love to hear what brought you here.
           </h1>
           <p className="mx-auto mt-4 max-w-lg text-[14px] leading-[1.6] text-warmstone sm:text-[15px]">
-            Questions about an order, a bespoke piece, or anything else — our team typically
-            replies within 1–2 business days.
+            A piece that caught your eye. A gift you are trying to find. A
+            story you would like to turn into gold. Tell us how we can help.
           </p>
         </section>
 
@@ -60,7 +76,7 @@ export default function ContactPage() {
                   <p className="mt-1 text-[14px] leading-[1.6] text-inknavy/80">
                     Down Town, Business Bay
                     <br />
-                    sweden, United Arab Emirates
+                    Dubai, United Arab Emirates
                   </p>
                 </div>
               </div>

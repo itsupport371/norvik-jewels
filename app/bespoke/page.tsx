@@ -12,6 +12,12 @@ import BespokeForm from '@/components/bespoke-form';
 // optional sub-section) is NOT included — its own implementation note gates
 // it on redesign-of-customer-owned-jewellery being an actually offered,
 // defined service, which hasn't been confirmed.
+export const metadata = {
+  title: 'Bespoke Gold Jewellery Enquiries | Norvik Jewels',
+  description:
+    'Share your idea for a personal gold piece with Norvik Jewels. Enquire about a design, gift, or occasion you would like to explore.',
+};
+
 export default function BespokePage() {
   return (
     <>

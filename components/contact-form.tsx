@@ -9,10 +9,21 @@ import { createClient } from '@/lib/supabase/client';
 // this project already uses (addresses, wishlist) — no email service
 // configured anywhere here, so this IS where a submission actually goes,
 // not a decorative form that quietly does nothing.
+//
+// 2 Nov 2026 — content recheck against the brief: added the "Subject"
+// field the brief's form row asks for (Name · Email · Phone · Subject ·
+// Message). The table itself (0007_contact_messages.sql) has no `subject`
+// column and adding one needs a migration Neha would have to run in
+// Supabase first — rather than risk the insert failing silently if that
+// never happens, Subject is folded into the stored `message` text
+// ("Subject: ...") instead of a new column. Confirmation text also
+// swapped to the brief's own line (row 102) — the old one promised a
+// "1-2 business days" reply time that was never actually confirmed.
 export default function ContactForm() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,11 +40,14 @@ export default function ContactForm() {
 
     setSubmitting(true);
     const supabase = createClient();
+    const fullMessage = subject.trim()
+      ? `Subject: ${subject.trim()}\n\n${message.trim()}`
+      : message.trim();
     const { error: insertError } = await supabase.from('contact_messages').insert({
       name: name.trim(),
       email: email.trim(),
       phone: phone.trim() || null,
-      message: message.trim(),
+      message: fullMessage,
     });
     setSubmitting(false);
 
@@ -46,6 +60,7 @@ export default function ContactForm() {
     setName('');
     setEmail('');
     setPhone('');
+    setSubject('');
     setMessage('');
   }
 
@@ -54,7 +69,7 @@ export default function ContactForm() {
       <div className="border border-line bg-softwhite px-6 py-10 text-center">
         <p className="font-display text-xl text-ink">Message sent</p>
         <p className="mt-2 text-[14px] leading-[1.6] text-charcoal">
-          Thank you for reaching out — our team will get back to you within 1–2 business days.
+          Thank you for reaching out. The Norvik team will be in touch.
         </p>
         <button
           onClick={() => setSent(false)}
@@ -109,6 +124,18 @@ export default function ContactForm() {
 
       <div>
         <label className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
+          Subject
+        </label>
+        <input
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+          placeholder="What is this about?"
+          className="w-full border border-line bg-ivory px-4 py-3 text-base text-ink outline-none focus:border-ink sm:text-sm"
+        />
+      </div>
+
+      <div>
+        <label className="mb-1.5 block text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
           Message
         </label>
         <textarea
@@ -128,7 +155,7 @@ export default function ContactForm() {
         disabled={submitting}
         className="w-full bg-antiquegold px-8 py-3.5 text-[11px] font-medium uppercase leading-[1.2] tracking-[0.08em] text-white transition-opacity hover:opacity-90 disabled:opacity-50 sm:w-auto sm:text-[12px]"
       >
-        {submitting ? 'Sending…' : 'Send Message'}
+        {submitting ? 'Sending…' : 'Send Your Message'}
       </button>
     </form>
   );

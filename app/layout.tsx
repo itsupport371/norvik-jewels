@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Manrope } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import ChatWidget from '@/components/chat-widget';
+import CookieConsent from '@/components/cookie-consent';
 import { WishlistProvider } from '@/lib/wishlist-context';
 import { CartProvider } from '@/lib/cart-context';
 import { LocaleProvider } from '@/lib/locale-context';
@@ -21,10 +22,14 @@ const sans = Manrope({
   display: 'swap',
 });
 
+// Title/description — content brief ("Ecommerce_Mann_2"), Search Metadata
+// section, row 139 ("Home"). This is the sitewide default/fallback; pages
+// with their own `metadata` export (contact, our-world, bespoke) or
+// `generateMetadata` (shop) override it per the brief's per-page rows.
 export const metadata: Metadata = {
-  title: 'NORVIK JEWELS — Fine Jewellery',
+  title: 'Norvik Jewels | Born Between Two Suns',
   description:
-    'Premium gold and diamond jewellery, crafted for everyday luxury.',
+    'Discover 18K gold jewellery where Scandinavian restraint meets Dubai brilliance. Explore the Norvik collections and find a piece that feels personal.',
   icons: {
     icon: [
       { url: '/favicon.ico' },
@@ -69,6 +74,7 @@ export default function RootLayout({
             <CartProvider>
               {children}
               <ChatWidget />
+              <CookieConsent />
             </CartProvider>
           </WishlistProvider>
         </LocaleProvider>

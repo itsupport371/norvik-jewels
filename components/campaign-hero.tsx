@@ -26,6 +26,14 @@ type Slide = {
   showReadMore?: boolean;
   ctaLabel: string;
   ctaHref: string;
+  // Brief row 18 ("Secondary hero link") — gated on a monitored bespoke
+  // enquiry route existing, which it now does (/bespoke, 30 Oct 2026).
+  // Added 2 Nov 2026 content recheck, understated on purpose (plain text
+  // link, not a second solid button) so it doesn't compete with the main
+  // CTA above it.
+  secondaryText?: string;
+  secondaryLabel?: string;
+  secondaryHref?: string;
 };
 
 // 30 Oct 2026 (client): back to a 2-slide carousel like the original —
@@ -56,6 +64,9 @@ const SLIDES: Slide[] = [
     showReadMore: true,
     ctaLabel: 'Explore the collections',
     ctaHref: '/collections',
+    secondaryText: 'Begin with something personal.',
+    secondaryLabel: 'Enquire about a bespoke piece',
+    secondaryHref: '/bespoke',
   },
   {
     // 30 Oct 2026: client replaced "Details That Endure" with the content
@@ -225,6 +236,17 @@ export default function CampaignHero() {
               >
                 {slide.ctaLabel}
               </Link>
+              {slide.secondaryLabel && slide.secondaryHref && (
+                <p className="mt-4 text-[13px] leading-[1.5] text-ivory/70">
+                  {slide.secondaryText}{' '}
+                  <Link
+                    href={slide.secondaryHref}
+                    className="font-medium text-ivory underline decoration-[#D9BE93] underline-offset-4 hover:text-[#D9BE93]"
+                  >
+                    {slide.secondaryLabel}
+                  </Link>
+                </p>
+              )}
             </div>
           ))}
         </div>

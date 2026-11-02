@@ -290,6 +290,11 @@ export default function ClientCarePage() {
                   the available service, expected timeline, and any charges,
                   before you place your order.
                 </p>
+                <p className="mt-3 max-w-lg text-[12px] italic leading-[1.5] text-charcoal/50">
+                  Pending confirmation — the bracketed details below will be
+                  replaced with final destinations, timelines and charges
+                  once confirmed.
+                </p>
                 <div className="mt-8 space-y-6">
                   <div>
                     <p className="mb-1 font-medium text-[14px] text-ink sm:text-[15px]">Destination details</p>
@@ -340,6 +345,11 @@ export default function ClientCarePage() {
                   including the return window, any eligible exchange or
                   resizing service, and the terms for personalised pieces.
                 </p>
+                <p className="mt-3 max-w-lg text-[12px] italic leading-[1.5] text-charcoal/50">
+                  Pending confirmation — the bracketed details below will be
+                  replaced with final windows, conditions and warranty terms
+                  once confirmed.
+                </p>
                 <div className="mt-8 space-y-6">
                   <div>
                     <p className="mb-1 font-medium text-[14px] text-ink sm:text-[15px]">Returns</p>
@@ -389,9 +399,14 @@ export default function ClientCarePage() {
                 <p className="mb-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
                   Frequently Asked Questions
                 </p>
-                <h2 className="font-display mb-8 max-w-lg text-[26px] font-medium leading-[1.15] tracking-[-0.01em] text-ink sm:text-[32px]">
+                <h2 className="font-display mb-3 max-w-lg text-[26px] font-medium leading-[1.15] tracking-[-0.01em] text-ink sm:text-[32px]">
                   A little clarity, before you choose.
                 </h2>
+                <p className="mb-5 max-w-lg text-[12px] italic leading-[1.5] text-charcoal/50">
+                  A couple of answers below reference details still pending
+                  confirmation — see Delivery and Returns, Exchanges and
+                  Aftercare above.
+                </p>
                 <div className="divide-y divide-line border-t border-line">
                   {FAQS.map((item) => (
                     <div key={item.q} className="py-6">

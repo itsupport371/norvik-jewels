@@ -199,6 +199,14 @@ export default function AuthForm({ mode }: { mode: Mode }) {
   return (
     <div className="w-full max-w-sm">
       <h1 className="text-center font-display text-[28px] font-semibold leading-[1.05] tracking-[-0.01em] text-white sm:text-[34px]">{heading}</h1>
+      {/* Brief row 124 ("Sign in") — 2 Nov 2026 content recheck. Login mode
+          only; signup already has its own "Create an account" heading
+          doing the same job. */}
+      {mode === 'login' && (
+        <p className="mt-2 text-center text-[14px] leading-[1.5] text-white/70">
+          Welcome to Norvik. Sign in to view your orders and saved pieces.
+        </p>
+      )}
       <p className="mt-2 text-center text-[13px] font-medium leading-[1.6] text-white/80">
         {mode === 'login' ? (
           <>
