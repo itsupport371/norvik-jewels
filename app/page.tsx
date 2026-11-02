@@ -13,8 +13,38 @@ import { getAllProductsServer } from "@/lib/products-server";
 // can no longer be a plain static component.
 export const dynamic = 'force-dynamic';
 
+// 2 Nov 2026 (client): the "Shop by Category" tiles were showing all 8
+// category labels with hardcoded local stock images, even for categories
+// that have no real published products yet — client wants only the
+// categories that actually exist in the catalogue, each tile using a real
+// photo from one of its own products instead of a generic placeholder.
+// `href`/`label` for all 8 stay here since they're the fixed set of
+// possible categories (lib/mock-products.ts `Product['category']`); which
+// ones actually render, and which photo each uses, is computed per-request
+// below from the real `products` list.
+const CATEGORY_TILES = [
+  { href: '/shop?category=rings', label: 'Rings' },
+  { href: '/shop?category=earrings', label: 'Earrings' },
+  { href: '/shop?category=pendants', label: 'Pendants' },
+  { href: '/shop?category=pendant set', label: 'Pendant Set' },
+  { href: '/shop?category=nose pin', label: 'Nose Pin' },
+  { href: '/shop?category=baby earrings', label: 'Baby Earrings' },
+  { href: '/shop?category=tanmaniya', label: 'Tanmaniya' },
+  { href: '/shop?category=bracelet', label: 'Bracelet' },
+] as const;
+
 export default async function HomePage() {
   const products = await getAllProductsServer();
+
+  // Keep a tile only if at least one published product in that category has
+  // a real photo, and use that product's own first image as the tile photo
+  // — prefers a Signature piece (closest thing to a "best" product) when
+  // one exists, otherwise just the first match found.
+  const categoryTiles = CATEGORY_TILES.flatMap((tile) => {
+    const inCategory = products.filter((p) => p.category === tile.label && p.images?.[0]);
+    const chosen = inCategory.find((p) => p.isSignature) ?? inCategory[0];
+    return chosen ? [{ ...tile, image: chosen.images[0] }] : [];
+  });
 
   return (
     <>
@@ -46,51 +76,7 @@ export default async function HomePage() {
               row on phones (4 tiny circles side by side was too cramped),
               4 per row from `sm:` up, so 8 categories read as a clean 2x4. */}
           <div className="grid grid-cols-2 justify-items-center gap-x-8 gap-y-10 sm:grid-cols-4 sm:gap-x-10 lg:gap-x-14">
-            {[
-              {
-                href: '/shop?category=rings',
-                label: 'Rings',
-                image: '/images/product-ring-1.jpg',
-              },
-              {
-                href: '/shop?category=earrings',
-                label: 'Earrings',
-                image: '/images/product-earring-1.jpg',
-              },
-              {
-                href: '/shop?category=pendants',
-                label: 'Pendants',
-                image: '/images/swan-pendant-a-white.jpg',
-              },
-              {
-                href: '/shop?category=pendant set',
-                label: 'Pendant Set',
-                image: '/images/swan-pendant-b-white.jpg',
-              },
-              {
-                href: '/shop?category=nose pin',
-                label: 'Nose Pin',
-                image: '/images/nose-pin-yellow.jpg',
-              },
-              {
-                href: '/shop?category=baby earrings',
-                label: 'Baby Earrings',
-                image: '/images/product-earring-1.jpg',
-              },
-              {
-                href: '/shop?category=tanmaniya',
-                label: 'Tanmaniya',
-                image: '/images/swan-pendant-a-yellow.jpg',
-              },
-              {
-                href: '/shop?category=bracelet',
-                label: 'Bracelet',
-                image: '/images/ring-yellow-gold.jpg',
-              },
-              // New categories above are placeholders pending client
-              // confirmation (see lib/mock-products.ts) — same reused
-              // images as their placeholder product entries.
-            ].map((c) => (
+            {categoryTiles.map((c) => (
               <Link key={c.label} href={c.href} className="group flex flex-col items-center gap-3 text-center">
                 <div className="relative h-24 w-24 overflow-hidden rounded-full sm:h-32 sm:w-32 lg:h-36 lg:w-36">
                   <Image
