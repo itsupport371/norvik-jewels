@@ -1955,3 +1955,34 @@ Both files verified via TypeScript syntax check (no new errors). Client needs to
 review the list, then "Fix all" to apply — this part needs her own logged-in session
 (RLS-only architecture, no service-role key in this project), so it couldn't be run from
 here directly.
+
+## Some products showing SKU instead of a name on the live site (3 Nov 2026)
+
+Client sent a screenshot: a product card on `/shop` showing "EPS-01237 piece" where
+the name should be.
+
+**Root cause:** `app/admin/products/import/page.tsx`'s `fillMissingNames()` (see that
+file's own comments, ~line 440-484) falls back to `` `${norvikSku || sku} piece` ``
+when a sheet row has no Display Name column at all and no matching row elsewhere in
+the same workbook to borrow a name from. The import preview does flag these rows
+(italic/muted text, a "missing name" count) so they can be typed in before confirming
+the import — but these particular rows went through without being corrected.
+
+**Scope:** queried the live site's own embedded product data (same technique as the
+rose-cover bug above) for names matching this exact placeholder shape. Found 15
+affected products, all from two batches: `ER-417`–`ER-423` (Earrings) and
+`EPS-01232`/`EPS-01233`/`EPS-01237` + `IER-0424`–`IER-0428` (Pendants/Earrings).
+
+**Not auto-fixable** — unlike the rose-cover bug, there's no data on hand to compute
+the correct name from; only the client's own order sheets know what each design is
+actually called. New tool, `app/admin/products/fix-missing-names/page.tsx` — scans
+for the exact fallback-name shape (name === "<norvik_sku or sku> piece"), lists each
+one with its photo, SKU and category, and a text box to type the real name into,
+saved individually per row as she fills them in (not a blind "fix all", since every
+row needs a different typed answer). Not wired into any nav — reached directly at
+`/admin/products/fix-missing-names`.
+
+Verified via TypeScript syntax check. Client needs to open
+`/admin/products/fix-missing-names` while logged in as admin, click "Scan all
+products", and type the real name in for each of the 15 — same RLS-only reason as
+the rose-cover tool, this needs her own logged-in session.
