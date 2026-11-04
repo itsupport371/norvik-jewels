@@ -2069,3 +2069,50 @@ right now.
 **Status: the actual customer-facing bug (SKU showing instead of a name on live
 product cards) is fully fixed** — all 15 live products were renamed via
 `live_product_names.xlsx` through the tool's Step 2 Excel upload.
+
+## "Co-founder" changed to "Founder" + real portrait photo (4 Nov 2026)
+
+Client asked: "co founder ki jagah founder likhna hein and ye photo use karna" —
+replace every visible "Co-founder"/"Co-Founder" with "Founder", and use the headshot
+she sent instead of the placeholder image.
+
+**Text changes** (visible copy only — the `id="co-founder"` anchor and
+`/our-world#co-founder` links were left as-is; those are internal, not shown to
+visitors, and changing them risks nothing but adds no value):
+- `app/our-world/page.tsx` — eyebrow label "Co-Founder" → "Founder", body line "As a
+  co-founder, I wanted to..." → "As a founder, I wanted...", sign-off "Co-founder,
+  Norvik Jewels" → "Founder, Norvik Jewels", photo alt text updated too.
+- `app/page.tsx` (homepage teaser) — eyebrow "Co-Founder's Story" → "Founder's
+  Story", link text "Read the co-founder's story" → "Read the founder's story",
+  photo alt text updated.
+- `components/site-footer.tsx` — "Our World" column link "Co-founder's Story" →
+  "Founder's Story".
+
+**Photo**: both the homepage teaser and the /our-world Founder section were using
+`/images/campaign-navy-desktop.jpg` — a campaign/product shot reused as a stand-in,
+not an actual photo of her. Replaced with the portrait she sent in chat, saved as
+`public/images/founder-portrait.jpg` (converted to JPEG, same treatment as the
+site's other images).
+
+Verified via TypeScript syntax check (all 3 files clean). Note: the first push of
+`app/our-world/page.tsx` and this progress file got reverted on the client's machine
+before she ran git add/commit (confirmed by re-staging — the files were back to
+pre-edit content; `app/page.tsx` and `site-footer.tsx` kept their edits fine) — redone
+a second time same day. Cause unclear; flagged to client to check for an editor/git
+client auto-discard action, or any file-sync tool (OneDrive etc.) touching this folder.
+
+### Still open — footer address
+
+Client also asked to pull the correct studio/registered address from "the Excel" to
+fix the footer. Checked both `Excel_ecommerce_content_mann_2.xlsx` and
+`Ecommerce_Mann_2.docx` (the content brief) directly — **neither has a real
+address**. The brief's own "Launch Details" sheet has it as a literal unfilled
+placeholder (`Registered seller: "[Complete registered address and country]"`) with
+an explicit instruction next to it: "Use the actual seller address... Do not invent
+an atelier address." The "Down Town, Business Bay, Dubai, UAE" line currently in the
+footer isn't from this brief either — it predates this engagement and its source is
+unknown.
+
+Not changed — need the real address from the client directly rather than guessing
+one, consistent with the project's standing rule against inventing business facts
+(delivery windows, policies, etc. follow the same rule).

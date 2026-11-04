@@ -149,24 +149,24 @@ export default function OurWorldPage() {
             the homepage's "Read the co-founder's story" link
             (/our-world#co-founder) has a real destination. Reworked 30 Oct
             2026 into the same 2-column (text + photo) layout as the
-            homepage Founder teaser (app/page.tsx), from a reference image
-            the client sent — photo reused from the campaign hero's navy
-            slide (components/campaign-hero.tsx), not a new upload. Sign-off
-            name used exactly as given in the brief; flagged there to
-            confirm the preferred public spelling before this goes live. */}
+            homepage Founder teaser (app/page.tsx). "Co-founder" changed to
+            "Founder" site-wide (4 Nov 2026, client instruction), and the
+            placeholder campaign photo swapped for her own portrait
+            (public/images/founder-portrait.jpg, client-supplied). Sign-off
+            name used exactly as given in the brief. */}
         <section id="co-founder" className="grid grid-cols-1 lg:grid-cols-2">
           <div className="relative order-first aspect-[4/3] lg:order-none lg:aspect-auto">
             <Image
-              src="/images/campaign-navy-desktop.jpg"
-              alt="Neha S Shah, Co-founder, Norvik Jewels"
+              src="/images/founder-portrait.jpg"
+              alt="Neha S Shah, Founder, Norvik Jewels"
               fill
-              className="object-cover object-[75%_35%]"
+              className="object-cover object-top"
               sizes="(min-width: 1024px) 50vw, 100vw"
             />
           </div>
           <div className="flex flex-col items-start justify-center bg-white px-8 py-16 lg:px-16">
             <p className="mb-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
-              Co-Founder
+              Founder
             </p>
             <h2 className="font-display mb-6 max-w-md text-[28px] font-medium leading-[1.1] tracking-[-0.01em] text-ink sm:text-[36px]">
               A life between two worlds.
@@ -193,7 +193,7 @@ export default function OurWorldPage() {
               </p>
               <p>
                 That question became the beginning of Norvik Jewels. As a
-                co-founder, I wanted to bring these two feelings together in
+                founder, I wanted to bring these two feelings together in
                 gold: clear in its form, considered in its details, and warm in
                 the way it meets the person wearing it.
               </p>
@@ -214,7 +214,7 @@ export default function OurWorldPage() {
             <p className="mt-6 text-[14px] leading-[1.6] text-ink">
               Neha S Shah
               <br />
-              <span className="text-[12px] text-charcoal">Co-founder, Norvik Jewels</span>
+              <span className="text-[12px] text-charcoal">Founder, Norvik Jewels</span>
             </p>
           </div>
         </section>
