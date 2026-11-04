@@ -179,12 +179,15 @@ export default async function HomePage() {
             Reworked 30 Oct 2026 (client sent a reference image: text left,
             portrait right) from the earlier centered text-only version —
             same split layout already used by the Signature banner above.
-            "Co-founder" changed to "Founder" site-wide, and the placeholder
-            campaign photo swapped for her own portrait (4 Nov 2026, client
-            instruction; public/images/founder-portrait.jpg). CTA points at
-            the Founder Story section on /our-world (id="co-founder" kept as
-            the anchor id — internal, not shown to visitors), not a
-            standalone page — there wasn't one. */}
+            "Co-founder" changed to "Founder" site-wide (4 Nov 2026). Her own
+            portrait (public/images/founder-portrait.jpg) was tried here too,
+            but client preferred the original campaign photo on this
+            homepage spot specifically ("purani blue background wali photo
+            better thi cover page pe") — kept her real portrait on the
+            /our-world Founder section only, reverted this one back. CTA
+            points at the Founder Story section on /our-world
+            (id="co-founder" kept as the anchor id — internal, not shown to
+            visitors), not a standalone page — there wasn't one. */}
         <section className="grid grid-cols-1 lg:grid-cols-2">
           <div className="flex flex-col items-start justify-center bg-white px-8 py-16 lg:px-16">
             <p className="mb-3 text-[10px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold sm:text-[11px]">
@@ -204,12 +207,12 @@ export default async function HomePage() {
               Read the founder&rsquo;s story
             </Link>
           </div>
-          <div className="relative aspect-[4/3] bg-white lg:aspect-auto">
+          <div className="relative aspect-[4/3] lg:aspect-auto">
             <Image
-              src="/images/founder-portrait.jpg"
+              src="/images/campaign-navy-desktop.jpg"
               alt="Neha S Shah, Founder, Norvik Jewels"
               fill
-              className="object-contain"
+              className="object-cover object-[75%_35%]"
               sizes="(min-width: 1024px) 50vw, 100vw"
             />
           </div>

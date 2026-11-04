@@ -155,12 +155,12 @@ export default function OurWorldPage() {
             (public/images/founder-portrait.jpg, client-supplied). Sign-off
             name used exactly as given in the brief. */}
         <section id="co-founder" className="grid grid-cols-1 lg:grid-cols-2">
-          <div className="relative order-first aspect-[4/3] lg:order-none lg:aspect-auto">
+          <div className="relative order-first aspect-[4/3] bg-white lg:order-none lg:aspect-auto">
             <Image
               src="/images/founder-portrait.jpg"
               alt="Neha S Shah, Founder, Norvik Jewels"
               fill
-              className="object-cover object-top"
+              className="object-contain"
               sizes="(min-width: 1024px) 50vw, 100vw"
             />
           </div>
