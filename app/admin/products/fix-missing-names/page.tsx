@@ -27,6 +27,29 @@ import { createClient } from '@/lib/supabase/client';
 // typing. This is a separate, simpler parser than the import tool's own —
 // it only needs a SKU->name map, not full gold/diamond/pricing parsing — so
 // it doesn't carry (or need) that file's many batch-specific quirks.
+//
+// Multi-file upload added same day — client's names are split across
+// several Excels (same pattern already used by the photos/products import
+// tools), so the file input takes multiple files at once, each one parsed
+// and merged into a single combined lookup before matching against the
+// still-unmatched rows. Uploading more files later adds to the matches
+// already made rather than replacing them, and the "files read" list is
+// cumulative across upload actions for the same reason.
+//
+// "Export remaining (CSV)" added 4 Nov 2026 — the 15 products visible on
+// the live site got named by Claude visually inspecting each product photo
+// (client has no source Excel at all right now: "names wali excel mere
+// paas nahi hein atm"). The other 148 are still in `draft` status, so they
+// never appear on the live site and can't be viewed that way — Claude has
+// no DB/admin access (RLS-only architecture, no service-role key), so there
+// was no way to even get the list of which SKUs/photos still need a name
+// without the client doing the scan herself and handing that list over.
+// This button solves exactly that: it's a pure client-side dump of the
+// `rows` state the page already has after "Scan all products" — no new
+// query, nothing server-side — to a CSV (SKU, Category, Photo URL) she can
+// send over. Every product photo lives in the public `product-images`
+// Storage bucket, so the photo URLs in that CSV are directly viewable
+// without any login, same as the 15 live ones were.
 const FALLBACK_NAME_RE = /^(.+)\s+piece$/i;
 
 type ProductRow = {
@@ -139,38 +162,28 @@ export default function FixMissingNamesPage() {
     }
   }
 
-  // Accepts several files at once (products were imported in batches —
-  // 3 Nov 2026, client: "kaise upload karu multiple excels, already admin
-  // mein photos/products ke waqt ki thi" — the same multi-batch Excel sets
-  // used for the original import/photo-matching tools). Every file's
-  // SKU->name map is merged together before matching, so a product whose
-  // real name sits in any one of the uploaded files gets found — order
-  // doesn't matter, and a SKU repeated across files just keeps whichever
-  // file's row is read last (harmless: real designs don't share SKUs).
   async function handleExcelFiles(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
     if (files.length === 0) return;
-    // Appended, not replaced — the file picker can be used more than once
-    // (e.g. one batch at a time, or a forgotten file added after the
-    // first upload) and earlier matches should stay filled in.
-    setExcelFileNames((prev) => [...prev, ...files.map((f) => f.name)]);
     setExcelError(null);
     setExcelParsing(true);
+    const failed: string[] = [];
     try {
       const XLSX = await import('xlsx');
       const combinedLookup = new Map<string, string>();
-      const failedFiles: string[] = [];
-
+      const readNames: string[] = [];
       for (const file of files) {
         try {
           const buffer = await file.arrayBuffer();
           const workbook = XLSX.read(buffer, { type: 'array' });
           const lookup = buildNameLookup(workbook, XLSX);
           for (const [sku, name] of lookup) combinedLookup.set(sku, name);
+          readNames.push(file.name);
         } catch {
-          failedFiles.push(file.name);
+          failed.push(file.name);
         }
       }
+      setExcelFileNames((prev) => [...prev, ...readNames]);
 
       const newDrafts: Record<string, string> = {};
       const newMatched: Record<string, boolean> = {};
@@ -187,17 +200,20 @@ export default function FixMissingNamesPage() {
       setDrafts((prev) => ({ ...prev, ...newDrafts }));
       setMatchedFromExcel((prev) => ({ ...prev, ...newMatched }));
 
-      if (failedFiles.length > 0) {
-        setExcelError(`Could not read: ${failedFiles.join(', ')} — the rest were still matched.`);
+      if (failed.length > 0) {
+        setExcelError(
+          `Could not read: ${failed.join(', ')}. The others were read fine — check these aren't corrupted or password-protected.`
+        );
       } else if (Object.keys(newDrafts).length === 0) {
         setExcelError(
-          "Read the file(s) but couldn't match any SKUs against the products still needing a name — check they're the right sheets, or the SKU column headers."
+          "Read the file(s) but couldn't match any SKUs against the products still needing a name — check it's the right sheet, or the SKU column header."
         );
       }
     } catch (err) {
-      setExcelError(err instanceof Error ? err.message : 'Could not read those files.');
+      setExcelError(err instanceof Error ? err.message : 'Could not read the file(s).');
     } finally {
       setExcelParsing(false);
+      e.target.value = '';
     }
   }
 
@@ -226,6 +242,30 @@ export default function FixMissingNamesPage() {
       await handleSave(row);
     }
     setApplyingAll(false);
+  }
+
+  function csvCell(v: string): string {
+    return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+  }
+
+  function handleExportRemaining() {
+    const toExport = rows.filter((r) => statuses[r.id] !== 'done');
+    const header = ['Norvik SKU', 'SKU', 'Category', 'Photo URL'];
+    const lines = [header.map(csvCell).join(',')];
+    for (const r of toExport) {
+      lines.push(
+        [r.norvik_sku ?? '', r.sku ?? '', r.category, r.images?.[0] ?? ''].map(csvCell).join(',')
+      );
+    }
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `missing-names-remaining-${toExport.length}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   const remaining = rows.filter((r) => statuses[r.id] !== 'done').length;
@@ -272,15 +312,23 @@ export default function FixMissingNamesPage() {
             placeholder name — <strong>{remaining}</strong> left to fix.
           </p>
 
+          {remaining > 0 && (
+            <button
+              onClick={handleExportRemaining}
+              className="mt-3 border border-antiquegold px-5 py-2 text-[12px] font-medium uppercase tracking-[0.08em] text-antiquegold hover:bg-antiquegold hover:text-softwhite"
+            >
+              Export remaining {remaining} to CSV
+            </button>
+          )}
+
           <h2 className="mt-8 text-[13px] font-medium uppercase tracking-[0.08em] text-antiquegold">
-            Step 2 — upload the Excel with the real names
+            Step 2 — upload the Excel(s) with the real names
           </h2>
           <p className="mt-1 text-[13px] text-charcoal">
-            Upload the product Excel files you already have — same ones used for the import and
-            photos tools, select as many at once as you need (any sheet with a SKU column and a
-            Name column works). They&apos;re matched by SKU automatically and fill the names in
-            below — nothing is saved until you click &quot;Save&quot; or &quot;Apply matched
-            names&quot;.
+            Upload the product Excel(s) you already have — select more than one at once if the
+            names are split across files (any sheet with a SKU column and a Name column works).
+            It matches by SKU automatically and fills the names in below — nothing is saved
+            until you click &quot;Save&quot; or &quot;Apply matched names&quot;.
           </p>
           <input
             type="file"
@@ -291,9 +339,7 @@ export default function FixMissingNamesPage() {
             className="mt-3 text-[13px]"
           />
           {excelFileNames.length > 0 && !excelParsing && (
-            <p className="mt-1 text-[12px] text-muted">
-              Read {excelFileNames.length} file{excelFileNames.length === 1 ? '' : 's'}: {excelFileNames.join(', ')}
-            </p>
+            <p className="mt-1 text-[12px] text-muted">Read: {excelFileNames.join(', ')}</p>
           )}
           {excelParsing && <p className="mt-1 text-[12px] text-muted">Reading…</p>}
           {excelError && (
