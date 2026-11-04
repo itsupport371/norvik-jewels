@@ -204,12 +204,12 @@ export default async function HomePage() {
               Read the founder&rsquo;s story
             </Link>
           </div>
-          <div className="relative aspect-[4/3] lg:aspect-auto">
+          <div className="relative aspect-[4/3] bg-white lg:aspect-auto">
             <Image
               src="/images/founder-portrait.jpg"
               alt="Neha S Shah, Founder, Norvik Jewels"
               fill
-              className="object-cover object-top"
+              className="object-contain"
               sizes="(min-width: 1024px) 50vw, 100vw"
             />
           </div>
