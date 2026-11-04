@@ -144,9 +144,9 @@ export default function OurWorldPage() {
           </div>
         </section>
 
-        {/* Co-Founder Story — content brief (28 Oct 2026, "Ecommerce_Mann_2"),
+        {/* Founder Story — content brief (28 Oct 2026, "Ecommerce_Mann_2"),
             section 5. Added here (not a standalone page — none existed) so
-            the homepage's "Read the co-founder's story" link
+            the homepage's "Read the founder's story" link
             (/our-world#co-founder) has a real destination. Reworked 30 Oct
             2026 into the same 2-column (text + photo) layout as the
             homepage Founder teaser (app/page.tsx). "Co-founder" changed to
