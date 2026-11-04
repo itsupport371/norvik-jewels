@@ -114,7 +114,7 @@ export default async function SiteFooter() {
               </li>
               <li>
                 <Link href="/our-world#co-founder" className="hover:text-white">
-                  Co-founder&apos;s Story
+                  Founder&apos;s Story
                 </Link>
               </li>
             </ul>

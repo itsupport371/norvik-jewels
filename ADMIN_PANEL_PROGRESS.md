@@ -1986,3 +1986,86 @@ Verified via TypeScript syntax check. Client needs to open
 `/admin/products/fix-missing-names` while logged in as admin, click "Scan all
 products", and type the real name in for each of the 15 — same RLS-only reason as
 the rose-cover tool, this needs her own logged-in session.
+
+### Update (3 Nov 2026) — Excel upload, multi-file, and the 15 live names
+
+Client pushed back on typing 163 names by hand ("too complex") and said she already
+had the real names in an Excel she'd uploaded before, but no longer has that file.
+`fix-missing-names/page.tsx` was reworked twice in response:
+
+1. Added an Excel-upload step (reusing the `xlsx` package already a project
+   dependency) — `buildNameLookup()` parses any uploaded workbook generically
+   (finds the header column containing "name" and the one containing "sku"),
+   matches rows by `norvik_sku` then `sku`, and pre-fills the name box for any
+   match, still editable before saving. A bulk "Apply N matched names" button
+   saves all matched rows at once.
+2. Client then asked for multiple-Excel upload at once (same pattern as the
+   existing photos/products import tools) — file input changed to `multiple`,
+   `handleExcelFiles()` loops every selected file and merges their lookups into
+   one combined map before matching; the uploaded-filenames list is cumulative
+   across upload actions instead of being replaced each time.
+
+**163 vs 15 — not a bug, two different scopes.** The admin tool's own scan queries
+the full `products` table (RLS lets an admin see drafts too) and found 163 products
+with the placeholder name. The live-site scrape used for the original scope estimate
+only sees `status = 'published'` rows — 15 of the 163. So ~148 of the 163 are still
+drafts, not yet visible to customers; only the 15 live ones are an active bug right
+now.
+
+**Client has no Excel with real names at all currently** ("names wali excel mere
+paas nahi hein atm"). Since there's no source of truth to pull correct names from,
+and typing 163 blind entries isn't realistic for her, she asked me to look at each
+live product's photo myself and give it a reasonable name for now ("tu product dekh
+ke name dede abhi ke liye") — as a stopgap, not a claim that these are the
+"official" names from wherever the originals came from.
+
+Viewed each of the 15 live products' photos directly (Supabase Storage image URLs)
+and named them by what's actually in the photo:
+
+| SKU | Name given |
+|---|---|
+| ER-417 | Diamond Fan Studs |
+| ER-418 | Open Teardrop Diamond Earrings |
+| ER-419 | Diamond Halo Arc Studs |
+| ER-420 | Arched Square Diamond Drops |
+| ER-421 | Clover Diamond Studs |
+| ER-422 | Diamond Orbit Studs |
+| ER-423 | Hexagon Pavé Diamond Studs |
+| IER-0424 | Twin Pear Diamond Studs |
+| IER-0425 | Diamond Spiral Studs |
+| IER-0426 | Diamond Flower Burst Studs |
+| IER-0427 | Quatrefoil Diamond Studs |
+| IER-0428 | Diamond Leaf Fan Studs |
+| EPS-01232 | Diamond Butterfly Pendant |
+| EPS-01233 | Diamond Bee Pendant |
+| EPS-01237 | Diamond Butterfly Heart Pendant |
+
+(Checked the three EPS-* pendants' `...-render-y1.jpg` files specifically, since
+that filename pattern looked similar to the earlier CAD-render-mistaken-for-photo
+bug above — these are clean, finished-looking catalog renders, not raw CAD
+software screenshots, so no separate bug there.)
+
+Delivered as `live_product_names.xlsx` (columns: Norvik SKU, Name) — saved in this
+project's root folder — for her to upload directly into `/admin/products/fix-missing-names`
+Step 2 (Excel upload), review, and apply. The remaining ~148 draft products are not
+customer-visible, so no urgency there; still open whether she wants those named too,
+left for real names later, or handled before each is ever published.
+
+### Closed for now (4 Nov 2026) — the remaining 148 have no photos
+
+Client clarified: the ~148 products still in `draft` status (out of the 163 total
+placeholder-name products) were deliberately left as drafts because **they have no
+product photos at all** — not a separate oversight. That rules out the
+photo-inspection naming approach used for the 15 live ones (there's nothing to look
+at), so the planned CSV-export-and-photo-review pass for these is on hold.
+
+Since these products are both draft (not customer-visible) and missing photos (not
+presentable even if published), there's no urgency — leaving them as-is until the
+client has real photos + names for them from the supplier. The "Export remaining to
+CSV" button added to `fix-missing-names/page.tsx` earlier today is harmless to leave
+in place (useful later once real data exists), just not being used for this batch
+right now.
+
+**Status: the actual customer-facing bug (SKU showing instead of a name on live
+product cards) is fully fixed** — all 15 live products were renamed via
+`live_product_names.xlsx` through the tool's Step 2 Excel upload.
