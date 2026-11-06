@@ -189,9 +189,24 @@ export default async function SiteFooter() {
           <p>
             © {new Date().getFullYear()} Norvik Jewels. All rights reserved.
           </p>
+          {/* Physical address removed from display (6 Nov 2026, client
+              instruction: "address mat show kar website mein") — was
+              showing "Down Town, Business Bay, Dubai, UAE". Phone/email
+              kept. If the client wants a real registered address shown
+              again later, confirm the exact text with them first (see
+              founder-photo-and-footer.md — the content brief never had a
+              real one, only an explicit placeholder). */}
           <p>
-            Down Town, Business Bay, Dubai, UAE · +971 585 622 369 ·{' '}
-            info@norvikgold.com
+            +971 585 622 369 ·{' '}
+            <a
+              href="https://wa.me/971585622369"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white"
+            >
+              WhatsApp
+            </a>{' '}
+            · info@norvikjewels.com
           </p>
         </div>
       </div>
