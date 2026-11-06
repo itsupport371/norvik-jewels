@@ -169,11 +169,27 @@ export const CLARITY_CHARGE_PERCENT: Record<string, number> = {
 // EF-VVS stacks FG's color premium with VVS's own +5 clarity premium
 // (CLARITY_CHARGE_PERCENT.VVS1/VVS2) for 10 — also matches the ~10.6%
 // live-priced delta above almost exactly.
-export const DIAMOND_QUALITY_TIERS: { key: string; colorRange: string; sublabel: string; priceChargePercent: number }[] = [
-  { key: 'EF-VVS', colorRange: 'E-F', sublabel: 'Exceptional White · Top Grade', priceChargePercent: 10 },
-  { key: 'FG-SI', colorRange: 'F-G', sublabel: 'Near Colorless · Premium', priceChargePercent: 6 },
-  { key: 'GH-SI', colorRange: 'G-H', sublabel: 'Near Colorless · Classic', priceChargePercent: 4 },
-  { key: 'IJ-SI', colorRange: 'I-J', sublabel: 'Slightly Tinted · Value', priceChargePercent: 2 },
+//
+// `priceChargePercent` above is now SUPERSEDED for actual pricing by
+// `baseRatePerCarat` below (client instruction, 6 Nov 2026: "lowest quality
+// 120k and quality increase 40k increase" — relayed by Neha ahead of the
+// domain go-live, so "sir" could send back final pricing). The client gave
+// a flat ₹/carat rate per tier instead of a %, so product-configurator.tsx
+// and getDisplayPrice() now use this rate directly as `diamondBaseRatePerCarat`
+// (with colorChargePercent forced to 0 for Rings/Earrings, so the old %
+// doesn't also stack on top) — `priceChargePercent` is kept on the object
+// only so the old scale isn't lost, in case the client ever reverts to a %
+// model. Lowest tier (IJ-SI) = ₹1,20,000/carat; each step up the list
+// (GH-SI, FG-SI, EF-VVS) adds ₹40,000/carat. Scope: applied ONLY to this
+// Rings/Earrings 4-tier system for now — the separate Clarity×Color grid
+// used by other categories (Pendants etc., CLARITY_GRADES/COLOR_GRADES
+// above) is intentionally left untouched pending the client confirming
+// whether this same ladder should extend there too.
+export const DIAMOND_QUALITY_TIERS: { key: string; colorRange: string; sublabel: string; priceChargePercent: number; baseRatePerCarat: number }[] = [
+  { key: 'EF-VVS', colorRange: 'E-F', sublabel: 'Exceptional White · Top Grade', priceChargePercent: 10, baseRatePerCarat: 240000 },
+  { key: 'FG-SI', colorRange: 'F-G', sublabel: 'Near Colorless · Premium', priceChargePercent: 6, baseRatePerCarat: 200000 },
+  { key: 'GH-SI', colorRange: 'G-H', sublabel: 'Near Colorless · Classic', priceChargePercent: 4, baseRatePerCarat: 160000 },
+  { key: 'IJ-SI', colorRange: 'I-J', sublabel: 'Slightly Tinted · Value', priceChargePercent: 2, baseRatePerCarat: 120000 },
 ];
 
 function extractKaratFromLabel(metalLabel: string): 9 | 14 | 18 {
@@ -193,7 +209,23 @@ function extractKaratFromLabel(metalLabel: string): 9 | 14 | 18 {
 export function getDisplayPrice(product: Product): number {
   const karat = extractKaratFromLabel(product.metalOptions[0]?.label ?? '18K');
   const hasDiamond = Boolean(product.diamond) && (product.diamondCaratTotal ?? 0) > 0;
-  const colorChargePercent = hasDiamond ? COLOR_CHARGE_PERCENT['D-F'] ?? 0 : 0;
+  const isRingOrEarring = product.category === 'Rings' || product.category === 'Earrings';
+
+  // Rings/Earrings: price with the flat per-carat "Diamond Quality" ladder
+  // (client instruction, 6 Nov 2026 — see DIAMOND_QUALITY_TIERS.baseRatePerCarat
+  // above), using the same 'GH-SI' default tier the PDP configurator starts
+  // on, so a listing price always matches what the shopper sees first on
+  // the product page. colorChargePercent is forced to 0 here so the old %
+  // scale doesn't also stack on top of the new flat rate. Other categories
+  // are unchanged — still the flat placeholder rate pending client input.
+  const diamondBaseRatePerCarat = isRingOrEarring
+    ? DIAMOND_QUALITY_TIERS.find((t) => t.key === 'GH-SI')?.baseRatePerCarat ?? 160000
+    : 100000; // placeholder — pending client confirmation (non-Ring/Earring categories)
+  const colorChargePercent = isRingOrEarring
+    ? 0
+    : hasDiamond
+      ? COLOR_CHARGE_PERCENT['D-F'] ?? 0
+      : 0;
 
   const pricing = calculatePrice({
     goldRate24kPer10g: TEST_GOLD_RATE_24K_PER_10G,
@@ -201,7 +233,7 @@ export function getDisplayPrice(product: Product): number {
     goldWeightGrams: product.goldWeightGrams,
     makingChargePercent: 12, // placeholder — pending client confirmation (matches product-configurator.tsx)
     diamondCaratRequired: product.diamondCaratTotal ?? 0,
-    diamondBaseRatePerCarat: 100000, // placeholder — pending client confirmation
+    diamondBaseRatePerCarat,
     colorChargePercent,
     clarityChargePercent: 0,
     cutChargePercent: 0,

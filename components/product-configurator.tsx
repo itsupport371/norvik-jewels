@@ -219,20 +219,27 @@ export default function ProductConfigurator({
     needsSize && baselineIndex !== -1 && selectedIndex !== -1 ? (selectedIndex - baselineIndex) * 0.1 : 0;
   const effectiveGoldWeight = Math.max(0.1, product.goldWeightGrams + sizeWeightDelta);
 
-  // Rings use the single combined tier's own % (its clarity side is
-  // always SI, worth 0%, same as CLARITY_CHARGE_PERCENT.SI1 below), gated
-  // on `hasAnyDiamond` (real diamond weight data) rather than `hasDiamond`
-  // (full config) — see the hasAnyDiamond comment above. Every other
-  // category keeps the existing separate Color+Clarity charges, still
-  // gated on `hasDiamond` exactly as before.
+  // Rings/Earrings (6 Nov 2026, client instruction: "lowest quality 120k and
+  // quality increase 40k increase"): Diamond Quality is now priced with a
+  // flat ₹/carat rate per tier — DIAMOND_QUALITY_TIERS[*].baseRatePerCarat
+  // in lib/mock-products.ts (IJ-SI lowest ₹1,20,000/carat, +₹40,000/carat
+  // per tier up to EF-VVS) — fed in as `diamondBaseRatePerCarat` below,
+  // instead of the old flat ₹1L placeholder + a %. So colorChargePercent is
+  // forced to 0 here for rings: the tier's old `priceChargePercent` would
+  // otherwise stack a second markup on top of the new flat rate. Every
+  // other category is untouched — still the separate Color+Clarity %
+  // charges, gated on `hasDiamond` exactly as before; that base rate stays
+  // the old 100000 placeholder pending client confirmation for those
+  // categories specifically.
   const colorChargePercent = isRing
-    ? hasAnyDiamond
-      ? DIAMOND_QUALITY_TIERS.find((t) => t.key === diamondQualityTier)?.priceChargePercent ?? 0
-      : 0
+    ? 0
     : hasDiamond
       ? COLOR_CHARGE_PERCENT[colorKey] ?? 0
       : 0;
   const clarityChargePercent = hasDiamond && !isRing ? CLARITY_CHARGE_PERCENT[clarityKey] ?? 0 : 0;
+  const diamondBaseRatePerCarat = isRing
+    ? DIAMOND_QUALITY_TIERS.find((t) => t.key === diamondQualityTier)?.baseRatePerCarat ?? 120000
+    : 100000; // placeholder — pending client confirmation (non-Ring/Earring categories)
 
   const rawPricing = calculatePrice({
     goldRate24kPer10g: TEST_GOLD_RATE_24K_PER_10G,
@@ -240,8 +247,8 @@ export default function ProductConfigurator({
     goldWeightGrams: effectiveGoldWeight,
     makingChargePercent: 12, // placeholder — pending client confirmation
     diamondCaratRequired: product.diamondCaratTotal ?? 0,
-    diamondBaseRatePerCarat: 100000, // placeholder — pending client confirmation
-    colorChargePercent, // reacts to selected Diamond Quality — placeholder %s
+    diamondBaseRatePerCarat, // rings/earrings: tier-based flat rate; others: placeholder
+    colorChargePercent, // 0 for rings now (quality priced via the base rate instead)
     clarityChargePercent, // now also reacts to selected Clarity (was always 0)
     cutChargePercent: 0,
     gstPercent: 3,

@@ -2116,3 +2116,41 @@ unknown.
 Not changed — need the real address from the client directly rather than guessing
 one, consistent with the project's standing rule against inventing business facts
 (delivery windows, policies, etc. follow the same rule).
+
+## Gold rate + diamond quality pricing updated per client (6 Nov 2026)
+
+Client sent back real pricing numbers (via Neha, ahead of the domain go-live)
+to replace two of the placeholder values flagged throughout `lib/pricing.ts`,
+`lib/mock-products.ts`, and `components/product-configurator.tsx`:
+
+- **24K gold rate**: `TEST_GOLD_RATE_24K_PER_10G` in `lib/pricing.ts` changed
+  from the old test value (₹1,00,000/10g) to **₹1,41,776 per 10g** — this is
+  still a manually-set constant, not a live MCX feed, same as before.
+- **Diamond Quality pricing (Rings/Earrings only)**: client's instruction —
+  "lowest quality 120k and quality increase 40k increase" — implemented as a
+  flat ₹/carat rate per tier on `DIAMOND_QUALITY_TIERS` in
+  `lib/mock-products.ts` (new `baseRatePerCarat` field):
+  - IJ-SI (lowest) — ₹1,20,000/carat
+  - GH-SI — ₹1,60,000/carat
+  - FG-SI — ₹2,00,000/carat
+  - EF-VVS (highest) — ₹2,40,000/carat
+
+  This REPLACES the old flat ₹1L/carat placeholder + a % markup for these
+  two categories — `colorChargePercent` is now forced to 0 for Rings/
+  Earrings so the old % doesn't also stack on top of the new flat rate.
+  The old `priceChargePercent` field is kept on each tier object (unused for
+  pricing now) only so that scale isn't lost if the client ever goes back to
+  a % model.
+
+### Scope — still open
+This ladder was applied **only** to the Rings/Earrings 4-tier "Diamond
+Quality" system. The separate Clarity × Color grid used by every other
+category (Pendants etc. — `CLARITY_GRADES`/`COLOR_GRADES`/
+`CLARITY_CHARGE_PERCENT`/`COLOR_CHARGE_PERCENT`) is **unchanged** — still the
+old flat ₹1L/carat + % placeholder, clearly commented as pending client
+confirmation. Flag to the client: should this same ₹1.2L-base/+₹40k-per-step
+ladder extend to those categories too, and if so, how does it map onto 9
+Clarity tiers × 5 Color tiers (the Rings/Earrings system only has 4 steps)?
+
+Making Charge % (12%, in both `getDisplayPrice()` and the PDP configurator)
+and GST (3%) are still unconfirmed placeholders, untouched by this change.

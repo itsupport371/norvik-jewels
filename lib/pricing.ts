@@ -83,6 +83,7 @@ export function calculatePrice(input: PricingInput): PricingResult {
   };
 }
 
-// Fixed test rate — client confirmed 24K rate = ₹1,00,000 per 10g for testing.
-// Replace with a live API value once the provider is chosen.
-export const TEST_GOLD_RATE_24K_PER_10G = 100000;
+// 24K gold rate — client-supplied (6 Nov 2026): ₹1,41,776 per 10g.
+// Still a manually-set rate, not a live MCX feed — replace with a live API
+// value once a provider is chosen (see OPEN QUESTIONS above).
+export const TEST_GOLD_RATE_24K_PER_10G = 141776;
