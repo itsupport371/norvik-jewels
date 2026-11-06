@@ -8,6 +8,22 @@ const nextConfig = {
         hostname: '*.supabase.co',
       },
     ],
+    // 6 Nov 2026: product images across the site started showing broken on
+    // the live domain — every `/_next/image` request was returning HTTP 402
+    // (Payment Required). Confirmed this is NOT a code/data bug: the actual
+    // source images on Supabase Storage load fine (200 OK) when fetched
+    // directly. Vercel's Hobby plan has a monthly quota on its own Image
+    // Optimization service (the thing that resizes/re-encodes images on the
+    // fly via `/_next/image`); once that quota is used up it returns 402
+    // instead of the image, for every remaining request until the next
+    // billing cycle (or an upgrade to Pro). `unoptimized: true` turns off
+    // that resizing step entirely — `next/image` then just serves the
+    // original file directly, so pages keep working regardless of this
+    // quota. Trade-off: no more automatic resize/avif-webp conversion, so
+    // pages may be a bit heavier than before — acceptable vs. broken images
+    // blocking real customers. Revisit (remove this line) if/when the
+    // client upgrades the Vercel plan and wants optimization back.
+    unoptimized: true,
   },
   // `next dev`'s webpack persistent disk cache (.next/cache/webpack) gzip's
   // its cache packs on every rebuild. On machines with limited free memory
