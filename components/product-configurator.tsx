@@ -170,7 +170,10 @@ export default function ProductConfigurator({
   // picker instead of separate Clarity/Color".
   const isRing = product.category === 'Rings' || product.category === 'Earrings';
   const hasAnyDiamond = (product.diamondCaratTotal ?? 0) > 0;
-  const [diamondQualityTier, setDiamondQualityTier] = useState('GH-SI');
+  // Default changed GH-SI -> IJ-SI (6 Nov 2026, client/Neha instruction:
+  // "default IJSI rakh") — lowest Diamond Quality tier, so the PDP starts on
+  // the lowest/most-affordable price by default.
+  const [diamondQualityTier, setDiamondQualityTier] = useState('IJ-SI');
 
   const allowedColors = useMemo(
     () => CLARITY_ALLOWED_COLORS[clarityKey] ?? [],

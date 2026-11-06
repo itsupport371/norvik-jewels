@@ -213,13 +213,14 @@ export function getDisplayPrice(product: Product): number {
 
   // Rings/Earrings: price with the flat per-carat "Diamond Quality" ladder
   // (client instruction, 6 Nov 2026 — see DIAMOND_QUALITY_TIERS.baseRatePerCarat
-  // above), using the same 'GH-SI' default tier the PDP configurator starts
-  // on, so a listing price always matches what the shopper sees first on
-  // the product page. colorChargePercent is forced to 0 here so the old %
+  // above), using the same 'IJ-SI' default tier the PDP configurator starts
+  // on (changed from 'GH-SI', "default IJSI rakh" — 6 Nov 2026), so a
+  // listing price always matches what the shopper sees first on the
+  // product page. colorChargePercent is forced to 0 here so the old %
   // scale doesn't also stack on top of the new flat rate. Other categories
   // are unchanged — still the flat placeholder rate pending client input.
   const diamondBaseRatePerCarat = isRingOrEarring
-    ? DIAMOND_QUALITY_TIERS.find((t) => t.key === 'GH-SI')?.baseRatePerCarat ?? 160000
+    ? DIAMOND_QUALITY_TIERS.find((t) => t.key === 'IJ-SI')?.baseRatePerCarat ?? 120000
     : 100000; // placeholder — pending client confirmation (non-Ring/Earring categories)
   const colorChargePercent = isRingOrEarring
     ? 0
@@ -332,6 +333,9 @@ export const products: Product[] = [
     description:
       'A round brilliant centre stone encircled by a halo of pavé diamonds, set on a delicate band — designed to catch light from every angle.',
     metalOptions: [
+      // 9 KT made the default (first) option everywhere in the catalogue —
+      // 6 Nov 2026, client/Neha instruction ("9kt every products mein").
+      { label: '9 KT Rose Gold', priceModifier: 0, stock: 'In Stock', metalColor: 'rose' },
       { label: '18 KT Rose Gold', priceModifier: 0, stock: 'In Stock', metalColor: 'rose' },
       { label: '18 KT Yellow Gold', priceModifier: 0, stock: 'Only 1 left', metalColor: 'yellow' },
       { label: '18 KT White Gold', priceModifier: 0, stock: 'Made to Order', metalColor: 'white' },
@@ -385,9 +389,11 @@ export const products: Product[] = [
     description:
       'A single brilliant-cut diamond on a clean, tapered band — a quiet, everyday classic.',
     metalOptions: [
+      // 9 KT moved to the front as the default — 6 Nov 2026 ("9kt every
+      // products mein"); same entry, just reordered.
+      { label: '9 KT Rose Gold', priceModifier: -150, stock: 'In Stock', metalColor: 'rose' },
       { label: '14 KT Yellow Gold', priceModifier: 0, stock: 'In Stock', metalColor: 'yellow' },
       { label: '18 KT White Gold', priceModifier: 300, stock: 'Made to Order', metalColor: 'white' },
-      { label: '9 KT Rose Gold', priceModifier: -150, stock: 'In Stock', metalColor: 'rose' },
     ],
     sizeOptions: [
       { label: '5', sublabel: '44.8 mm', priceModifier: 0, stock: 'In Stock' },
@@ -415,6 +421,7 @@ export const products: Product[] = [
     description:
       'A cluster of round diamonds arranged in a floral silhouette, secured with a screw-back for everyday, secure wear.',
     metalOptions: [
+      { label: '9 KT Yellow Gold', priceModifier: 0, stock: 'In Stock' },
       { label: '18 KT Yellow Gold', priceModifier: 0, stock: 'In Stock' },
       { label: '18 KT White Gold', priceModifier: 150, stock: 'Made to Order' },
     ],
@@ -434,9 +441,10 @@ export const products: Product[] = [
     description:
       'A polished, everyday hoop in solid gold — lightweight enough for daily wear. No stones, so it\u2019s a metal-only configuration.',
     metalOptions: [
+      // 9 KT moved to the front as the default — 6 Nov 2026.
+      { label: '9 KT Rose Gold', priceModifier: -100, stock: 'Made to Order' },
       { label: '14 KT Yellow Gold', priceModifier: 0, stock: 'In Stock' },
       { label: '18 KT Yellow Gold', priceModifier: 220, stock: 'In Stock' },
-      { label: '9 KT Rose Gold', priceModifier: -100, stock: 'Made to Order' },
     ],
     sizeOptions: [
       { label: 'Small', sublabel: '12 mm', priceModifier: 0, stock: 'In Stock' },
@@ -455,6 +463,7 @@ export const products: Product[] = [
     description:
       'Norvik Jewels\u2019 signature stud, finished with a secure screw-back closure.',
     metalOptions: [
+      { label: '9 KT Yellow Gold', priceModifier: 0, stock: 'In Stock' },
       { label: '18 KT Yellow Gold', priceModifier: 0, stock: 'In Stock' },
       { label: '18 KT White Gold', priceModifier: 180, stock: 'Only 1 left' },
     ],
@@ -487,6 +496,7 @@ export const products: Product[] = [
     description:
       'A lotus-inspired stud with a diamond halo center, finished with a secure screw-back closure.',
     metalOptions: [
+      { label: '9 KT Yellow Gold', priceModifier: 0, stock: 'In Stock', metalColor: 'yellow' },
       { label: '18 KT Yellow Gold', priceModifier: 0, stock: 'In Stock', metalColor: 'yellow' },
       { label: '18 KT White Gold', priceModifier: 400, stock: 'Made to Order', metalColor: 'white' },
       { label: '18 KT Rose Gold', priceModifier: 200, stock: 'In Stock', metalColor: 'rose' },
@@ -516,6 +526,7 @@ export const products: Product[] = [
     description:
       'A trillion-cut silhouette framed in a diamond border, with a single brilliant stone suspended at the center.',
     metalOptions: [
+      { label: '9 KT Yellow Gold', priceModifier: 0, stock: 'In Stock', metalColor: 'yellow' },
       { label: '18 KT Yellow Gold', priceModifier: 0, stock: 'In Stock', metalColor: 'yellow' },
       { label: '18 KT White Gold', priceModifier: 350, stock: 'Made to Order', metalColor: 'white' },
       { label: '18 KT Rose Gold', priceModifier: 150, stock: 'Only 2 left', metalColor: 'rose' },
@@ -545,6 +556,7 @@ export const products: Product[] = [
     description:
       'A graceful swan silhouette in gold, wrapped in a fan of marquise-cut red stones and diamond accents.',
     metalOptions: [
+      { label: '9 KT White Gold', priceModifier: 0, stock: 'In Stock', metalColor: 'white' },
       { label: '18 KT White Gold', priceModifier: 0, stock: 'In Stock', metalColor: 'white' },
       { label: '18 KT Yellow Gold', priceModifier: 300, stock: 'In Stock', metalColor: 'yellow' },
       { label: '18 KT Rose Gold', priceModifier: 300, stock: 'Made to Order', metalColor: 'rose' },
@@ -571,6 +583,7 @@ export const products: Product[] = [
     description:
       'An asymmetric double-swan design, richly set with marquise red stones and diamond leaf accents.',
     metalOptions: [
+      { label: '9 KT Rose Gold', priceModifier: 0, stock: 'In Stock', metalColor: 'rose' },
       { label: '18 KT Rose Gold', priceModifier: 0, stock: 'In Stock', metalColor: 'rose' },
       { label: '18 KT Yellow Gold', priceModifier: 300, stock: 'In Stock', metalColor: 'yellow' },
       { label: '18 KT White Gold', priceModifier: 300, stock: 'Made to Order', metalColor: 'white' },
@@ -601,6 +614,7 @@ export const products: Product[] = [
     description:
       'A delicate clover-leaf nose pin with a 4-diamond cluster, finished with an adjustable wire post.',
     metalOptions: [
+      { label: '9 KT Yellow Gold', priceModifier: 0, stock: 'In Stock', metalColor: 'yellow' },
       { label: '18 KT Yellow Gold', priceModifier: 0, stock: 'In Stock', metalColor: 'yellow' },
       { label: '18 KT White Gold', priceModifier: 250, stock: 'Made to Order', metalColor: 'white' },
       { label: '18 KT Rose Gold', priceModifier: 150, stock: 'In Stock', metalColor: 'rose' },
@@ -633,6 +647,7 @@ export const products: Product[] = [
     description:
       'PLACEHOLDER — reusing the Swan Pendant Signature photos until real matching-set photography is provided. A pendant-and-earring set is meant to pair two coordinated pieces sold together; swap in the real SKU once the client confirms this category.',
     metalOptions: [
+      { label: '9 KT White Gold', priceModifier: 0, stock: 'Made to Order', metalColor: 'white' },
       { label: '18 KT White Gold', priceModifier: 0, stock: 'Made to Order', metalColor: 'white' },
       { label: '18 KT Yellow Gold', priceModifier: 300, stock: 'Made to Order', metalColor: 'yellow' },
     ],
@@ -649,6 +664,7 @@ export const products: Product[] = [
     description:
       'PLACEHOLDER — reusing an existing stud earring photo. Real baby/kids-sized earring SKUs (smaller stone sizes, safety backs) to be added once the client confirms this category and sends product details.',
     metalOptions: [
+      { label: '9 KT Yellow Gold', priceModifier: 0, stock: 'In Stock' },
       { label: '18 KT Yellow Gold', priceModifier: 0, stock: 'In Stock' },
     ],
     sizeOptions: [{ label: 'One Size', priceModifier: 0, stock: 'In Stock' }],
@@ -664,6 +680,7 @@ export const products: Product[] = [
     description:
       'PLACEHOLDER — reusing an existing pendant photo; a real tanmaniya (traditional black-bead gold pendant) design and photo are needed from the client, this is only to hold the category slot.',
     metalOptions: [
+      { label: '9 KT Yellow Gold', priceModifier: 0, stock: 'Made to Order', metalColor: 'yellow' },
       { label: '18 KT Yellow Gold', priceModifier: 0, stock: 'Made to Order', metalColor: 'yellow' },
     ],
     sizeOptions: [{ label: 'One Size', priceModifier: 0, stock: 'Made to Order' }],
@@ -684,6 +701,7 @@ export const products: Product[] = [
     description:
       'PLACEHOLDER — no bracelet photo exists yet in the asset library, this is temporarily using a ring photo just to hold the category slot. Needs a real bracelet photo and SKU before this is client-ready.',
     metalOptions: [
+      { label: '9 KT Yellow Gold', priceModifier: 0, stock: 'Made to Order' },
       { label: '18 KT Yellow Gold', priceModifier: 0, stock: 'Made to Order' },
     ],
     sizeOptions: [{ label: 'One Size', priceModifier: 0, stock: 'Made to Order' }],

@@ -2154,3 +2154,35 @@ Clarity tiers × 5 Color tiers (the Rings/Earrings system only has 4 steps)?
 
 Making Charge % (12%, in both `getDisplayPrice()` and the PDP configurator)
 and GST (3%) are still unconfirmed placeholders, untouched by this change.
+
+## Default Diamond Quality + default metal = 9 KT (6 Nov 2026)
+
+Two more small client instructions ("default IJSI rakh and 9kt every
+products mein"), same session as the gold-rate/diamond-ladder change above:
+
+- **Default Diamond Quality tier** changed from `GH-SI` to **`IJ-SI`**
+  (the lowest tier) in both `components/product-configurator.tsx` (PDP
+  starting selection) and `lib/mock-products.ts`'s `getDisplayPrice()`
+  (listing price), so they keep matching each other.
+- **Default metal = 9 KT, every product**: the static showcase catalogue in
+  `lib/mock-products.ts` (`products` array) was edited directly — every
+  product's `metalOptions[0]` is now a 9 KT option (existing 9 KT entries
+  moved to the front where present; new ones added, copying the color/photo
+  of whatever was previously first, where not).
+
+  **Important — this static array is NOT the live catalogue.** Per the
+  comment at the top of `lib/products-server.ts` (22 Sep 2026), the real
+  storefront reads only published rows from Supabase `products`; the static
+  array only still exists because its `Product` type and shared pricing
+  constants (`DIAMOND_QUALITY_TIERS`, `calculatePrice`, etc.) are reused
+  site-wide. So editing it alone would NOT have changed anything a shopper
+  actually sees.
+
+  To actually fix the real catalogue, added a new one-off admin tool:
+  **`/admin/products/fix-default-9kt`** — same scan-then-bulk-fix pattern as
+  `/admin/products/fix-rose-covers`. It scans every real product's
+  `metal_options`, and for any whose first (default) option isn't 9 KT,
+  either moves an existing 9 KT option to the front or adds a new one
+  (same color/photo as the old default). **Neha needs to actually open this
+  page and click through it (Scan -> Fix N products) for the real catalogue
+  to change** — pushing the code alone does not touch the database.
