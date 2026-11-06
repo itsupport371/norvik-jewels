@@ -197,16 +197,7 @@ export default async function SiteFooter() {
               founder-photo-and-footer.md — the content brief never had a
               real one, only an explicit placeholder). */}
           <p>
-            +971 585 622 369 ·{' '}
-            <a
-              href="https://wa.me/971585622369"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-white"
-            >
-              WhatsApp
-            </a>{' '}
-            · info@norvikjewels.com
+            +971 585 622 369 · info@norvikjewels.com
           </p>
         </div>
       </div>

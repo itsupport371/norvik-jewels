@@ -69,16 +69,6 @@ export default function ContactPage() {
                   </a>
                 </div>
 
-                <div>
-                  <p className="text-[11px] font-medium uppercase leading-[1.2] tracking-[0.14em] text-antiquegold">
-                    Studio
-                  </p>
-                  <p className="mt-1 text-[14px] leading-[1.6] text-inknavy/80">
-                    Down Town, Business Bay
-                    <br />
-                    Dubai, United Arab Emirates
-                  </p>
-                </div>
               </div>
             </div>
 
