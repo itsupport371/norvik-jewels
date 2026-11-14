@@ -106,6 +106,30 @@ function trailingNumber(s: string): number | null {
   return m ? parseInt(m[1], 10) : null;
 }
 
+// "Moo Uthake Vol. 2" (Pendant sets, 14 Nov 2026): this is the first batch
+// where one Excel workbook holds TWO sheets of otherwise-unrelated
+// products — "Earring" and "Pendants" — each design number appearing once
+// per sheet (e.g. "ER-331" on the Earring sheet, "PD-331" on the Pendants
+// sheet; same number, two different real products, one per category). The
+// photo folders are named the opposite way round and abbreviated
+// ("331-ER", "331-P" — number first, "P" not "PD"), optionally suffixed
+// "-Rounds" on some designs (e.g. "332-ER-Rounds") with no corresponding
+// "-Rounds" row anywhere in the sheet — there's only ever one row per
+// design per sheet, so it's just this batch's own folder-naming habit, not
+// a second variant to match separately, and is stripped before matching.
+// Neither existing fallback catches this: the folder name doesn't end in a
+// digit (ends in "ER"/"P"/"Rounds") so trailingNumber is no help, and even
+// if it did, "ER-331" and "PD-331" share the same trailing number 331, so
+// that map would mark it ambiguous anyway — this batch is exactly the
+// collision the trailing-number fallback already guards against.
+const MO_UTHAKE_FOLDER_RE = /^(\d+)-(ER|P)(-Rounds)?$/i;
+function moUthakeSkuFromFolder(folderName: string): string | null {
+  const m = folderName.match(MO_UTHAKE_FOLDER_RE);
+  if (!m) return null;
+  const [, num, kind] = m;
+  return kind.toUpperCase() === 'ER' ? `ER-${num}` : `PD-${num}`;
+}
+
 function parseFileName(name: string) {
   if (EXCLUDED_NAME_RE.test(name)) return null;
   const m = name.match(IMAGE_NAME_RE);
@@ -281,8 +305,11 @@ export default function ImportPhotosPage() {
       const nextGroups: PhotoGroup[] = [];
       for (const [folderName, files] of byFolder.entries()) {
         const folderNum = trailingNumber(folderName);
+        const moUthakeSku = moUthakeSkuFromFolder(folderName);
         const product =
-          bySku.get(normalizeSku(folderName)) ?? (folderNum !== null ? byTrailingNumber.get(folderNum) ?? undefined : undefined);
+          bySku.get(normalizeSku(folderName)) ??
+          (moUthakeSku ? bySku.get(normalizeSku(moUthakeSku)) : undefined) ??
+          (folderNum !== null ? byTrailingNumber.get(folderNum) ?? undefined : undefined);
         nextGroups.push({
           folderName,
           productId: product?.id,
