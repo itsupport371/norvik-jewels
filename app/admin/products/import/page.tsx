@@ -367,7 +367,20 @@ function parseHeaderDrivenV1(allRows: unknown[][], sheetName: string): ParsedRow
   function finalizeCurrent() {
     if (!current) return;
     current.diamondPieceCount = pieceCount;
-    current.norvikSku = norvikSkuFound || current.sku;
+    // 20 Nov 2026: this new "Batch-16 solitaire earring" workbook has NO
+    // Norvik SKU column at all (unlike the original Batch-16 sheet this
+    // dedup logic was written against) — every row falls into this
+    // no-Norvik-SKU branch. Falling back to the raw manufacturer `sku`
+    // (as before) breaks dedupeByNorvikSku below for the "S ER-45(0.50)"
+    // .. "(2.00)" carat-variant rows: each carat's sku string is
+    // different, so they'd never share a key and all 4 would import as
+    // separate products (114 rows instead of the intended ~54 designs).
+    // Falling back to the NORMALIZED (de-suffixed) sku instead gives every
+    // carat variant of the same design the same synthetic Norvik SKU, so
+    // the existing dedupe still collapses them to one row per design —
+    // exactly like it does when a sheet's real Norvik SKU column repeats
+    // across those rows.
+    current.norvikSku = norvikSkuFound || normalizeDedupedSku(current.sku);
     current.hasNorvikSku = Boolean(norvikSkuFound);
     current.name = nameFound ?? '';
     current.hasName = Boolean(nameFound);
