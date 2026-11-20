@@ -264,7 +264,21 @@ function parseHeaderDrivenV1(allRows: unknown[][], sheetName: string): ParsedRow
   const rows = allRows.slice(1);
 
   const skuCol = findCol(header, ['sku code', 'sku', 'style no']);
-  const nameCol = findCol(header, ['display', 'product name']);
+  let nameCol = findCol(header, ['display', 'product name']);
+  // Batch-18 ("VL-" Valentine's pendants/necklaces, 20 Nov 2026): this
+  // sheet's name column is headed literally "Name" — not "Display Name" or
+  // "Product name" — so the substring match above missed it entirely and
+  // every one of the 30 rows that DO have a real name typed in fell back to
+  // the "<Norvik SKU> piece" placeholder in the preview. A plain substring
+  // match on "name" would be too loose generally (it would also match an
+  // unrelated header that happens to contain "name" somewhere), so this
+  // only accepts a header that TRIMS+LOWERCASES to EXACTLY "name" — the
+  // same precedent as norvikCol's bare-"sku" fallback below.
+  if (nameCol < 0) {
+    nameCol = header.findIndex(
+      (cell) => typeof cell === 'string' && cell.trim().toLowerCase() === 'name'
+    );
+  }
   // Batch-15 (30 Sep 2026): the sheet has BOTH a "Casting Gold Wt(18kt)"
   // column (the raw cast blank, before polishing/finishing loses material)
   // and an "Est.Final Gold Wt(18kt)" column (the piece's actual finished
